@@ -13,9 +13,22 @@
 			 name="nti.dataserver-badges"
 			 provides="zope.generations.interfaces.IInstallableSchemaManager"/>
 	
+	<!-- Adpaters -->
+	
 	<adapter name="badges"
 			 for="nti.dataserver.interfaces.IDataserverFolder pyramid.interfaces.IRequest"
 			 factory=".views.NTIBadgesPathAdapter"
 			 provides="zope.traversing.interfaces.IPathAdapter" />
+	
+	<!-- Externalization -->
+	<include package="nti.externalization" file="meta.zcml" />
+	<include package="nti.externalization" />
+	<ext:registerAutoPackageIO
+		root_interfaces=".interfaces.IVerificationObject
+						 .interfaces.IIdentityObject
+						 .interfaces.IAlignmentObject
+						 .interfaces.IBadgeClass
+						 .interfaces.IBadgeAssertion"
+		modules=".openbadges" />
 	
 </configure>

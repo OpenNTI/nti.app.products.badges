@@ -47,7 +47,7 @@ class IIdentityObject(interface.Interface):
 
 class IAlignmentObject(interface.Interface):
 	name = nti_schema.ValidTextLine(title="The name of the alignment")
-	url = nti_schema.HTTPURL('URL linking to the official description of the standard')
+	url = nti_schema.HTTPURL(title='URL linking to the official description of the standard')
 	description = nti_schema.ValidText(title="Short description of the standard",
                                        required=False)
 
@@ -58,14 +58,14 @@ class IBadgeClass(nti_interfaces.IUserTaggedContent):
 	
 	image = nti_schema.Variant((
 					nti_schema.DataURI(title="Image data"),
-					nti_schema.HTTPURL('Image URL')),
+					nti_schema.HTTPURL(title='Image URL')),
 					title="Image representing the achievement")
 
-	criteria = nti_schema.HTTPURL('URL of the criteria for earning the achievement')
+	criteria = nti_schema.HTTPURL(title='URL of the criteria for earning the achievement')
 
-	issuer = nti_schema.HTTPURL('URL of the organization that issued the badge')
+	issuer = nti_schema.HTTPURL(title='URL of the organization that issued the badge')
 
-	alignment = nti_schema.ListOrTuple(IAlignmentObject,
+	alignment = nti_schema.ListOrTuple(value_type=nti_schema.Object(IAlignmentObject),
                                        title="Objects describing which educational standards",
                                        required=False,
                                        min_length=0)
@@ -77,7 +77,7 @@ class IBadgeAssertion(interface.Interface):
 								  title="The recipient of the achievement")
 	badge = nti_schema.Variant((
 					nti_schema.Object(IBadgeClass, title="Badge class"),
-					nti_schema.HTTPURL('badge URL')),
+					nti_schema.HTTPURL(title='badge URL')),
 					title="badge being awarded")
 
 	verify = nti_schema.Object(IVerificationObject,
@@ -87,7 +87,7 @@ class IBadgeAssertion(interface.Interface):
 
 	image = nti_schema.Variant((
 					nti_schema.DataURI(title="Image data"),
-					nti_schema.HTTPURL('Image URL')),
+					nti_schema.HTTPURL(title='Image URL')),
 					title="Image representing this user's achievement",
 					required=False)
 

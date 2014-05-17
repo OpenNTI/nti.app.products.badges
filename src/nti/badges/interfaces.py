@@ -102,7 +102,3 @@ class IBadgeAssertion(interface.Interface):
 class IBadgeManager(interface.Interface):
 	pass
 
-class ITahrirBadgeManager(IBadgeManager):
-	"""
-	Interface for Tahrir database managers
-	"""

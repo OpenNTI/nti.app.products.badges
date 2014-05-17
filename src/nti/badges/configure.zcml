@@ -27,6 +27,7 @@
 			 provides=".interfaces.IIdentityObject" />
 	
 	<!-- Externalization -->
+	
 	<include package="nti.externalization" file="meta.zcml" />
 	<include package="nti.externalization" />
 	<ext:registerAutoPackageIO
@@ -36,5 +37,9 @@
 						 .interfaces.IBadgeClass
 						 .interfaces.IBadgeAssertion"
 		modules=".openbadges" />
+	
+	<!-- tahrir-api -->
+	
+	<include package="." file="configure_tahrir.zcml" />
 	
 </configure>

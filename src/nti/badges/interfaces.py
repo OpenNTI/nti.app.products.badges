@@ -97,3 +97,12 @@ class IBadgeAssertion(interface.Interface):
 					required=False)
 
 	expires = nti_schema.ValidDatetime(title="Achievment expiry", required=False)
+
+
+class IBadgeManager(interface.Interface):
+	pass
+
+class ITahrirBadgeManager(IBadgeManager):
+	"""
+	Interface for Tahrir database managers
+	"""

@@ -41,7 +41,8 @@ class IIdentityObject(interface.Interface):
 							 title='The type of identity',
 							 required=True, default=ID_TYPE_EMAIL)
 
-	hashed = nti_schema.Bool(title='Whether or not the id value is hashed')
+	hashed = nti_schema.Bool(title='Whether or not the id value is hashed',
+							 required=False, default=False)
 
 	salt = nti_schema.ValidTextLine(title="Salt string", required=False)
 

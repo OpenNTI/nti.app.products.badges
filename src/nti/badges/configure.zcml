@@ -21,6 +21,10 @@
 			 for="nti.dataserver.interfaces.IDataserverFolder pyramid.interfaces.IRequest"
 			 factory=".views.NTIBadgesPathAdapter"
 			 provides="zope.traversing.interfaces.IPathAdapter" />
+		
+	<adapter factory=".adapters.user_to_identity_object"
+			 for="nti.dataserver.interfaces.IUser"
+			 provides=".interfaces.IIdentityObject" />
 	
 	<!-- Externalization -->
 	<include package="nti.externalization" file="meta.zcml" />

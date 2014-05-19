@@ -16,8 +16,8 @@ from zope import interface
 from zope.configuration import fields
 from zope.component.zcml import utility
 
-from . import tahrir_manager
 from . import tahrir_interfaces
+from . tahrir_manager import create_tahrir_badge_manager
 
 class IRegisterTahrirDB(interface.Interface):
 	"""
@@ -25,11 +25,16 @@ class IRegisterTahrirDB(interface.Interface):
 	"""
 	name = fields.TextLine(title="db name identifier (site)", required=False, default="")
 	dburi = fields.TextLine(title="db dburi", required=True)
+	autocommit = fields.Bool(title='autocommit flag', required=False, default=True)
+	twophase = fields.Bool(title='two phase commit protocol', required=False, default=False)
 
-def registerTahrirDB(_context, dburi, name=u""):
+def registerTahrirDB(_context, dburi, twophase=False, autocommit=True, name=u""):
 	"""
 	Register an db
 	"""
-	factory = functools.partial(tahrir_manager.TahrirBadgeManager, dburi=dburi)
+	factory = functools.partial(create_tahrir_badge_manager,
+								dburi=dburi,
+								twophase=twophase,
+								autocommit=autocommit)
 	utility(_context, provides=tahrir_interfaces.ITahrirBadgeManager,
 			factory=factory, name=name)

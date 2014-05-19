@@ -25,10 +25,9 @@ class IRegisterTahrirDB(interface.Interface):
 	"""
 	name = fields.TextLine(title="db name identifier (site)", required=False, default="")
 	dburi = fields.TextLine(title="db dburi", required=True)
-	autocommit = fields.Bool(title='autocommit flag', required=False, default=True)
 	twophase = fields.Bool(title='two phase commit protocol', required=False, default=False)
 
-def registerTahrirDB(_context, dburi, twophase=False, autocommit=True, name=u""):
+def registerTahrirDB(_context, dburi, twophase=False, autocommit=False, name=u""):
 	"""
 	Register an db
 	"""

@@ -12,4 +12,24 @@
 		<implements interface=".tahrir_interfaces.IIssuer" />
 	</class>
 		
+	<class class="tahrir_api.model.Badge">
+		<implements interface=".tahrir_interfaces.IBadge" />
+	</class>
+	
+	<class class="tahrir_api.model.Person">
+		<implements interface=".tahrir_interfaces.IPerson" />
+	</class>
+	
+	<class class="tahrir_api.model.Invitation">
+		<implements interface=".tahrir_interfaces.IInvitation" />
+	</class>
+	
+	<class class="tahrir_api.model.Authorization">
+		<implements interface=".tahrir_interfaces.IAuthorization" />
+	</class>
+	
+	<class class="tahrir_api.model.Assertion">
+		<implements interface=".tahrir_interfaces.IAssertion" />
+	</class>
+
 </configure>

@@ -20,9 +20,11 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 
 from zope.sqlalchemy import ZopeTransactionExtension
 
-from . import tahrir_interfaces
-
 from tahrir_api.dbapi import TahrirDatabase
+
+from nti.utils.property import Lazy
+
+from . import tahrir_interfaces
 
 def get_possible_site_names(request=None, include_default=True):
 	request = request or get_current_request()
@@ -50,18 +52,31 @@ class TahrirBadgeManager(object):
 	def __init__(self, dburi, twophase=False, autocommit=True):
 		self.dburi = dburi
 		self.twophase = twophase
-		self._engine = create_engine(dburi)
-		self._session_maker = sessionmaker(bind=self._engine)
-		self._Session = scoped_session(self._sessionmaker,
-									   twophase=self.twophase,
-									   extension=ZopeTransactionExtension())
-		self.db = TahrirDatabase(session=self._Session, autocommit=autocommit)
-		self._meta = MetaData()
-		self._meta.bind = self._engine
-		self._meta.create_all(checkfirst=True)
+		self.autocommit = autocommit
 
+	@Lazy
+	def engine(self):
+		result = create_engine(self.dburi)
+		return result
+
+	@Lazy
+	def sessionmaker(self):
+		result = sessionmaker(bind=self.engine)
+		return result
+
+	@Lazy
 	def session(self):
-		return self._Session()
+		result = scoped_session(self.sessionmaker,
+								twophase=self.twophase,
+								extension=ZopeTransactionExtension())
+		return result
+
+	@Lazy
+	def db(self):
+		result = TahrirDatabase(session=self.session, autocommit=self.autocommit)
+		meta = MetaData(bind=self.engine)
+		meta.create_all(checkfirst=True)
+		return result
 
 def create_tahrir_badge_manager(dburi, twophase=False, autocommit=True):
 	result = TahrirBadgeManager(dburi, twophase, autocommit)

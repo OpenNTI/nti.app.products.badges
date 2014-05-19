@@ -15,12 +15,13 @@ from zope import component
 
 from pyramid.threadlocal import get_current_request
 
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from zope.sqlalchemy import ZopeTransactionExtension
 
 from tahrir_api.dbapi import TahrirDatabase
+from tahrir_api.model import DeclarativeBase as tahrir_base
 
 from nti.utils.property import Lazy
 
@@ -46,6 +47,9 @@ def get_tahri_badgemanger(names=None, request=None):
 			return manager
 	return None
 
+class NTITahrirDatabase(TahrirDatabase):
+	pass
+
 @interface.implementer(tahrir_interfaces.ITahrirBadgeManager)
 class TahrirBadgeManager(object):
 
@@ -61,21 +65,21 @@ class TahrirBadgeManager(object):
 
 	@Lazy
 	def sessionmaker(self):
-		result = sessionmaker(bind=self.engine)
+		result = sessionmaker(bind=self.engine,
+							  twophase=self.twophase,
+							  extension=ZopeTransactionExtension())
 		return result
 
 	@Lazy
 	def session(self):
-		result = scoped_session(self.sessionmaker,
-								twophase=self.twophase,
-								extension=ZopeTransactionExtension())
+		result = scoped_session(self.sessionmaker)
 		return result
 
 	@Lazy
 	def db(self):
-		result = TahrirDatabase(session=self.session, autocommit=self.autocommit)
-		meta = MetaData(bind=self.engine)
-		meta.create_all(checkfirst=True)
+		result = NTITahrirDatabase(session=self.session, autocommit=self.autocommit)
+		self.session.configure(bind=self.engine)
+		tahrir_base.metadata.create_all(self.engine, checkfirst=True)
 		return result
 
 def create_tahrir_badge_manager(dburi, twophase=False, autocommit=True):

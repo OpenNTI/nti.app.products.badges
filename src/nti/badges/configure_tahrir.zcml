@@ -9,6 +9,8 @@
 	<include package="zope.component" />
 	<include package="zope.security" />
 	
+	<!-- Implements -->
+	
 	<class class="tahrir_api.model.Issuer">
 		<implements interface=".tahrir_interfaces.IIssuer" />
 	</class>
@@ -32,10 +34,17 @@
 	<class class="tahrir_api.model.Assertion">
 		<implements interface=".tahrir_interfaces.IAssertion" />
 	</class>
+	
+	<!-- Adapters -->
+	
+	<adapter factory=".tahrir_adapters.user_to_tahrir_person"
+			 for="nti.dataserver.interfaces.IUser"
+			 provides=".tahrir_interfaces.IPerson" />
 		
+	<!-- Database -->
+		 
 	<configure zcml:condition="have devmode">
 		<include package="." file="meta_tahrir.zcml" />
 		<tdb:registerTahrirDB dburi="sqlite://" />
 	</configure>
-	
 </configure>

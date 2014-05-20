@@ -53,11 +53,3 @@ def user_to_tahrir_person(user):
     result.created_on = datetime.fromtimestamp(user.createdTime)
     return result
 
-@component.adapter(tahrir_interfaces.IPerson)
-@interface.implementer(badge_interfaces.IIdentityObject)
-def person_to_identity_object(person):
-    result = openbadges.IdentityObject(identity=person.email,
-                                       type=badge_interfaces.ID_TYPE_EMAIL,
-                                       hashed=False,
-                                       salt=None)
-    return result

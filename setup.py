@@ -18,7 +18,7 @@ setup(
     version=VERSION,
     author='Jason Madden',
     author_email='jason@nextthought.com',
-    description="NTI Products Badges",
+    description="NTI Badges Product Integration",
     long_description=codecs.open('README.rst', encoding='utf-8').read(),
     license='Proprietary',
     keywords='pyramid preference',

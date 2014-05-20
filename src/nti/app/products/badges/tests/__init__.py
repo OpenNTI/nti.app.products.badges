@@ -26,7 +26,7 @@ class SharedConfiguringTestLayer(ZopeComponentLayer,
                                  ConfiguringLayerMixin,
                                  DSInjectorMixin):
 
-    set_up_packages = ('nti.dataserver', 'nti.badges')
+    set_up_packages = ('nti.dataserver', 'nti.badges', 'nti.app.products.badges')
 
     @classmethod
     def setUp(cls):

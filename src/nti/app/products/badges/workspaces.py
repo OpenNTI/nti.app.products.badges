@@ -4,7 +4,7 @@
 Implementation of an Atom/OData workspace and collection
 for badges.
 
-.. $Id: workspaces.py 38592 2014-05-07 16:58:14Z jason.madden $
+.. $Id$
 """
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"

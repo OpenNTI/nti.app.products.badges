@@ -13,11 +13,11 @@
 		
 	<adapter factory=".adapters.user_to_identity_object"
 			 for="nti.dataserver.interfaces.IUser"
-			 provides="nti.badges.interfaces.IIdentityObject" />
+			 provides="nti.badges.openbadges.interfaces.IIdentityObject" />
 	
 	<adapter factory=".adapters.user_to_tahrir_person"
 			 for="nti.dataserver.interfaces.IUser"
-			 provides="nti.badges.tahrir_interfaces.IPerson" />
+			 provides="nti.badges.tahrir.interfaces.IPerson" />
 		
 	<!-- Subscribers -->
 	

@@ -18,22 +18,22 @@ from tahrir_api.model import Person
 from nti.dataserver import interfaces as nti_interfaces
 from nti.dataserver.users import interfaces as user_interfaces
 
-from nti.badges import openbadges
-from nti.badges import tahrir_interfaces
-from nti.badges import interfaces as badge_interfaces
+from nti.badges.openbadges.elements import IdentityObject
+from nti.badges.tahrir import interfaces as tahrir_interfaces
+from nti.badges.openbadges import interfaces as open_interfaces
 
 from . import get_user_email
 
 @component.adapter(nti_interfaces.IUser)
-@interface.implementer(badge_interfaces.IIdentityObject)
+@interface.implementer(open_interfaces.IIdentityObject)
 def user_to_identity_object(user):
     email = get_user_email(user)
     if not email:
         raise TypeError("no user email found")
-    result = openbadges.IdentityObject(identity=email,
-                                       type=badge_interfaces.ID_TYPE_EMAIL,
-                                       hashed=False,
-                                       salt=None)
+    result = IdentityObject(identity=email,
+                            type=open_interfaces.ID_TYPE_EMAIL,
+                            hashed=False,
+                            salt=None)
     return result
 
 @component.adapter(nti_interfaces.IUser)

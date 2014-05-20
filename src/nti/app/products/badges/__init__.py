@@ -29,7 +29,7 @@ def get_possible_site_names(request=None, include_default=True):
         site_names += ('',)
     return site_names
 
-def get_badgemanger(names=None, request=None):
+def get_badge_manager(names=None, request=None):
     names = names.split() if isinstance(names, six.string_types) else names
     names = names or get_possible_site_names(request=request)
     for site in names:

@@ -12,8 +12,8 @@ from hamcrest import has_property
 
 from nti.dataserver.users import User
 
-from nti.badges import tahrir_interfaces
-from nti.badges import interfaces as badges_interfaces
+from nti.badges.tahrir import interfaces as tahrir_interfaces
+from nti.badges.openbadges import interfaces as open_interfaces
 
 import nti.dataserver.tests.mock_dataserver as mock_dataserver
 from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
@@ -37,7 +37,7 @@ class TestAdapters(NTIBadgesTestCase):
 	@WithMockDSTrans
 	def test_user_to_io(self):
 		user = self._create_user()
-		io = badges_interfaces.IIdentityObject(user)
+		io = open_interfaces.IIdentityObject(user)
 		assert_that(io, has_property('identity', 'nt@nti.com'))
 
 	@WithMockDSTrans
@@ -49,5 +49,5 @@ class TestAdapters(NTIBadgesTestCase):
 		assert_that(person, has_property('bio', 'my bio'))
 		assert_that(person, has_property('website', 'http://www.foo.com'))
 
-		io = badges_interfaces.IIdentityObject(person)
+		io = open_interfaces.IIdentityObject(person)
 		assert_that(io, has_property('identity', 'nt@nti.com'))

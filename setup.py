@@ -14,11 +14,11 @@ IS_PYPY = py_impl() == 'PyPy'
 
 
 setup(
-    name='nti.badges',
+    name='nti.app.products.badges',
     version=VERSION,
     author='Jason Madden',
     author_email='jason@nextthought.com',
-    description="NTI Badges",
+    description="NTI Products Badges",
     long_description=codecs.open('README.rst', encoding='utf-8').read(),
     license='Proprietary',
     keywords='pyramid preference',
@@ -36,7 +36,7 @@ setup(
 	namespace_packages=['nti'],
 	install_requires=[
 		'setuptools',
-        'tahrir-api'
+        'nti.badges'
 	],
 	entry_points=entry_points
 )

@@ -79,7 +79,8 @@ class TahrirBadgeManager(object):
 	def db(self):
 		result = NTITahrirDatabase(session=self.session, autocommit=self.autocommit)
 		self.session.configure(bind=self.engine)
-		tahrir_base.metadata.create_all(self.engine, checkfirst=True)
+		metadata = getattr(tahrir_base, 'metadata')
+		metadata.create_all(self.engine, checkfirst=True)
 		return result
 
 def create_tahrir_badge_manager(dburi, twophase=False, autocommit=True):

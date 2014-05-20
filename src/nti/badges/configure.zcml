@@ -40,6 +40,6 @@
 	
 	<!-- tahrir-api -->
 	
-	<include package="." file="configure_tahrir.zcml" />
+	<include package="." file="tahrir_configure.zcml" />
 	
 </configure>

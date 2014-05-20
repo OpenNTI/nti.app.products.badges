@@ -44,7 +44,7 @@
 	<!-- Database -->
 		 
 	<configure zcml:condition="have devmode">
-		<include package="." file="meta_tahrir.zcml" />
+		<include package="." file="tahrir_meta.zcml" />
 		<tdb:registerTahrirDB dburi="sqlite://" />
 	</configure>
 </configure>

@@ -23,4 +23,16 @@
 	
 	<subscriber handler=".subscribers._user_deleted" />
 	
+	<!-- Workspaces -->
+	<!-- A subscriber for enumeration -->
+	<subscriber factory=".workspaces.BadgesWorkspace"
+				provides=".interfaces.IBadgesWorkspace" />
+
+	<!-- And an adapter for direct access -->
+	<adapter factory=".workspaces.BadgesWorkspace"
+			 provides=".interfaces.IBadgesWorkspace" />
+			 
+	<adapter name="Badges"
+			 factory=".views.BadgesPathAdapter" />
+			 
 </configure>

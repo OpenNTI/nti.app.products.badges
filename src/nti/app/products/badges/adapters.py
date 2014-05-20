@@ -22,11 +22,12 @@ from nti.badges import openbadges
 from nti.badges import tahrir_interfaces
 from nti.badges import interfaces as badge_interfaces
 
+from . import get_user_email
+
 @component.adapter(nti_interfaces.IUser)
 @interface.implementer(badge_interfaces.IIdentityObject)
 def user_to_identity_object(user):
-    profile = user_interfaces.IUserProfile(user)
-    email = getattr(profile, 'email', None)
+    email = get_user_email(user)
     if not email:
         raise TypeError("no user email found")
     result = openbadges.IdentityObject(identity=email,
@@ -38,10 +39,10 @@ def user_to_identity_object(user):
 @component.adapter(nti_interfaces.IUser)
 @interface.implementer(tahrir_interfaces.IPerson)
 def user_to_tahrir_person(user):
-    profile = user_interfaces.IUserProfile(user)
-    email = getattr(profile, 'email', None)
+    email = get_user_email(user)
     if not email:
         raise TypeError("no user email found")
+    profile = user_interfaces.IUserProfile(user)
     result = Person()
     result.email = email
     result.nickname = getattr(profile, 'alias', None) or \

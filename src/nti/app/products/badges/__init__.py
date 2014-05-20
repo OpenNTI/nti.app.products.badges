@@ -14,7 +14,9 @@ from zope import component
 
 from pyramid.threadlocal import get_current_request
 
-from nti.badges import tahrir_interfaces
+from nti.badges import interfaces as badge_interfaces
+
+from nti.dataserver.users import interfaces as user_interfaces
 
 def get_possible_site_names(request=None, include_default=True):
     request = request or get_current_request()
@@ -27,11 +29,16 @@ def get_possible_site_names(request=None, include_default=True):
         site_names += ('',)
     return site_names
 
-def get_tahri_badgemanger(names=None, request=None):
+def get_badgemanger(names=None, request=None):
     names = names.split() if isinstance(names, six.string_types) else names
     names = names or get_possible_site_names(request=request)
     for site in names:
-        manager = component.queryUtility(tahrir_interfaces.ITahrirBadgeManager, name=site)
+        manager = component.queryUtility(badge_interfaces.IBadgeManager, name=site)
         if manager is not None:
             return manager
     return None
+
+def get_user_email(user):
+    profile = user_interfaces.IUserProfile(user)
+    email = getattr(profile, "email", None)
+    return email

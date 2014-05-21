@@ -24,8 +24,8 @@
 	<subscriber handler=".subscribers._user_deleted" />
 	
 	<subscriber
-		factory=".subscribers._DefaultPrincipalBadgeManager"
-		provides=".interfaces.IPrincipalBadgeManager"/>
+		factory=".subscribers._DefaultPrincipalBadgeManagerCatalog"
+		provides=".interfaces.IPrincipalBadgeManagerCatalog"/>
 		
 	<!-- Workspaces -->
 	<!-- A subscriber for enumeration -->

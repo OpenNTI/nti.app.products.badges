@@ -22,7 +22,7 @@ from . import get_badge_manager
 
 @component.adapter(nti_interfaces.IUser)
 @interface.implementer(interfaces.IPrincipalBadgeManagerCatalog)
-class _DefaultPrincipalBadgeManager(object):
+class _DefaultPrincipalBadgeManagerCatalog(object):
 
     def __init__(self, context):
         self.context = context

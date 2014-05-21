@@ -25,7 +25,8 @@ from nti.utils.property import Lazy
 from nti.utils.property import alias
 
 from . import interfaces
-from . import get_badge_manager
+from . import get_user_id
+from . import get_user_badge_managers
 
 @interface.implementer(interfaces.IBadgesWorkspace)
 class _BadgesWorkspace(contained.Contained):
@@ -33,14 +34,15 @@ class _BadgesWorkspace(contained.Contained):
 	__name__ = 'Badges'
 	name = alias('__name__', __name__)
 
-	def __init__(self, user_service, manager):
-		self.manager = manager
+	def __init__(self, user_service):
 		self.context = user_service
 		self.user = user_service.user
 
 	@Lazy
 	def collections(self):
-		return (AllBadgesCollection(self),)
+		return (AllBadgesCollection(self),
+				EarnableBadgeCollection(self),
+				EarnedBadgeCollection(self))
 
 	def __getitem__(self, key):
 		"Make us traversable to collections."
@@ -58,11 +60,9 @@ def BadgesWorkspace(user_service):
 	"""
 	The badges for a user reside at the path ``/users/$ME/Badges``.
 	"""
-	manager = get_badge_manager()
-	if manager:
-		workspace = _BadgesWorkspace(user_service, manager)
-		workspace.__parent__ = workspace.user
-		return workspace
+	workspace = _BadgesWorkspace(user_service)
+	workspace.__parent__ = workspace.user
+	return workspace
 
 @interface.implementer(app_interfaces.IContainerCollection)
 class AllBadgesCollection(contained.Contained):
@@ -82,11 +82,10 @@ class AllBadgesCollection(contained.Contained):
 		container = LastModifiedCopyingUserList()
 		container.__parent__ = parent
 		container.__name__ = __name__
-		for catalog in component.subscribers((parent.user,), interfaces.IPrincipalBadgeManagerCatalog):
-			for manager in catalog.iter_managers():
-				badges = manager.get_all_badges()
-				# we use open badges for in/out
-				container.extend(open_interfaces.IBadgeClass(x) for x in badges)
+		for manager in get_user_badge_managers(parent.user):
+			badges = manager.get_all_badges()
+			# we use open badges for in/out
+			container.extend(open_interfaces.IBadgeClass(x) for x in badges)
 		return container
 
 	def __getitem__(self, key):
@@ -97,3 +96,45 @@ class AllBadgesCollection(contained.Contained):
 	def __len__(self):
 		return 1
 
+@interface.implementer(app_interfaces.IContainerCollection)
+class EarnableBadgeCollection(contained.Contained):
+
+	# : Our name, part of our URL.
+	__name__ = 'EarnableBadges'
+	name = alias('__name__', __name__)
+
+	accepts = ()
+	container = ()
+
+	def __init__(self, parent):
+		self.__parent__ = parent
+
+	def __len__(self):
+		return len(self.container)
+
+@interface.implementer(app_interfaces.IContainerCollection)
+class EarnedBadgeCollection(contained.Contained):
+
+	# : Our name, part of our URL.
+	__name__ = 'EarnedBadges'
+	name = alias('__name__', __name__)
+
+	accepts = ()
+
+	def __init__(self, parent):
+		self.__parent__ = parent
+
+	@Lazy
+	def container(self):
+		parent = self.__parent__
+		container = LastModifiedCopyingUserList()
+		container.__parent__ = parent
+		container.__name__ = __name__
+		uid = get_user_id(parent.user)
+		for manager in get_user_badge_managers(parent.user):
+			badges = manager.get_user_badges(uid)
+			container.extend(open_interfaces.IBadgeClass(x) for x in badges)
+		return container
+
+	def __len__(self):
+		return len(self.container)

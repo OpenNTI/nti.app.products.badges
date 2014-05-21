@@ -12,28 +12,30 @@ from zope import component
 from zope import interface
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 
-from nti.dataserver import interfaces as nti_interfaces
-
 from nti.badges import interfaces as badge_interfaces
+
+from nti.dataserver import interfaces as nti_interfaces
 
 from . import interfaces
 from . import get_user_id
-from . import get_badge_manager
+from . import get_user_badge_managers
 
 @component.adapter(nti_interfaces.IUser)
-@interface.implementer(interfaces.IPrincipalBadgeManagerCatalog)
-class _DefaultPrincipalBadgeManagerCatalog(object):
+@interface.implementer(interfaces.IPrincipalBadgeManager)
+class _DefaultPrincipalBadgeManager(object):
+
+    __slots__ = ('context',)
 
     def __init__(self, context):
         self.context = context
 
-    def iter_managers(self):
-        for manager in component.getUtilitiesFor(badge_interfaces.IBadgeManager):
-            yield manager
+    @property
+    def manager(self):
+        result = component.getUtility(badge_interfaces.IBadgeManager)
+        return result
 
 @component.adapter(nti_interfaces.IUser, IObjectRemovedEvent)
 def _user_deleted(user, event):
     uid = get_user_id(user)
-    manager = get_badge_manager()
-    if manager and manager.delete_user(uid):
-        logger.info("User removed from badge manager")
+    for manager in get_user_badge_managers(user):
+        manager.delete_user(uid)

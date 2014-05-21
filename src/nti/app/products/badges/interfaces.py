@@ -10,14 +10,15 @@ from zope import interface
 
 from nti.appserver import interfaces as app_interfaces
 
+from nti.badges.interfaces import IBadgeManager
+
+from nti.utils import schema as nti_schema
+
 class IBadgesWorkspace(app_interfaces.IWorkspace):
     """
     A workspace containing data for badges.
     """
 
-class IPrincipalBadgeManagerCatalog(interface.Interface):
+class IPrincipalBadgeManager(interface.Interface):
+    manager = nti_schema.Object(IBadgeManager, title="badge manager")
 
-    def iter_managers():
-        """
-        Iterate across :class:`nti.badges.interfaces.IBadgeManager` objects
-        """

@@ -23,10 +23,12 @@
 	
 	<subscriber handler=".subscribers._user_deleted" />
 	
-	<subscriber
-		factory=".subscribers._DefaultPrincipalBadgeManagerCatalog"
-		provides=".interfaces.IPrincipalBadgeManagerCatalog"/>
-		
+	<configure zcml:condition="have devmode">
+		<subscriber
+			factory=".subscribers._DefaultPrincipalBadgeManager"
+			provides=".interfaces.IPrincipalBadgeManager"/>
+	</configure>
+	
 	<!-- Workspaces -->
 	<!-- A subscriber for enumeration -->
 	<subscriber factory=".workspaces.BadgesWorkspace"

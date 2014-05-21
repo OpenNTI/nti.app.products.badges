@@ -38,7 +38,7 @@ def get_badge_manager(names=None, request=None):
             return manager
     return None
 
-def get_user_email(user):
-    profile = user_interfaces.IUserProfile(user)
-    email = getattr(profile, "email", None)
-    return email
+def get_user_id(user):
+    result = user.username  # TODO: Switch to email when they can be verified
+    return result
+

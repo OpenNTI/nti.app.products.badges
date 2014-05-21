@@ -17,6 +17,10 @@ from zope.container import contained
 
 from nti.appserver import interfaces as app_interfaces
 
+from nti.badges.openbadges import interfaces as open_interfaces
+
+from nti.dataserver.datastructures import LastModifiedCopyingUserList
+
 from nti.utils.property import Lazy
 from nti.utils.property import alias
 
@@ -71,6 +75,19 @@ class AllBadgesCollection(contained.Contained):
 
 	def __init__(self, parent):
 		self.__parent__ = parent
+
+	@Lazy
+	def container(self):
+		parent = self.__parent__
+		container = LastModifiedCopyingUserList()
+		container.__parent__ = parent
+		container.__name__ = __name__
+		for catalog in component.subscribers((parent.user,), interfaces.IPrincipalBadgeManagerCatalog):
+			for manager in catalog.iter_managers():
+				badges = manager.get_all_badges()
+				# we use open badges for in/out
+				container.extend(open_interfaces.IBadgeClass(x) for x in badges)
+		return container
 
 	def __getitem__(self, key):
 		if key == self.container.__name__:

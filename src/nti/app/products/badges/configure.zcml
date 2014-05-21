@@ -23,6 +23,10 @@
 	
 	<subscriber handler=".subscribers._user_deleted" />
 	
+	<subscriber
+		factory=".subscribers._DefaultPrincipalBadgeManager"
+		provides=".interfaces.IPrincipalBadgeManager"/>
+		
 	<!-- Workspaces -->
 	<!-- A subscriber for enumeration -->
 	<subscriber factory=".workspaces.BadgesWorkspace"

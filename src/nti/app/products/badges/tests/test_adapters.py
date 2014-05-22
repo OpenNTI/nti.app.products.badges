@@ -22,8 +22,8 @@ from nti.app.products.badges.tests import NTIBadgesTestCase
 
 class TestAdapters(NTIBadgesTestCase):
 
-	def _create_user(self, username='nt@nti.com', password='temp001',
-					 email='nt@nti.com', alias='myalias',
+	def _create_user(self, username='ntiuser', password='temp001',
+					 email='ntiuser@nti.com', alias='myalias',
 					 home_page='http://www.foo.com',
 					 about="my bio"):
 		ds = mock_dataserver.current_mock_ds
@@ -38,16 +38,16 @@ class TestAdapters(NTIBadgesTestCase):
 	def test_user_to_io(self):
 		user = self._create_user()
 		io = open_interfaces.IIdentityObject(user)
-		assert_that(io, has_property('identity', 'nt@nti.com'))
+		assert_that(io, has_property('identity', 'ntiuser'))
 
 	@WithMockDSTrans
 	def test_user_2_person_2_io(self):
 		user = self._create_user()
 		person = tahrir_interfaces.IPerson(user)
-		assert_that(person, has_property('email', 'nt@nti.com'))
-		assert_that(person, has_property('nickname', 'myalias'))
+		assert_that(person, has_property('email', 'ntiuser'))
+		assert_that(person, has_property('nickname', 'ntiuser'))
 		assert_that(person, has_property('bio', 'my bio'))
 		assert_that(person, has_property('website', 'http://www.foo.com'))
 
 		io = open_interfaces.IIdentityObject(person)
-		assert_that(io, has_property('identity', 'nt@nti.com'))
+		assert_that(io, has_property('identity', u'ntiuser'))

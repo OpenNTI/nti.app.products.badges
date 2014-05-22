@@ -18,7 +18,7 @@ from tahrir_api.model import Person
 from nti.dataserver import interfaces as nti_interfaces
 from nti.dataserver.users import interfaces as user_interfaces
 
-from nti.badges.openbadges.elements import IdentityObject
+from nti.badges.openbadges.model import IdentityObject
 from nti.badges.tahrir import interfaces as tahrir_interfaces
 from nti.badges.openbadges import interfaces as open_interfaces
 
@@ -41,11 +41,9 @@ def user_to_tahrir_person(user):
     profile = user_interfaces.IUserProfile(user)
     result = Person()
     result.email = uid
-    result.nickname = getattr(profile, 'alias', None) or \
-                      getattr(profile, 'realname', None) or \
-                      user.username
-    result.website = getattr(profile, 'home_page', None) or u''
+    result.nickname = user.username
     result.bio = getattr(profile, 'about', None) or u''
+    result.website = getattr(profile, 'home_page', None) or u''
     result.created_on = datetime.fromtimestamp(user.createdTime)
     return result
 

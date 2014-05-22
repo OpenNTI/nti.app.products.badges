@@ -42,7 +42,13 @@
 	<adapter factory=".workspaces.BadgesWorkspace"
 			 provides=".interfaces.IBadgesWorkspace" />
 			 
+	<!-- Path Adapters -->
+	
 	<adapter name="Badges"
 			 factory=".views.BadgesPathAdapter" />
 			 
+	<adapter name="badges"
+			 for="nti.dataserver.interfaces.IDataserverFolder pyramid.interfaces.IRequest"
+			 factory=".views.NTIBadgesPathAdapter"
+			 provides="zope.traversing.interfaces.IPathAdapter" />
 </configure>

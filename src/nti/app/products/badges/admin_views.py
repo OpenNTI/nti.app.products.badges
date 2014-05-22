@@ -59,7 +59,7 @@ def readInput(request):
 			 name='create_persons',
 			 renderer='rest',
 			 request_method='POST',
-			 context=views.BadgesPathAdapter,
+			 context=views.NTIBadgesPathAdapter,
 			 permission=nauth.ACT_MODERATE)
 def create_persons(request):
 	values = readInput(request)
@@ -89,6 +89,6 @@ def create_persons(request):
 					total += 1
 
 	result = LocatedExternalDict()
-	result['Elapsed'] = time.time() - now
 	result['Total'] = total
+	result['Elapsed'] = time.time() - now
 	return result

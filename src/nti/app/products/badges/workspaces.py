@@ -17,8 +17,6 @@ from zope.container import contained
 
 from nti.appserver import interfaces as app_interfaces
 
-from nti.badges.openbadges import interfaces as open_interfaces
-
 from nti.dataserver.datastructures import LastModifiedCopyingUserList
 
 from nti.utils.property import Lazy
@@ -84,8 +82,7 @@ class AllBadgesCollection(contained.Contained):
 		container.__name__ = __name__
 		for manager in get_user_badge_managers(parent.user):
 			badges = manager.get_all_badges()
-			# we use open badges for in/out
-			container.extend(open_interfaces.IBadgeClass(x) for x in badges)
+			container.extend(badges)
 		return container
 
 	def __getitem__(self, key):
@@ -133,7 +130,7 @@ class EarnedBadgeCollection(contained.Contained):
 		uid = get_user_id(parent.user)
 		for manager in get_user_badge_managers(parent.user):
 			badges = manager.get_user_badges(uid)
-			container.extend(open_interfaces.IBadgeClass(x) for x in badges)
+			container.extend(badges)
 		return container
 
 	def __len__(self):

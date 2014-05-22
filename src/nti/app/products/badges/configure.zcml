@@ -19,6 +19,10 @@
 			 for="nti.dataserver.interfaces.IUser"
 			 provides="nti.badges.tahrir.interfaces.IPerson" />
 		
+	<adapter factory=".adapters.user_to_ntiperson"
+			 for="nti.dataserver.interfaces.IUser"
+			 provides="nti.badges.interfaces.INTIPerson" />
+			 
 	<!-- Subscribers -->
 	
 	<subscriber handler=".subscribers._user_deleted" />

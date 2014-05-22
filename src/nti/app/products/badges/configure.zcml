@@ -9,6 +9,12 @@
 	<include package="zope.component" />
 	<include package="zope.security" />
 	
+	<!-- Generations -->
+	
+	<utility factory=".generations.install._NTIBadgesSchemaManager"
+			 name="nti.dataserver-ntibadges"
+			 provides="zope.generations.interfaces.IInstallableSchemaManager" />
+			 
 	<!-- Adpaters -->
 		
 	<adapter factory=".adapters.user_to_identity_object"

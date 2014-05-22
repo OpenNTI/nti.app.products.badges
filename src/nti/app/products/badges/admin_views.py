@@ -29,7 +29,6 @@ from nti.externalization.interfaces import LocatedExternalDict
 from nti.utils.maps import CaseInsensitiveDict
 
 from . import views
-from . import get_user_id
 from . import get_user_badge_managers
 
 def _make_min_max_btree_range(search_term):
@@ -81,9 +80,8 @@ def create_persons(request):
 		if not user or not nti_interfaces.IUser.providedBy(user):
 			continue
 		for manager in get_user_badge_managers(user):
-			uid = get_user_id(user)
-			if not manager.person_exists(pid=uid, name=user.username):
-				ntiperson = badges_interfaces.INTIPerson(user)
+			ntiperson = badges_interfaces.INTIPerson(user)
+			if not manager.person_exists(ntiperson):
 				ntiperson.createdTime = time.time()
 				if manager.add_person(ntiperson):
 					total += 1

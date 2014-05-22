@@ -17,5 +17,5 @@ def get_user_id(user):
 	return result
 
 def get_user_badge_managers(user):
-	for manager in component.subscribers((user,), interfaces.IPrincipalBadgeManager):
-		yield manager
+	for pbm in component.subscribers((user,), interfaces.IPrincipalBadgeManager):
+		yield pbm.manager

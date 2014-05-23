@@ -51,11 +51,15 @@
 			 
 	<!-- Path Adapters -->
 	
-	<adapter name="Badges"
-			 factory=".views.BadgesPathAdapter" />
+	<adapter name="BadgesWorkspace"
+			 factory=".views.BadgesWorkspacePathAdapter" />
+		
+	<adapter name="OpenBadges"
+			 factory=".views.OpenBadgesPathAdapter"
+			 provides="zope.traversing.interfaces.IPathAdapter" />
 			 
-	<adapter name="badges"
+	<adapter name="BadgeAdmin"
 			 for="nti.dataserver.interfaces.IDataserverFolder pyramid.interfaces.IRequest"
-			 factory=".views.NTIBadgesPathAdapter"
+			 factory=".views.BadgeAdminPathAdapter"
 			 provides="zope.traversing.interfaces.IPathAdapter" />
 </configure>

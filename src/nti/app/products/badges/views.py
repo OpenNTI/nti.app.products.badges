@@ -26,17 +26,29 @@ from . import interfaces
 
 @interface.implementer(IPathAdapter)
 @component.adapter(nti_interfaces.IUser, IRequest)
-def BadgesPathAdapter(context, request):
+def BadgesWorkspacePathAdapter(context, request):
     service = IUserService(context)
     workspace = interfaces.IBadgesWorkspace(service)
     return workspace
 
 @interface.implementer(IPathAdapter, IContained)
-class NTIBadgesPathAdapter(zcontained.Contained):
+class BadgeAdminPathAdapter(zcontained.Contained):
 
-    __name__ = 'badges'
+    __name__ = 'BadgeAdmin'
 
     def __init__(self, context, request):
         self.context = context
         self.request = request
         self.__parent__ = context
+
+@interface.implementer(IPathAdapter)
+@component.adapter(nti_interfaces.IDataserverFolder, IRequest)
+class OpenBadgesPathAdapter(zcontained.Contained):
+
+    def __init__(self, course, request):
+        self.__parent__ = course
+        self.__name__ = 'OpenBadges'
+
+    def __getitem__(self, badge):
+        badge = badge.lower()
+        raise KeyError(badge)

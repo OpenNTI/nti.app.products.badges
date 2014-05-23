@@ -38,7 +38,7 @@
 	</configure>
 	
 	<subscriber handler=".subscribers._user_created" />
-	<subscriber handler=".subscribers._user_deleted" /
+	<subscriber handler=".subscribers._user_deleted" />
 	
 	<!-- Workspaces -->
 	<!-- A subscriber for enumeration -->

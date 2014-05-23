@@ -31,13 +31,14 @@
 			 
 	<!-- Subscribers -->
 	
-	<subscriber handler=".subscribers._user_deleted" />
-	
 	<configure zcml:condition="have devmode">
 		<subscriber
-			factory=".subscribers._DefaultPrincipalBadgeManager"
+			factory=".managers._DefaultPrincipalBadgeManager"
 			provides=".interfaces.IPrincipalBadgeManager"/>
 	</configure>
+	
+	<subscriber handler=".subscribers._user_created" />
+	<subscriber handler=".subscribers._user_deleted" /
 	
 	<!-- Workspaces -->
 	<!-- A subscriber for enumeration -->

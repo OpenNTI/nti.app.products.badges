@@ -8,34 +8,28 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import time
+
 from zope import component
-from zope import interface
+from zope.lifecycleevent.interfaces import IObjectCreatedEvent
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 
-from nti.badges import interfaces as badge_interfaces
+from nti.badges import interfaces as badges_interfaces
 
 from nti.dataserver import interfaces as nti_interfaces
 
-from . import interfaces
-from . import get_user_id
 from . import get_user_badge_managers
-
-@component.adapter(nti_interfaces.IUser)
-@interface.implementer(interfaces.IPrincipalBadgeManager)
-class _DefaultPrincipalBadgeManager(object):
-
-    __slots__ = ('context',)
-
-    def __init__(self, context):
-        self.context = context
-
-    @property
-    def manager(self):
-        result = component.getUtility(badge_interfaces.IBadgeManager)
-        return result
 
 @component.adapter(nti_interfaces.IUser, IObjectRemovedEvent)
 def _user_deleted(user, event):
-    uid = get_user_id(user)
+    person = badges_interfaces.INTIPerson(user)
     for manager in get_user_badge_managers(user):
-        manager.delete_user(uid)
+        manager.delete_person(person)
+
+@component.adapter(nti_interfaces.IUser, IObjectCreatedEvent)
+def _user_created(user, event):
+    ntiperson = badges_interfaces.INTIPerson(user)
+    for manager in get_user_badge_managers(user):
+        if not manager.person_exists(ntiperson):
+            ntiperson.createdTime = time.time()
+            manager.add_person(ntiperson)

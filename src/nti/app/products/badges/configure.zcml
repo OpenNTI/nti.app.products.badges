@@ -39,6 +39,7 @@
 	
 	<subscriber handler=".subscribers._user_created" />
 	<subscriber handler=".subscribers._user_deleted" />
+	<subscriber handler=".subscribers._after_database_opened_listener" />
 	
 	<!-- Workspaces -->
 	<!-- A subscriber for enumeration -->

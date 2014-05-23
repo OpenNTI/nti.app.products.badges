@@ -58,7 +58,7 @@ def readInput(request):
 			 name='create_persons',
 			 renderer='rest',
 			 request_method='POST',
-			 context=views.NTIBadgesPathAdapter,
+			 context=views.BadgeAdminPathAdapter,
 			 permission=nauth.ACT_MODERATE)
 def create_persons(request):
 	values = readInput(request)

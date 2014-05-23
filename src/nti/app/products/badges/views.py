@@ -17,12 +17,15 @@ from zope.container import contained as zcontained
 from zope.traversing.interfaces import IPathAdapter
 
 from pyramid.interfaces import IRequest
+from pyramid.threadlocal import get_current_request
 
 from nti.appserver.interfaces import IUserService
 
+from nti.dataserver.users import User
 from nti.dataserver import interfaces as nti_interfaces
 
 from . import interfaces
+from . import get_user_badge_managers
 
 @interface.implementer(IPathAdapter)
 @component.adapter(nti_interfaces.IUser, IRequest)
@@ -50,5 +53,12 @@ class OpenBadgesPathAdapter(zcontained.Contained):
         self.__name__ = 'OpenBadges'
 
     def __getitem__(self, badge):
-        badge = badge.lower()
+        request = get_current_request()
+        username = request.authenticated_userid if request else None
+        user = User.get_user(username) if username else None
+        if user is not None:
+            for manager in get_user_badge_managers(user):
+                result = manager.get_badge(badge)
+                if result is not None:
+                    return result
         raise KeyError(badge)

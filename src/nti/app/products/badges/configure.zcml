@@ -29,6 +29,16 @@
 			 for="nti.dataserver.interfaces.IUser"
 			 provides="nti.badges.interfaces.INTIPerson" />
 			 
+	<!-- Decorators -->
+
+	<subscriber factory=".decorators._BadgeHRefAdder"
+				for="nti.badges.openbadges.interfaces.IBadgeClass"
+				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
+	
+	<subscriber factory=".decorators._BadgeHRefAdder"
+				for="nti.badges.interfaces.INTIBadge"
+				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
+	
 	<!-- Subscribers -->
 	
 	<configure zcml:condition="have devmode">

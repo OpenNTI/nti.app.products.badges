@@ -38,29 +38,28 @@ def user_to_identity_object(user):
                             salt=None)
     return result
 
+def _set_common_person(user, person):
+    uid = get_user_id(user)
+    person.email = uid
+    profile = user_interfaces.IUserProfile(user)
+    person.bio = getattr(profile, 'about', None) or u''
+    person.website = getattr(profile, 'home_page', None) or u''
+    
 @component.adapter(nti_interfaces.IUser)
 @interface.implementer(tahrir_interfaces.IPerson)
 def user_to_tahrir_person(user):
-    uid = get_user_id(user)
-    profile = user_interfaces.IUserProfile(user)
     result = Person()
-    result.email = uid
+    _set_common_person(user, result)
     result.nickname = user.username
-    result.bio = getattr(profile, 'about', None) or u''
-    result.website = getattr(profile, 'home_page', None) or u''
     result.created_on = datetime.fromtimestamp(user.createdTime)
     return result
 
 @component.adapter(nti_interfaces.IUser)
 @interface.implementer(badges_interfaces.INTIPerson)
 def user_to_ntiperson(user):
-    uid = get_user_id(user)
     result = NTIPerson()
-    result.email = uid
+    _set_common_person(user, result)
     result.name = user.username
     result.createdTime = user.createdTime
-    profile = user_interfaces.IUserProfile(user)
-    result.bio = getattr(profile, 'about', None) or u''
-    result.website = getattr(profile, 'home_page', None) or u''
     return result
 

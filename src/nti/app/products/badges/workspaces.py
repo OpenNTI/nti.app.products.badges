@@ -17,6 +17,9 @@ from zope.container import contained
 
 from nti.appserver import interfaces as app_interfaces
 
+from nti.badges.interfaces import INTIBadge
+from nti.badges.interfaces import INTIPerson
+
 from nti.dataserver.datastructures import LastModifiedCopyingUserList
 
 from nti.utils.property import Lazy
@@ -80,9 +83,10 @@ class AllBadgesCollection(contained.Contained):
 		container = LastModifiedCopyingUserList()
 		container.__parent__ = parent
 		container.__name__ = __name__
+		predicate = interfaces.get_badge_predicate_for_user(parent.user)
 		for manager in get_user_badge_managers(parent.user):
 			badges = manager.get_all_badges()
-			container.extend(badges)
+			container.extend(INTIBadge(b) for b in badges if predicate(b))
 		return container
 
 	def __getitem__(self, key):
@@ -101,10 +105,31 @@ class EarnableBadgeCollection(contained.Contained):
 	name = alias('__name__', __name__)
 
 	accepts = ()
-	container = ()
 
 	def __init__(self, parent):
 		self.__parent__ = parent
+
+	def _has_been_earned(self, user, badge):
+		person = INTIPerson(user)
+		badge = INTIBadge(badge)
+		for manager in get_user_badge_managers(user):
+			if manager.assertion_exists(person, badge):
+				return True
+		return False
+
+	@Lazy
+	def container(self):
+		parent = self.__parent__
+		user = parent.user
+		container = LastModifiedCopyingUserList()
+		container.__parent__ = parent
+		container.__name__ = __name__
+
+		for subs in component.subscribers((user,), interfaces.IPrincipalErnableBadges):
+			for badge in subs.iter_badges():
+				if not self._has_been_earned(user, badge):
+					container.append(INTIBadge(badge))
+		return container
 
 	def __len__(self):
 		return len(self.container)
@@ -130,7 +155,7 @@ class EarnedBadgeCollection(contained.Contained):
 		uid = get_user_id(parent.user)
 		for manager in get_user_badge_managers(parent.user):
 			badges = manager.get_user_badges(uid)
-			container.extend(badges)
+			container.extend(INTIBadge(b) for b in badges)
 		return container
 
 	def __len__(self):

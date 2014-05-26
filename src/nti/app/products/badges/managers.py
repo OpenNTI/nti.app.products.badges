@@ -26,7 +26,6 @@ class _DefaultPrincipalBadgeManager(object):
     def __init__(self, context):
         self.context = context
 
-    @property
-    def manager(self):
-        result = component.getUtility(badge_interfaces.IBadgeManager)
-        return result
+    def iter_managers(self):
+        result = component.queryUtility(badge_interfaces.IBadgeManager)
+        return (result,) if result is not None else ()

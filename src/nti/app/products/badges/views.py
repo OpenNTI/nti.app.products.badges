@@ -21,6 +21,8 @@ from pyramid.threadlocal import get_current_request
 
 from nti.appserver.interfaces import IUserService
 
+from nti.badges.openbadges import interfaces as badge_interfaces
+
 from nti.dataserver.users import User
 from nti.dataserver import interfaces as nti_interfaces
 
@@ -60,5 +62,5 @@ class OpenBadgesPathAdapter(zcontained.Contained):
             for manager in get_user_badge_managers(user):
                 result = manager.get_badge(badge)
                 if result is not None:
-                    return result
+                    return badge_interfaces.IBadgeClass(result)
         raise KeyError(badge)

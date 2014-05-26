@@ -63,7 +63,7 @@
 			 
 	<!-- Path Adapters -->
 	
-	<adapter name="BadgesWorkspace"
+	<adapter name="Badges"
 			 factory=".views.BadgesWorkspacePathAdapter" />
 		
 	<adapter name="OpenBadges"

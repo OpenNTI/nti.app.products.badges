@@ -18,4 +18,6 @@ def get_user_id(user):
 
 def get_user_badge_managers(user):
 	for pbm in component.subscribers((user,), interfaces.IPrincipalBadgeManager):
-		yield pbm.manager
+		manager = pbm.manager
+		if manager is not None:
+			yield manager

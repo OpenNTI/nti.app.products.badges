@@ -10,6 +10,8 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 
+from nti.badges import interfaces as badge_interfaces
+
 from . import interfaces
 
 def get_user_id(user):
@@ -20,3 +22,10 @@ def get_user_badge_managers(user):
 	for pbm in component.subscribers((user,), interfaces.IPrincipalBadgeManager):
 		for manager in pbm.iter_managers():
 			yield manager
+
+def get_badge(badge):
+	for _, manager in component.getUtilitiesFor(badge_interfaces.IBadgeManager):
+		result = manager.get_badge(badge)
+		if result is not None:
+			return result
+	return None

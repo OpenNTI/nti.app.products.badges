@@ -8,11 +8,13 @@ __docformat__ = "restructuredtext en"
 # pylint: disable=W0212,R0904
 
 from hamcrest import is_
+from hamcrest import none
 from hamcrest import has_length
 from hamcrest import assert_that
 
 from nti.dataserver.users import User
 
+from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_user_id
 from nti.app.products.badges import get_user_badge_managers
 
@@ -46,3 +48,8 @@ class TestBadges(NTIBadgesTestCase):
 		user = self._create_user()
 		managers = list(get_user_badge_managers(user))
 		assert_that(managers, has_length(1))
+
+	@WithMockDSTrans
+	def test_get_badge(self):
+		badge = get_badge("not found")
+		assert_that(badge, is_(none()))

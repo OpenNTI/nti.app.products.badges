@@ -24,7 +24,6 @@ def sync_db(path, dbid=None, verify=False):
 		return  # No badge manager was found
 
 	results = scanner.flat_scan(path, verify)  # pairs mozilla badge/issuer
-	print(results)
 	for _, manager in managers:
 		for badge, issuer in results:
 			if issuer is None:

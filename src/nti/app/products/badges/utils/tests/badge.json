@@ -1,0 +1,8 @@
+{
+	"name": "Zangetzus",
+	"description": "True shikai form.",
+	"image": "http://bleach.org/ichigo.png",
+	"criteria": "http://bleach.org/ichigo-badge.html",
+	"tags": ["shinigami", "quincy"],
+	"issuer": "http://bleach.org/bleach.json"
+}

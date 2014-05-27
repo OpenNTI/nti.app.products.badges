@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 $Id$
@@ -15,15 +16,16 @@ from nti.badges import interfaces as badge_interfaces
 def sync_db(path, dbid=None, verify=False):
 	if dbid is not None:
 		manager = component.getUtility(badge_interfaces.IBadgeManager, name=dbid)
-		managers = (manager,)
+		managers = (dbid, manager)
 	else:
 		managers = list(component.getUtilitiesFor(badge_interfaces.IBadgeManager))
 	
 	if not managers:
-		return  # No badge manager was foun
+		return  # No badge manager was found
 
 	results = scanner.flat_scan(path, verify)  # pairs mozilla badge/issuer
-	for manager in manager:
+	print(results)
+	for _, manager in managers:
 		for badge, issuer in results:
 			if issuer is None:
 				logger.debug("Badge %s cannot be processed; issuer not found",

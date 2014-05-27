@@ -1,0 +1,16 @@
+{
+	"uid": "ichigo",
+	"recipient": {
+		"type": "email",
+		"hashed": false,
+		"identity": "nt@nti.com"
+	},
+	"image": "http://bleach.org/ichigo.png",
+	"evidence": "http://bleach.org/ichigo.html",
+	"issuedOn": 1359217910,
+	"badge": "https://bleach.org/ichigo.json",
+	"verify": {
+		"type": "hosted",
+		"url": "https://bleach.org/ichigo-badge.json"
+	}
+}

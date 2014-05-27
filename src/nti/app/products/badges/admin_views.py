@@ -129,7 +129,8 @@ def award(request):
 
 	# add assertion
 	uid = get_user_id(user)
-	manager.add_assertion(uid, badge_name)
+	if not manager.assertion_exists(uid, badge_name):
+		manager.add_assertion(uid, badge_name)
 
 	return hexc.HTTPNoContent()
 

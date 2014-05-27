@@ -19,6 +19,7 @@ from nti.badges import interfaces as badge_interfaces
 from nti.dataserver.tests.mock_dataserver import WithMockDS
 from nti.dataserver.tests.mock_dataserver import mock_db_trans
 
+from nti.app.products.badges.tests import generator
 from nti.app.testing.application_webtest import ApplicationTestLayer
 
 from nti.testing.layers import find_test
@@ -70,19 +71,22 @@ import unittest
 class NTIBadgesTestCase(unittest.TestCase):
     layer = SharedConfiguringTestLayer
 
+sample_size = 5
+
 class NTIBadgesApplicationTestLayer(ApplicationTestLayer):
 
     @classmethod
-    def _register_sample(self):
-        path = os.path.join(os.path.dirname(__file__), 'sample.db')
-        dburi = "sqlite:///%s" % path
-        bm = manager.create_badge_manager(dburi)
-        component.provideUtility(bm, badge_interfaces.IBadgeManager, "sample")
+    def _register_sample(cls):
+        import transaction
+        with transaction.manager:
+            bm = manager.create_badge_manager(defaultSQLite=True)
+            generator.generate_db(bm.db, sample_size, sample_size, sample_size)
+            component.provideUtility(bm, badge_interfaces.IBadgeManager, "sample")
 
     @classmethod
     def setUp(cls):
-        cls._register_sample()
         _change_ds_dir(cls)
+        cls._register_sample()
 
     @classmethod
     def tearDown(cls):

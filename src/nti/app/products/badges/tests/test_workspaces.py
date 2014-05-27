@@ -17,15 +17,23 @@ from hamcrest import assert_that
 from hamcrest import has_property
 from hamcrest import greater_than_or_equal_to
 
+import transaction
+
+from zope import component
+
 from nti.appserver.interfaces import IUserService
 from nti.appserver.interfaces import ICollection
 
+from nti.app.products.badges import get_user_id
 from nti.app.products.badges import interfaces as app_badge_interfaces
+
+from nti.badges import interfaces as badge_interfaces
 
 from nti.dataserver import traversal
 
 from nti.appserver.tests.test_application import TestApp
 
+from nti.app.products.badges.tests import sample_size
 from nti.app.products.badges.tests import NTIBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
@@ -72,7 +80,7 @@ class TestWorkspaces(ApplicationLayerTest):
 								   badges_path + '/EarnableBadges'))
 			
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
-	def test_badge_queries(self):
+	def test_all_badges(self):
 		username = 'ichigo@bleach.com'
 		with mock_dataserver.mock_db_trans(self.ds):
 			self._create_user(username=username)
@@ -82,4 +90,41 @@ class TestWorkspaces(ApplicationLayerTest):
 		res = testapp.get(all_badges_path,
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
-		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(5))))
+		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(sample_size))))
+
+	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
+	def test_earned_badges(self):
+		badge_name = "badge.1"
+		username = 'person.1@nti.com'
+		with mock_dataserver.mock_db_trans(self.ds):
+			user = self._create_user(username=username, external_value={'email':username})
+			uid = get_user_id(user)
+
+		earned_badges_path = '/dataserver2/users/person.1%40nti.com/Badges/EarnedBadges'
+		testapp = TestApp(self.app)
+		res = testapp.get(earned_badges_path,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
+		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(0))))
+
+		with transaction.manager:
+			manager = component.getUtility(badge_interfaces.IBadgeManager, "sample")
+			manager.add_assertion(uid, badge_name)
+
+		res = testapp.get(earned_badges_path,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
+		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(1))))
+
+	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
+	def test_earnable_badges(self):
+		username = 'person.1@nti.com'
+		with mock_dataserver.mock_db_trans(self.ds):
+			self._create_user(username=username, external_value={'email':username})
+
+		earned_badges_path = '/dataserver2/users/person.1%40nti.com/Badges/EarnableBadges'
+		testapp = TestApp(self.app)
+		res = testapp.get(earned_badges_path,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
+		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(0))))

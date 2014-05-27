@@ -154,7 +154,7 @@ class EarnedBadgeCollection(contained.Contained):
 		container.__name__ = __name__
 		uid = get_user_id(parent.user)
 		for manager in get_user_badge_managers(parent.user):
-			badges = manager.get_user_badges(uid)
+			badges = manager.get_person_badges(uid)
 			container.extend(INTIBadge(b) for b in badges)
 		return container
 

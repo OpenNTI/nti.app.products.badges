@@ -19,11 +19,10 @@ from . import interfaces
 @interface.implementer(interfaces.IPrincipalBadgeFilter)
 class _DefaultPrincipalBadgeFilter(object):
 
-    __slots__ = ()
+	__slots__ = ()
 
-    def __init__(self, *args):
-        pass
+	def __init__(self, *args):
+		pass
 
-    def allow_badge(self, badge, user):
-        return True
-
+	def allow_badge(self, badge, user):
+		return True

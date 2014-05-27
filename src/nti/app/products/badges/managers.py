@@ -27,5 +27,7 @@ class _DefaultPrincipalBadgeManager(object):
         self.context = context
 
     def iter_managers(self):
-        result = component.queryUtility(badge_interfaces.IBadgeManager)
-        return (result,) if result is not None else ()
+        result = []
+        for _, manager in component.getUtilitiesFor(badge_interfaces.IBadgeManager):
+            result.append(manager)
+        return result

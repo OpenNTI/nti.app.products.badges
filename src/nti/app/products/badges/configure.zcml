@@ -51,10 +51,8 @@
 	<subscriber	factory=".filters._DefaultPrincipalBadgeFilter"
 				provides=".interfaces.IPrincipalBadgeFilter"/>
 			
-	<configure zcml:condition="have devmode">
-		<subscriber	factory=".managers._DefaultPrincipalBadgeManager"
-					provides=".interfaces.IPrincipalBadgeManager"/>
-	</configure>
+	<subscriber	factory=".managers._DefaultPrincipalBadgeManager"
+				provides=".interfaces.IPrincipalBadgeManager"/>
 	
 	<!-- Workspaces -->
 	<!-- A subscriber for enumeration -->
@@ -69,10 +67,6 @@
 	
 	<adapter name="Badges"
 			 factory=".views.BadgesWorkspacePathAdapter" />
-		
-	<adapter name="OpenBadges"
-			 factory=".views.OpenBadgesPathAdapter"
-			 provides="zope.traversing.interfaces.IPathAdapter" />
 			 
 	<adapter name="BadgeAdmin"
 			 for="nti.dataserver.interfaces.IDataserverFolder pyramid.interfaces.IRequest"

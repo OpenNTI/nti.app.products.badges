@@ -30,7 +30,8 @@ from nti.externalization.interfaces import LocatedExternalDict
 
 from nti.utils.maps import CaseInsensitiveDict
 
-from . import utils
+from .utils import sync
+
 from . import views
 from . import interfaces
 from . import get_user_id
@@ -110,7 +111,13 @@ def award(request):
 		raise hexc.HTTPNotFound('User not found')
 	
 	badge = None
-	badge_name = values.get('badge', values.get('badge_name', values.get('badgeName')))
+	for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
+		badge_name = values.get(name)
+		if badge_name:
+			break
+	if not badge_name:
+		raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
+
 	for manager in get_user_badge_managers(user):
 		badge = manager.get_badge(badge_name)
 		if badge is not None:
@@ -148,7 +155,13 @@ def revoke(request):
 		raise hexc.HTTPNotFound('User not found')
 
 	badge = None
-	badge_name = values.get('badge', values.get('badge_name', values.get('badgeName')))
+	for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
+		badge_name = values.get(name)
+		if badge_name:
+			break
+	if not badge_name:
+		raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
+
 	for manager in get_user_badge_managers(user):
 		badge = manager.get_badge(badge_name)
 		if badge is not None:
@@ -175,21 +188,25 @@ def sync_db(request):
 	values = readInput(request)
 
 	# get badge directory
-	directory = values.get('directory')
+	for name in ('directory', 'dir', 'path', 'hosted_badge_images'):
+		directory = values.get(name)
+		if directory:
+			break
 	if not directory or not os.path.exists(directory) or not os.path.isdir(directory):
 		raise hexc.HTTPNotFound('Directory not found')
 
 	# get database name
-	dbname = values.get('dbid', values.get('db_id',
-					  values.get('dbname'), values.get('db_name')))
+	for name in ('dbid', 'dbname', 'db_id', 'db_name'):
+		dbname = values.get(name)
 
 	# verify object
 	verify = values.get('verify') or u''
 	verify = str(verify).lower() in ('1', 'true', 't', 'yes', 'y', 'on')
 
 	now = time.time()
+
 	# sync database
-	utils.sync.sync_db(directory, dbname, verify)
+	sync.sync_db(directory, dbname, verify)
 
 	# return
 	result = LocatedExternalDict()

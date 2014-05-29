@@ -29,3 +29,8 @@ def get_badge(badge):
 		if result is not None:
 			return result
 	return None
+
+def get_all_badges():
+	for _, manager in component.getUtilitiesFor(badge_interfaces.IBadgeManager):
+		for badge in manager.get_all_badges():
+			yield badge

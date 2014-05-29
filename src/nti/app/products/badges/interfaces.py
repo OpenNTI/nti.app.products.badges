@@ -8,8 +8,17 @@ __docformat__ = "restructuredtext en"
 
 from zope import component
 from zope import interface
+from zope.interface.interface import taggedValue
 
 from nti.appserver import interfaces as app_interfaces
+
+from nti.app.client_preferences.interfaces import TAG_EXTERNAL_PREFERENCE_GROUP
+
+class IBadgeSettings(interface.Interface):
+	"""
+	The root of the settings tree for badges
+	"""
+	taggedValue(TAG_EXTERNAL_PREFERENCE_GROUP, 'write')
 
 class IBadgesWorkspace(app_interfaces.IWorkspace):
 	"""

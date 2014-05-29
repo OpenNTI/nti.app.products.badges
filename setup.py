@@ -36,7 +36,8 @@ setup(
 	namespace_packages=['nti'],
 	install_requires=[
 		'setuptools',
-        'nti.badges'
+        'nti.badges',
+        'nti.app.client_preferences'
 	],
 	entry_points=entry_points
 )

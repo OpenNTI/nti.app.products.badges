@@ -72,4 +72,17 @@
 			 for="nti.dataserver.interfaces.IDataserverFolder pyramid.interfaces.IRequest"
 			 factory=".views.BadgeAdminPathAdapter"
 			 provides="zope.traversing.interfaces.IPathAdapter" />
+			 
+	<!-- Preferences -->
+		
+	<include package="zope.security" file="permissions.zcml"/>
+	<include package="zope.preference" file="meta.zcml" />
+	<include package="zope.preference" />
+		
+	<preferenceGroup
+		id="Badges"
+		title="Badge Settings"
+		schema=".interfaces.IBadgeSettings"
+		category="true" />
+
 </configure>

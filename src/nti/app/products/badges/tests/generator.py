@@ -26,9 +26,9 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
 	for code in xrange(issuers):
 		code += 1
 		issuer_id = database.add_issuer(origin=u'http://nti.com',
-									   name=u'issuer.%s@Rnti' % code,
-									   org=u'http://nti.com',
-									   contact=u'issuer.%s@nti.com' % code)
+									    name=u'issuer.%s@Rnti' % code,
+									    org=u'http://nti.com',
+									    contact=u'issuer.%s@nti.com' % code)
 		issuer_ids.append(issuer_id)
 		if verbose:
 			print('Issuer %s added' % issuer_id)
@@ -39,9 +39,8 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
 		for x in xrange(random.randint(1, 3)):
 			tags += 'tag.%s,' % (x + 1)
 		badge_id = database.add_badge(name=u'badge.%s' % code,
+									  desc=u'Badge %s' % code,
 						  			  image=u'http://nti.com/files/badge_%s.png' % code,
-						  			  title=u'Badge %s' % code,
-						  			  desc=u'Welcome to the Badge %s' % code,
 						  			  criteria=u'http://nti.com/criteria/%s.html' % code,
 						 			  issuer_id=random.choice(issuer_ids),
 						  			  tags=tags)

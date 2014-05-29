@@ -16,6 +16,7 @@ from nti.dataserver.users import User
 
 from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_user_id
+from nti.app.products.badges import get_all_badges
 from nti.app.products.badges import get_user_badge_managers
 
 import nti.dataserver.tests.mock_dataserver as mock_dataserver
@@ -53,3 +54,8 @@ class TestBadges(NTIBadgesTestCase):
 	def test_get_badge(self):
 		badge = get_badge("not found")
 		assert_that(badge, is_(none()))
+
+	@WithMockDSTrans
+	def test_get_all_badges(self):
+		badges = list(get_all_badges())
+		assert_that(badges, has_length(1))

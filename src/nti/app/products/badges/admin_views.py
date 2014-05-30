@@ -212,24 +212,13 @@ def sync_db(request):
 	result['Elapsed'] = time.time() - now
 	return result
 
-@view_config(route_name='objects.generic.traversal',
-			 name='bulk_import',
-			 renderer='rest',
-			 request_method='POST',
-			 context=views.BadgeAdminPathAdapter,
-			 permission=nauth.ACT_MODERATE)
-def bulk_import(request):
-	result = LocatedExternalDict()
-	result['Errors'] = errors = []
+def bulk_import(input_source, errors=[]):
+	managers = {}
 	ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
 
 	awards = 0
 	revokations = 0
-	managers = {}
-	now = time.time()
-	input_file = request.POST['source'].file
-	input_file.seek(0)
-	for line, source in enumerate(input_file):
+	for line, source in enumerate(input_source):
 		line += 1
 		source = source.strip()
 		if not source or source.startswith("#"):
@@ -247,7 +236,7 @@ def bulk_import(request):
 
 		user = User.get_user(username)
 		if user is None:
-			results = list(ent_catalog.searchResults(email=username))
+			results = list(ent_catalog.searchResults(email=(username, username)))
 			user = results[0] if results else None
 		if user is None:
 			errors.append("Invalid user '%s' in line %s" % (username, line))
@@ -265,12 +254,27 @@ def bulk_import(request):
 		if operation == 'award' and not manager.assertion_exists(uid, badge_name):
 			awards += 1
 			manager.add_assertion(uid, badge_name)
-			logger.debug('Badge %s awarded to %', badge_name, username)
+			logger.debug('Badge %s awarded to %s', badge_name, username)
 		elif operation == 'revoke' and manager.assertion_exists(uid, badge_name):
 			revokations += 1
 			manager.remove_assertion(uid, badge_name)
-			logger.debug('Badge %s revoked from %', badge_name, username)
-		
+			logger.debug('Badge %s revoked from %s', badge_name, username)
+
+	return (awards, revokations)
+
+@view_config(route_name='objects.generic.traversal',
+			 name='bulk_import',
+			 renderer='rest',
+			 request_method='POST',
+			 context=views.BadgeAdminPathAdapter,
+			 permission=nauth.ACT_MODERATE)
+def bulk_import_view(request):
+	now = time.time()
+	result = LocatedExternalDict()
+	result['Errors'] = errors = []
+	source = request.POST['source'].file
+	source.seek(0)
+	awards, revokations = bulk_import(source, errors)
 	result['Awards'] = awards
 	result['Revokations'] = revokations
 	result['Elapsed'] = time.time() - now

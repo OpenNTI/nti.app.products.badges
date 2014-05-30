@@ -8,14 +8,18 @@ __docformat__ = "restructuredtext en"
 # pylint: disable=W0212,R0904
 
 from hamcrest import is_
+from hamcrest import has_length
 from hamcrest import assert_that
 
 import os
 import json
+from cStringIO import StringIO
 
 from zope import component
 
 from nti.badges import interfaces as badge_interfaces
+
+from nti.app.products.badges.admin_views import bulk_import
 
 from nti.appserver.tests.test_application import TestApp
 
@@ -84,6 +88,34 @@ class TestAdminViews(ApplicationLayerTest):
 					 status=204)
 		manager = component.getUtility(badge_interfaces.IBadgeManager, "sample")
 		assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'), is_(False))
+
+	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
+	def test_bulk_import(self):
+		with mock_dataserver.mock_db_trans(self.ds):
+			for username in ('ichigo', 'rukia'):
+				self._create_user(username=username, external_value={'email':username+'@bleach.com'})
+
+		award_badge_path = '/dataserver2/BadgeAdmin/@@award'
+		testapp = TestApp(self.app)
+		testapp.post(award_badge_path,
+					 json.dumps({"username":"rukia",
+								 "badge":"badge.2"}),
+					 extra_environ=self._make_extra_environ(),
+					 status=204)
+		
+		with mock_dataserver.mock_db_trans(self.ds):
+			source = "ichigo\tbadge.1\n"
+			source += "rukia@bleach.com\tbadge.2\trevoke\n"
+			source += "aizen@bleach.com\tbadge.1\taward\n"
+			source += "ichigo@bleach.com\tnotfound-badge\taward\n"
+			source += "ichigo@bleach.com\tbadge.1\tinvalid\n"
+
+			errors = []
+			source = StringIO(source)
+			awards, revokations = bulk_import(source, errors)
+			assert_that(awards, is_(1))
+			assert_that(revokations, is_(1))
+			assert_that(errors, has_length(3))
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_sync_db(self):

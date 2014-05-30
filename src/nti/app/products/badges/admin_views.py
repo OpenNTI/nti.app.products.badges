@@ -16,14 +16,14 @@ import time
 import simplejson
 
 from zope import component
+from zope.catalog.interfaces import ICatalog
 
 from pyramid.view import view_config
 from pyramid import httpexceptions as hexc
 
-from nti.badges import interfaces as badges_interfaces
-
 from nti.dataserver.users import User
 from nti.dataserver import authorization as nauth
+from nti.dataserver.users import index as user_index
 from nti.dataserver import interfaces as nti_interfaces
 
 from nti.externalization.interfaces import LocatedExternalDict
@@ -35,6 +35,7 @@ from .utils import sync
 from . import views
 from . import interfaces
 from . import get_user_id
+from . import get_manager_for_badge
 from . import get_user_badge_managers
 
 def _make_min_max_btree_range(search_term):
@@ -86,10 +87,8 @@ def create_persons(request):
 		if not user or not nti_interfaces.IUser.providedBy(user):
 			continue
 		for manager in get_user_badge_managers(user):
-			ntiperson = badges_interfaces.INTIPerson(user)
-			if not manager.person_exists(ntiperson):
-				ntiperson.createdTime = time.time()
-				if manager.add_person(ntiperson):
+			if not manager.person_exists(user):
+				if manager.add_person(user):
 					total += 1
 
 	result = LocatedExternalDict()
@@ -210,5 +209,70 @@ def sync_db(request):
 
 	# return
 	result = LocatedExternalDict()
+	result['Elapsed'] = time.time() - now
+	return result
+
+@view_config(route_name='objects.generic.traversal',
+			 name='bulk_import',
+			 renderer='rest',
+			 request_method='POST',
+			 context=views.BadgeAdminPathAdapter,
+			 permission=nauth.ACT_MODERATE)
+def bulk_import(request):
+	result = LocatedExternalDict()
+	result['Errors'] = errors = []
+	ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
+
+	awards = 0
+	revokations = 0
+	managers = {}
+	now = time.time()
+	input_file = request.POST['source'].file
+	input_file.seek(0)
+	from IPython.core.debugger import Tracer; Tracer()()
+	for line, source in enumerate(input_file):
+		line += 1
+		source = source.strip()
+		if not source or source.startswith("#"):
+			continue
+		splits = source.split('\t')
+		if len(splits) < 2:
+			errors.append("Incorrect input in line %s" % line)
+			continue
+
+		username, badge_name = splits[0], splits[1]
+		operation = splits[2].lower() if len(splits) >= 3 else 'award'
+		if operation not in ('award', 'revoke'):
+			errors.append("Invalid operation '%s' in line %s" % (operation, line))
+			continue
+
+		user = User.get_user(username)
+		if user is None:
+			results = list(ent_catalog.searchResults(email=username))
+			user = results[0] if results else None
+		if user is None:
+			errors.append("Invalid user '%s' in line %s" % (username, line))
+			continue
+
+		manager = managers.get(badge_name)
+		if manager is None:
+			manager = get_manager_for_badge(badge_name)
+			if manager is None:
+				errors.append("Invalid badge '%s' in line %s" % (badge_name, line))
+				continue
+			managers[badge_name] = manager
+
+		uid = get_user_id(user)
+		if operation == 'award' and not manager.assertion_exists(uid, badge_name):
+			awards += 1
+			manager.add_assertion(uid, badge_name)
+			logger.debug('Badge %s awarded to %', badge_name, username)
+		elif operation == 'revoke' and manager.assertion_exists(uid, badge_name):
+			revokations += 1
+			manager.remove_assertion(uid, badge_name)
+			logger.debug('Badge %s revoked from %', badge_name, username)
+		
+	result['Awards'] = awards
+	result['Revokations'] = revokations
 	result['Elapsed'] = time.time() - now
 	return result

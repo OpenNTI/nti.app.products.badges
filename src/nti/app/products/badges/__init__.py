@@ -34,3 +34,10 @@ def get_all_badges():
 	for _, manager in component.getUtilitiesFor(badge_interfaces.IBadgeManager):
 		for badge in manager.get_all_badges():
 			yield badge
+
+def assertion_exists(user, badge):
+	for pbm in component.subscribers((user,), interfaces.IPrincipalBadgeManager):
+		for manager in pbm.iter_managers():
+			if manager.assertion_exists(user, badge):
+				return True
+	return False

@@ -49,8 +49,25 @@ class IPrincipalErnableBadges(interface.Interface):
 	def iter_badges():
 		pass
 
-def get_badge_predicate_for_user(user):
+class IPrincipalEarnedBadgeFilter(interface.Interface):
+	"""
+	define subscriber badge earned filter
+	"""
+
+	def allow_badge(user, badge):
+		"""
+		allow the specified badge
+		"""
+
+def get_principal_badge_filter(user):
 	filters = component.subscribers((user,), IPrincipalBadgeFilter)
+	filters = list(filters)
+	def uber_filter(badge):
+		return all((f.allow_badge(user, badge) for f in filters))
+	return uber_filter
+
+def get_principal_earned_badge_filter(user):
+	filters = component.subscribers((user,), IPrincipalEarnedBadgeFilter)
 	filters = list(filters)
 	def uber_filter(badge):
 		return all((f.allow_badge(user, badge) for f in filters))

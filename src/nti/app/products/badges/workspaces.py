@@ -15,6 +15,8 @@ from zope import interface
 from zope import component
 from zope.container import contained
 
+from pyramid.threadlocal import get_current_request
+
 from nti.appserver import interfaces as app_interfaces
 
 from nti.badges.openbadges.interfaces import IBadgeClass
@@ -84,7 +86,7 @@ class AllBadgesCollection(contained.Contained):
 		container = LastModifiedCopyingUserList()
 		container.__parent__ = parent
 		container.__name__ = __name__
-		predicate = interfaces.get_badge_predicate_for_user(parent.user)
+		predicate = interfaces.get_principal_badge_filter(parent.user)
 		for manager in get_user_badge_managers(parent.user):
 			badges = manager.get_all_badges()
 			container.extend(IBadgeClass(b) for b in badges if predicate(b))
@@ -121,6 +123,12 @@ class EarnableBadgeCollection(contained.Contained):
 		container.__parent__ = parent
 		container.__name__ = __name__
 
+		# Don't show earnable badges to anyone else
+		req = get_current_request()
+		if  req is None or req.authenticated_userid is None or \
+			req.authenticated_userid != user.username:
+			return container
+
 		for subs in component.subscribers((user,), interfaces.IPrincipalErnableBadges):
 			for badge in subs.iter_badges():
 				if not self._has_been_earned(user, badge):
@@ -149,9 +157,10 @@ class EarnedBadgeCollection(contained.Contained):
 		container.__parent__ = parent
 		container.__name__ = __name__
 		uid = get_user_id(parent.user)
+		predicate = interfaces.get_principal_earned_badge_filter(parent.user)
 		for manager in get_user_badge_managers(parent.user):
 			badges = manager.get_person_badges(uid)
-			container.extend(IBadgeClass(b) for b in badges)
+			container.extend(IBadgeClass(b) for b in badges if predicate(b))
 		return container
 
 	def __len__(self):

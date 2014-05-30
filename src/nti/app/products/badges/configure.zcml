@@ -54,6 +54,9 @@
 	<subscriber	factory=".filters._DefaultPrincipalBadgeFilter"
 				provides=".interfaces.IPrincipalBadgeFilter"/>
 			
+	<subscriber	factory=".filters._DefaultPrincipalEarnedBadgeFilter"
+				provides=".interfaces.IPrincipalEarnedBadgeFilter"/>
+				
 	<subscriber	factory=".managers._DefaultPrincipalBadgeManager"
 				provides=".interfaces.IPrincipalBadgeManager"/>
 	

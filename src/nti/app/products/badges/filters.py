@@ -24,5 +24,17 @@ class _DefaultPrincipalBadgeFilter(object):
 	def __init__(self, *args):
 		pass
 
-	def allow_badge(self, badge, user):
+	def allow_badge(self, user, badge):
+		return True
+
+@component.adapter(nti_interfaces.IUser)
+@interface.implementer(interfaces.IPrincipalEarnedBadgeFilter)
+class _DefaultPrincipalEarnedBadgeFilter(object):
+
+	__slots__ = ()
+
+	def __init__(self, *args):
+		pass
+
+	def allow_badge(self, user, badge):
 		return True

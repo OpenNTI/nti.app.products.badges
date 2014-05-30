@@ -229,7 +229,6 @@ def bulk_import(request):
 	now = time.time()
 	input_file = request.POST['source'].file
 	input_file.seek(0)
-	from IPython.core.debugger import Tracer; Tracer()()
 	for line, source in enumerate(input_file):
 		line += 1
 		source = source.strip()

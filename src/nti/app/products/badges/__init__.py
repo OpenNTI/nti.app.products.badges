@@ -25,18 +25,20 @@ def get_user_badge_managers(user):
 		for manager in pbm.iter_managers():
 			yield manager
 
-def get_manager_for_badge(badge):
+def get_manager_and_badge(badge):
 	for _, manager in component.getUtilitiesFor(badge_interfaces.IBadgeManager):
 		result = manager.get_badge(badge)
 		if result is not None:
-			return manager
+			return (manager, result)
+	return (None, None)
+
+def get_manager(badge):
+	result = get_manager_and_badge(badge)
+	return result[0]
 
 def get_badge(badge):
-	for _, manager in component.getUtilitiesFor(badge_interfaces.IBadgeManager):
-		result = manager.get_badge(badge)
-		if result is not None:
-			return result
-	return None
+	result = get_manager_and_badge(badge)
+	return result[1]
 
 def get_all_badges():
 	for _, manager in component.getUtilitiesFor(badge_interfaces.IBadgeManager):

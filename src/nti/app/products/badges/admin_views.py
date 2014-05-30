@@ -33,9 +33,8 @@ from nti.utils.maps import CaseInsensitiveDict
 from .utils import sync
 
 from . import views
-from . import interfaces
 from . import get_user_id
-from . import get_manager_for_badge
+from . import get_manager_and_badge
 from . import get_user_badge_managers
 
 def _make_min_max_btree_range(search_term):
@@ -109,7 +108,6 @@ def award(request):
 	if user is None:
 		raise hexc.HTTPNotFound('User not found')
 	
-	badge = None
 	for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
 		badge_name = values.get(name)
 		if badge_name:
@@ -117,17 +115,9 @@ def award(request):
 	if not badge_name:
 		raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
 
-	for manager in get_user_badge_managers(user):
-		badge = manager.get_badge(badge_name)
-		if badge is not None:
-			break
-
+	manager, badge = get_manager_and_badge(badge_name)
 	if badge is None:
 		raise hexc.HTTPNotFound('Badge not found')
-
-	predicate = interfaces.get_badge_predicate_for_user(user)
-	if not predicate(badge):
-		raise hexc.HTTPForbidden("Badge not authorized")
 
 	# add person if required
 	# an adapter must exists to convert the user to a person
@@ -153,7 +143,6 @@ def revoke(request):
 	if user is None:
 		raise hexc.HTTPNotFound('User not found')
 
-	badge = None
 	for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
 		badge_name = values.get(name)
 		if badge_name:
@@ -161,11 +150,7 @@ def revoke(request):
 	if not badge_name:
 		raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
 
-	for manager in get_user_badge_managers(user):
-		badge = manager.get_badge(badge_name)
-		if badge is not None:
-			break
-
+	manager, badge = get_manager_and_badge(badge_name)
 	if badge is None:
 		raise hexc.HTTPNotFound('Badge not found')
 
@@ -244,7 +229,7 @@ def bulk_import(input_source, errors=[]):
 
 		manager = managers.get(badge_name)
 		if manager is None:
-			manager = get_manager_for_badge(badge_name)
+			manager, _ = get_manager_and_badge(badge_name)
 			if manager is None:
 				errors.append("Invalid badge '%s' in line %s" % (badge_name, line))
 				continue

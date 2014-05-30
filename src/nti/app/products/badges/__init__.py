@@ -14,6 +14,8 @@ from nti.badges import interfaces as badge_interfaces
 
 from . import interfaces
 
+BADGES = 'Badges'
+
 def get_user_id(user):
 	result = user.username  # TODO: Switch to email when they can be verified
 	return result

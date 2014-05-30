@@ -15,8 +15,6 @@ from zope import interface
 from zope import component
 from zope.container import contained
 
-from pyramid.threadlocal import get_current_request
-
 from nti.appserver import interfaces as app_interfaces
 
 from nti.badges.openbadges.interfaces import IBadgeClass
@@ -122,12 +120,6 @@ class EarnableBadgeCollection(contained.Contained):
 		container = LastModifiedCopyingUserList()
 		container.__parent__ = parent
 		container.__name__ = __name__
-
-		# Don't show earnable badges to anyone else
-		req = get_current_request()
-		if  req is None or req.authenticated_userid is None or \
-			req.authenticated_userid != user.username:
-			return container
 
 		for subs in component.subscribers((user,), interfaces.IPrincipalErnableBadges):
 			for badge in subs.iter_badges():

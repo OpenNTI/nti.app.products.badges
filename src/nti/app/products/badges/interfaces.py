@@ -37,7 +37,7 @@ class IPrincipalBadgeFilter(interface.Interface):
 	define subscriber badge filter
 	"""
 
-	def allow_badge(badge, user):
+	def allow_badge(user, badge):
 		"""
 		allow the specified badge
 		"""
@@ -53,5 +53,5 @@ def get_badge_predicate_for_user(user):
 	filters = component.subscribers((user,), IPrincipalBadgeFilter)
 	filters = list(filters)
 	def uber_filter(badge):
-		return all((f.allow_badge(badge, user) for f in filters))
+		return all((f.allow_badge(user, badge) for f in filters))
 	return uber_filter

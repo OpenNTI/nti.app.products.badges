@@ -18,8 +18,16 @@ from pyramid.threadlocal import get_current_request
 
 from nti.badges.openbadges import interfaces as open_interfaces
 
+from nti.dataserver.links import Link
+from nti.dataserver import interfaces as nti_interfaces
+
 from nti.externalization import interfaces as ext_interfaces
 from nti.externalization.singleton import SingletonDecorator
+from nti.externalization.interfaces import StandardExternalFields
+
+LINKS = StandardExternalFields.LINKS
+
+from . import BADGES
 
 @interface.implementer(ext_interfaces.IExternalObjectDecorator)
 class _BadgeHRefAdder(object):
@@ -48,3 +56,18 @@ class _BadgeAssertionDecorator(object):
 				ds2 = '/'.join(request.path.split('/')[:2])
 				href = '%s/OpenBadges/%s' % (ds2, urllib.quote(badge_name))
 				mapping['badge'] = href
+
+@component.adapter(nti_interfaces.IUser)
+@interface.implementer(ext_interfaces.IExternalMappingDecorator)
+class _UserBadgesLinkDecorator(object):
+
+	__metaclass__ = SingletonDecorator
+
+	def decorateExternalMapping(self, context, result):
+		req = get_current_request()
+		if  req is None or req.authenticated_userid is None or \
+			req.authenticated_userid == context.username:
+			return
+
+		_links = result.setdefault(LINKS, [])
+		_links.append(Link(context, elements=(BADGES,), rel=BADGES))

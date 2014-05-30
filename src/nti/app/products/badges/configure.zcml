@@ -43,6 +43,9 @@
 				for="nti.badges.openbadges.interfaces.IBadgeAssertion"
 				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
 				
+	<subscriber factory=".decorators._UserBadgesLinkDecorator"
+				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
+				
 	<!-- Subscribers -->
 	
 	<subscriber handler=".subscribers._user_deleted" />

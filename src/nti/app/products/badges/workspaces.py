@@ -17,22 +17,23 @@ from zope.container import contained
 
 from nti.appserver import interfaces as app_interfaces
 
-from nti.badges.interfaces import INTIBadge
-from nti.badges.interfaces import INTIPerson
+from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.dataserver.datastructures import LastModifiedCopyingUserList
 
 from nti.utils.property import Lazy
 from nti.utils.property import alias
 
+from . import BADGES
 from . import interfaces
 from . import get_user_id
+from . import assertion_exists
 from . import get_user_badge_managers
 
 @interface.implementer(interfaces.IBadgesWorkspace)
 class _BadgesWorkspace(contained.Contained):
 
-	__name__ = 'Badges'
+	__name__ = BADGES
 	name = alias('__name__', __name__)
 
 	def __init__(self, user_service):
@@ -86,7 +87,7 @@ class AllBadgesCollection(contained.Contained):
 		predicate = interfaces.get_badge_predicate_for_user(parent.user)
 		for manager in get_user_badge_managers(parent.user):
 			badges = manager.get_all_badges()
-			container.extend(INTIBadge(b) for b in badges if predicate(b))
+			container.extend(IBadgeClass(b) for b in badges if predicate(b))
 		return container
 
 	def __getitem__(self, key):
@@ -110,12 +111,7 @@ class EarnableBadgeCollection(contained.Contained):
 		self.__parent__ = parent
 
 	def _has_been_earned(self, user, badge):
-		person = INTIPerson(user)
-		badge = INTIBadge(badge)
-		for manager in get_user_badge_managers(user):
-			if manager.assertion_exists(person, badge):
-				return True
-		return False
+		return assertion_exists(user, badge)
 
 	@Lazy
 	def container(self):
@@ -128,7 +124,7 @@ class EarnableBadgeCollection(contained.Contained):
 		for subs in component.subscribers((user,), interfaces.IPrincipalErnableBadges):
 			for badge in subs.iter_badges():
 				if not self._has_been_earned(user, badge):
-					container.append(INTIBadge(badge))
+					container.append(IBadgeClass(badge))
 		return container
 
 	def __len__(self):
@@ -155,7 +151,7 @@ class EarnedBadgeCollection(contained.Contained):
 		uid = get_user_id(parent.user)
 		for manager in get_user_badge_managers(parent.user):
 			badges = manager.get_person_badges(uid)
-			container.extend(INTIBadge(b) for b in badges)
+			container.extend(IBadgeClass(b) for b in badges)
 		return container
 
 	def __len__(self):

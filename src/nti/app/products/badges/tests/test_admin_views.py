@@ -44,7 +44,7 @@ class TestAdminViews(ApplicationLayerTest):
 					 extra_environ=self._make_extra_environ(),
 					 status=200)
 		manager = component.getUtility(badge_interfaces.IBadgeManager, "sample")
-		assert_that(manager.person_exists(email='ichigo@bleach.com'), is_(True))
+		assert_that(manager.person_exists('ichigo@bleach.com'), is_(True))
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_award(self):

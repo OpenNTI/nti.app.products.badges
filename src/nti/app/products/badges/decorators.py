@@ -8,6 +8,7 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import urllib
 import collections
 
 from zope import component
@@ -45,5 +46,5 @@ class _BadgeAssertionDecorator(object):
 			request = get_current_request()
 			if badge_name and request is not None:
 				ds2 = '/'.join(request.path.split('/')[:2])
-				href = '%s/OpenBadges/%s' % (ds2, badge_name)
+				href = '%s/OpenBadges/%s' % (ds2, urllib.quote(badge_name))
 				mapping['badge'] = href

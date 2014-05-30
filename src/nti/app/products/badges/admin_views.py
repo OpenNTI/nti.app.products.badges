@@ -240,7 +240,7 @@ def bulk_import(request):
 			errors.append("Incorrect input in line %s" % line)
 			continue
 
-		username, badge_name = splits[0], splits[1]
+		username, badge_name = splits[0].lower(), splits[1]
 		operation = splits[2].lower() if len(splits) >= 3 else 'award'
 		if operation not in ('award', 'revoke'):
 			errors.append("Invalid operation '%s' in line %s" % (operation, line))

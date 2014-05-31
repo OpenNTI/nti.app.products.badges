@@ -187,10 +187,11 @@ def sync_db(request):
 	verify = values.get('verify') or u''
 	verify = str(verify).lower() in ('1', 'true', 't', 'yes', 'y', 'on')
 
+	secret = values.get('secret')
 	now = time.time()
 
 	# sync database
-	sync.sync_db(directory, dbname, verify)
+	sync.sync_db(directory, dbid=dbname, verify=verify, secret=secret)
 
 	# return
 	result = LocatedExternalDict()

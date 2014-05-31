@@ -13,7 +13,7 @@ from zope import component
 from nti.badges.openbadges.utils import scanner
 from nti.badges import interfaces as badge_interfaces
 	
-def sync_db(path, dbid=None, verify=False):
+def sync_db(path, dbid=None, verify=False, **kwargs):
 	if dbid is not None:
 		manager = component.getUtility(badge_interfaces.IBadgeManager, name=dbid)
 		managers = (dbid, manager)
@@ -23,12 +23,16 @@ def sync_db(path, dbid=None, verify=False):
 	if not managers:
 		return  # No badge manager was found
 
-	results = scanner.flat_scan(path, verify)  # pairs mozilla badge/issuer
+	results = scanner.flat_scan(path, verify=verify, **kwargs)  # pairs mozilla badge/issuer
 	for _, manager in managers:
 		for badge, issuer in results:
 			if issuer is None:
 				logger.debug("Badge %s cannot be processed; issuer not found",
 							 badge.name)
 				continue
-			manager.add_issuer(issuer)
-			manager.add_badge(badge, issuer)
+			if not manager.issuer_exists(issuer):
+				manager.add_issuer(issuer)
+				logger.debug("Issuer %s,%s added" % issuer.name, issuer.url)
+			if not manager.badge_exists(badge):
+				manager.add_badge(badge, issuer)
+				logger.debug('Badge %s added', badge.name)

@@ -30,5 +30,6 @@ def _after_database_opened_listener(event):
     with transaction.manager:
         for _, manager in component.getUtilitiesFor(tahrir_interfaces.ITahrirBadgeManager):
             for _, issuer in component.getUtilitiesFor(tahrir_interfaces.IIssuer):
-                manager.add_issuer(issuer)
+                if not manager.issuer_exists(issuer):
+                    manager.add_issuer(issuer)
             

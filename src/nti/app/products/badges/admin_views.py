@@ -106,6 +106,10 @@ def award(request):
 	username = values.get('username', request.authenticated_userid)
 	user = User.get_user(username)
 	if user is None:
+		ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
+		results = list(ent_catalog.searchResults(email=(username, username)))
+		user = results[0] if results else None
+	if user is None:
 		raise hexc.HTTPNotFound('User not found')
 	
 	for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
@@ -140,6 +144,10 @@ def revoke(request):
 	values = readInput(request)
 	username = values.get('username', request.authenticated_userid)
 	user = User.get_user(username)
+	if user is None:
+		ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
+		results = list(ent_catalog.searchResults(email=(username, username)))
+		user = results[0] if results else None
 	if user is None:
 		raise hexc.HTTPNotFound('User not found')
 

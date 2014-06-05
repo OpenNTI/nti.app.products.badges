@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-$Id$
+.. $Id$
 """
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
@@ -23,9 +23,14 @@ def sync_db(path, dbid=None, verify=False, **kwargs):
 		managers = list(component.getUtilitiesFor(badge_interfaces.IBadgeManager))
 
 	if not managers:
-		return  # No badge manager was found
+		return (issuers, badges)  # No badge manager was found
 
+	logger.info("Scanning %s", path)
 	results = scanner.flat_scan(path, verify=verify, **kwargs)  # pairs mozilla badge/issuer
+	if not results:
+		logger.warn("No badges found")
+		return (issuers, badges)
+
 	for _, manager in managers:
 		for badge, issuer in results:
 			if issuer is None:

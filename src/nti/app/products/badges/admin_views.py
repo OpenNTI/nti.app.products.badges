@@ -184,6 +184,10 @@ def sync_db(request):
 		directory = values.get(name)
 		if directory:
 			break
+
+	if not directory:
+		directory = os.getenv('HOSTED_BADGE_IMAGES_DIR')
+
 	if not directory or not os.path.exists(directory) or not os.path.isdir(directory):
 		raise hexc.HTTPNotFound('Directory not found')
 

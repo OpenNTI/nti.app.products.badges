@@ -203,10 +203,12 @@ def sync_db(request):
 	now = time.time()
 
 	# sync database
-	sync.sync_db(directory, dbid=dbname, verify=verify, secret=secret)
+	issuers, badges = sync.sync_db(directory, dbid=dbname, verify=verify, secret=secret)
 
 	# return
 	result = LocatedExternalDict()
+	result['BadgesAdded'] = badges
+	result['IssuersAdded'] = issuers
 	result['Elapsed'] = time.time() - now
 	return result
 

@@ -8,6 +8,8 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import os
+
 from zope import component
 
 from nti.badges.openbadges.utils import scanner
@@ -25,6 +27,7 @@ def sync_db(path, dbid=None, verify=False, **kwargs):
 	if not managers:
 		return (issuers, badges)  # No badge manager was found
 
+	path = os.path.expanduser(path)
 	logger.info("Scanning %s", path)
 	results = scanner.flat_scan(path, verify=verify, **kwargs)  # pairs mozilla badge/issuer
 	if not results:

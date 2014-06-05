@@ -28,8 +28,8 @@ def _user_deleted(user, event):
 def _after_database_opened_listener(event):
     import transaction
     with transaction.manager:
-        for _, manager in component.getUtilitiesFor(tahrir_interfaces.ITahrirBadgeManager):
-            for _, issuer in component.getUtilitiesFor(tahrir_interfaces.IIssuer):
+        for _, issuer in component.getUtilitiesFor(tahrir_interfaces.IIssuer):
+            for _, manager in component.getUtilitiesFor(tahrir_interfaces.ITahrirBadgeManager):
                 if not manager.issuer_exists(issuer):
                     manager.add_issuer(issuer)
             

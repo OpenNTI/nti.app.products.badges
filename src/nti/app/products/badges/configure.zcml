@@ -9,6 +9,8 @@
 	<include package="zope.component" />
 	<include package="zope.security" />
 	
+	<include package="nti.contentfragments" />
+	
 	<!-- Generations -->
 	
 	<utility factory=".generations.install._NTIBadgesSchemaManager"

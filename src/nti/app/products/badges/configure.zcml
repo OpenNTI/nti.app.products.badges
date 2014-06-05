@@ -8,60 +8,60 @@
 	<include package="zope.security" file="meta.zcml" />
 	<include package="zope.component" />
 	<include package="zope.security" />
-	
+
 	<include package="nti.contentfragments" />
 	
 	<!-- Generations -->
-	
+
 	<utility factory=".generations.install._NTIBadgesSchemaManager"
 			 name="nti.dataserver-ntibadges"
 			 provides="zope.generations.interfaces.IInstallableSchemaManager" />
-			 
+
 	<!-- Adpaters -->
-		
+
 	<adapter factory=".adapters.user_to_identity_object"
 			 for="nti.dataserver.interfaces.IUser"
 			 provides="nti.badges.openbadges.interfaces.IIdentityObject" />
-	
+
 	<adapter factory=".adapters.user_to_tahrir_person"
 			 for="nti.dataserver.interfaces.IUser"
 			 provides="nti.badges.tahrir.interfaces.IPerson" />
-		
+
 	<adapter factory=".adapters.user_to_ntiperson"
 			 for="nti.dataserver.interfaces.IUser"
 			 provides="nti.badges.interfaces.INTIPerson" />
-			 
+
 	<!-- Decorators -->
 
 	<subscriber factory=".decorators._BadgeHRefAdder"
 				for="nti.badges.openbadges.interfaces.IBadgeClass"
 				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
-	
+
 	<subscriber factory=".decorators._BadgeHRefAdder"
 				for="nti.badges.interfaces.INTIBadge"
 				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
-	
+
 	<subscriber factory=".decorators._BadgeAssertionDecorator"
 				for="nti.badges.openbadges.interfaces.IBadgeAssertion"
 				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
-				
+
 	<subscriber factory=".decorators._UserBadgesLinkDecorator"
 				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
-				
+
 	<!-- Subscribers -->
-	
+
 	<subscriber handler=".subscribers._user_deleted" />
 	<subscriber handler=".subscribers._after_database_opened_listener" />
-	
+
 	<subscriber	factory=".filters._DefaultPrincipalBadgeFilter"
 				provides=".interfaces.IPrincipalBadgeFilter"/>
-			
+
 	<subscriber	factory=".filters._DefaultPrincipalEarnedBadgeFilter"
 				provides=".interfaces.IPrincipalEarnedBadgeFilter"/>
-				
+
 	<subscriber	factory=".managers._DefaultPrincipalBadgeManager"
 				provides=".interfaces.IPrincipalBadgeManager"/>
-	
+
 	<!-- Workspaces -->
 	<!-- A subscriber for enumeration -->
 	<subscriber factory=".workspaces.BadgesWorkspace"
@@ -70,23 +70,23 @@
 	<!-- And an adapter for direct access -->
 	<adapter factory=".workspaces.BadgesWorkspace"
 			 provides=".interfaces.IBadgesWorkspace" />
-			 
+
 	<!-- Path Adapters -->
-	
+
 	<adapter name="Badges"
 			 factory=".views.BadgesWorkspacePathAdapter" />
-			 
+
 	<adapter name="BadgeAdmin"
 			 for="nti.dataserver.interfaces.IDataserverFolder pyramid.interfaces.IRequest"
 			 factory=".views.BadgeAdminPathAdapter"
 			 provides="zope.traversing.interfaces.IPathAdapter" />
-			 
+
 	<!-- Preferences -->
-		
+
 	<include package="zope.security" file="permissions.zcml"/>
 	<include package="zope.preference" file="meta.zcml" />
 	<include package="zope.preference" />
-		
+
 	<preferenceGroup
 		id="Badges"
 		title="Badge Settings"

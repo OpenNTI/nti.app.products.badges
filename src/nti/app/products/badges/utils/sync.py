@@ -12,7 +12,7 @@ from zope import component
 
 from nti.badges.openbadges.utils import scanner
 from nti.badges import interfaces as badge_interfaces
-	
+
 def sync_db(path, dbid=None, verify=False, **kwargs):
 	badges = 0
 	issuers = 0
@@ -21,7 +21,7 @@ def sync_db(path, dbid=None, verify=False, **kwargs):
 		managers = (dbid, manager)
 	else:
 		managers = list(component.getUtilitiesFor(badge_interfaces.IBadgeManager))
-	
+
 	if not managers:
 		return  # No badge manager was found
 

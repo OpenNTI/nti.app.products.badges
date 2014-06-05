@@ -26,10 +26,12 @@ def _user_deleted(user, event):
 
 @component.adapter(IAfterDatabaseOpenedEvent)
 def _after_database_opened_listener(event):
+    logger.info("Adding registered tahrir issuers")
     import transaction
     with transaction.manager:
         for _, issuer in component.getUtilitiesFor(tahrir_interfaces.IIssuer):
             for _, manager in component.getUtilitiesFor(tahrir_interfaces.ITahrirBadgeManager):
                 if not manager.issuer_exists(issuer):
                     manager.add_issuer(issuer)
+                    logger.debug("Issuer (%s,%s) added", issuer.name, issuer.origin)
             

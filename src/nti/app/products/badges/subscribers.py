@@ -57,3 +57,71 @@ def _after_database_opened_listener(event):
 						logger.warn("Integrity error", exc_info=True)
 					else:
 						logger.debug("Issuer (%s,%s) added", issuer.name, issuer.origin)
+
+
+
+from nti.badges.openbadges.interfaces import IBadgeClass
+from nti.badges.tahrir.interfaces import IAssertion
+from zope.lifecycleevent import IObjectAddedEvent
+
+from .interfaces import SC_BADGE_EARNED
+
+from nti.dataserver.activitystream_change import Change
+from nti.dataserver.interfaces import IUser
+from nti.dataserver.interfaces import ACE_DENY_ALL
+from nti.dataserver.authorization_acl import acl_from_aces
+from nti.dataserver.authorization_acl import ace_allowing
+from nti.dataserver.authorization import ACT_READ
+
+from nti.appserver.interfaces import IUserActivityStorage
+
+from nti.app.notabledata.interfaces import IUserNotableDataStorage
+
+class AssertionChange(Change):
+	"""
+	Gives some class-level defaults that are useful
+	for assertions/badges.
+	"""
+
+	# When we write this out, turn the assertion into the actual
+	# badge
+	def externalObjectTransformationHook(self, assertion):
+		return IBadgeClass(assertion.badge)
+
+
+	# Eventually the assertion will have its own ACL,
+	# we want to use that. Right now it has no provider,
+	# so it gets no value from the superclass...
+	__copy_object_acl__ = True
+
+	# ...but we override to deny access for everyone except the
+	# "creator", which right now is the owner of the
+	# assertion...notable data bypasses this check for us
+	def __acl__(self):
+		creator = self.creator
+		if creator is not None:
+			return acl_from_aces( ace_allowing( creator, ACT_READ ) )
+		return (ACE_DENY_ALL,)
+
+@component.adapter(IAssertion, IObjectAddedEvent)
+def _make_assertions_notable_to_target(assertion, event):
+	"""
+	When a badge assertion is recorded, the event is notable
+	for the target user.
+	"""
+	change = AssertionChange(SC_BADGE_EARNED, assertion)
+
+	user = IUser(assertion.person)
+	# Set a creator...this may not be the best we can do in some cases
+	change.creator = user
+
+	storage = IUserNotableDataStorage(user)
+	storage.store_object( change, safe=True, take_ownership=True )
+
+	# At this point we can now put it in the default container in the
+	# intid-based activity stream for the user...pending ACL work. To
+	# be able to do that smoothly, we define a subclass of Change so
+	# we can easily toggle the values.
+	act_storage = IUserActivityStorage( user, None )
+	if act_storage is not None:
+		act_storage.addContainedObjectToContainer( change, '')

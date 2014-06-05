@@ -11,6 +11,7 @@ from hamcrest import is_
 from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import has_entry
+from hamcrest import has_entries
 
 import os
 from cStringIO import StringIO
@@ -22,8 +23,6 @@ from nti.ntiids import ntiids
 from nti.badges import interfaces as badge_interfaces
 
 from nti.app.products.badges.admin_views import bulk_import
-
-from nti.appserver.tests.test_application import TestApp
 
 from nti.app.products.badges.tests import NTISampleBadgesApplicationTestLayer
 
@@ -67,10 +66,15 @@ class TestAdminViews(ApplicationLayerTest):
 
 		# This had the side-effect of creating notable data about the award
 
-		path = '/dataserver2/users/%s/Pages(%s)/RUGDByOthersThatIMightBeInterestedIn/' % ( self.extra_environ_default_user, ntiids.ROOT )
-		res = self.testapp.get(path)
+		path = '/dataserver2/users/%s/Pages(%s)/RUGDByOthersThatIMightBeInterestedIn/' % ( username, ntiids.ROOT )
+		res = self.testapp.get(path, extra_environ=self._make_extra_environ(username))
 		assert_that( res.json_body, has_entry( 'TotalItemCount', 1))
 		assert_that( res.json_body, has_entry( 'Items', has_length(1) ))
+		item = res.json_body['Items'][0]
+
+		assert_that( item, has_entries( 'ChangeType', 'BadgeEarned',
+										'Class', 'Change',
+										'Item', has_entry('Class', 'Badge')))
 
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)

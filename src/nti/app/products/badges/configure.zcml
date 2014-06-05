@@ -10,7 +10,7 @@
 	<include package="zope.security" />
 
 	<include package="nti.contentfragments" />
-	
+
 	<!-- Generations -->
 
 	<utility factory=".generations.install._NTIBadgesSchemaManager"
@@ -30,6 +30,8 @@
 	<adapter factory=".adapters.user_to_ntiperson"
 			 for="nti.dataserver.interfaces.IUser"
 			 provides="nti.badges.interfaces.INTIPerson" />
+
+	<adapter factory=".adapters.tahrir_person_to_user" />
 
 	<!-- Decorators -->
 
@@ -52,6 +54,7 @@
 
 	<subscriber handler=".subscribers._user_deleted" />
 	<subscriber handler=".subscribers._after_database_opened_listener" />
+	<subscriber handler=".subscribers._make_assertions_notable_to_target" />
 
 	<subscriber	factory=".filters._DefaultPrincipalBadgeFilter"
 				provides=".interfaces.IPrincipalBadgeFilter"/>

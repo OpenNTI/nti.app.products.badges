@@ -26,7 +26,7 @@ class IBadgesWorkspace(app_interfaces.IWorkspace):
 	"""
 
 class IPrincipalBadgeManager(interface.Interface):
-	
+
 	def iter_managers():
 		"""
 		Return an iterable of IBadgeManager objects
@@ -72,3 +72,8 @@ def get_principal_earned_badge_filter(user):
 	def uber_filter(badge):
 		return all((f.allow_badge(user, badge) for f in filters))
 	return uber_filter
+
+from nti.dataserver.interfaces import make_stream_change_event_interface
+
+SC_BADGE_EARNED = 'BadgeEarned'
+IStreamChangeBadgeEarnedEvent = make_stream_change_event_interface( SC_BADGE_EARNED )[0]

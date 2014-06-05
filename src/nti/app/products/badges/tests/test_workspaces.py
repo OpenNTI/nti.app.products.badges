@@ -17,8 +17,6 @@ from hamcrest import assert_that
 from hamcrest import has_property
 from hamcrest import greater_than_or_equal_to
 
-import transaction
-
 from zope import component
 
 from nti.appserver.interfaces import IUserService
@@ -34,7 +32,7 @@ from nti.dataserver import traversal
 from nti.appserver.tests.test_application import TestApp
 
 from nti.app.products.badges.tests import sample_size
-from nti.app.products.badges.tests import NTIBadgesApplicationTestLayer
+from nti.app.products.badges.tests import NTISampleBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
@@ -47,7 +45,7 @@ from nti.testing.matchers import verifiably_provides
 
 class TestWorkspaces(ApplicationLayerTest):
 
-	layer = NTIBadgesApplicationTestLayer
+	layer = NTISampleBadgesApplicationTestLayer
 
 	@WithSharedApplicationMockDS
 	def test_workspace_links_in_service(self):
@@ -78,7 +76,7 @@ class TestWorkspaces(ApplicationLayerTest):
 						 has_items(badges_path + '/AllBadges',
 								   badges_path + '/EarnedBadges' ,
 								   badges_path + '/EarnableBadges'))
-			
+
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_all_badges(self):
 		username = 'ichigo@bleach.com'
@@ -107,8 +105,8 @@ class TestWorkspaces(ApplicationLayerTest):
 						  status=200)
 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(0))))
 
-		with transaction.manager:
-			manager = component.getUtility(badge_interfaces.IBadgeManager, "sample")
+		with mock_dataserver.mock_db_trans(self.ds):
+			manager = component.getUtility(badge_interfaces.IBadgeManager)
 			manager.add_assertion(uid, badge_name)
 
 		res = testapp.get(earned_badges_path,

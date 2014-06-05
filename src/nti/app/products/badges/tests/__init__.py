@@ -86,12 +86,12 @@ class NTIBadgesApplicationTestLayer(ApplicationTestLayer):
 	@classmethod
 	def testSetUp(cls, test=None):
 		bm = manager.create_badge_manager(dburi="sqlite://")
-		component.provideUtility(bm, badge_interfaces.IBadgeManager)
+		component.provideUtility(bm)
 
 	@classmethod
 	def testTearDown(cls):
 		bm = manager.create_badge_manager(defaultSQLite=True)
-		component.provideUtility(bm, badge_interfaces.IBadgeManager)
+		component.provideUtility(bm)
 
 
 
@@ -103,7 +103,7 @@ class NTISampleBadgesApplicationTestLayer(ApplicationTestLayer):
 		with transaction.manager:
 			bm = manager.create_badge_manager(dburi="sqlite://")
 			generator.generate_db(bm.db, sample_size, sample_size, sample_size)
-			component.provideUtility(bm, badge_interfaces.IBadgeManager)
+			component.provideUtility(bm)
 
 
 	@classmethod
@@ -122,4 +122,4 @@ class NTISampleBadgesApplicationTestLayer(ApplicationTestLayer):
 	@classmethod
 	def testTearDown(cls):
 		bm = manager.create_badge_manager(dburi="sqlite://")
-		component.provideUtility(bm, badge_interfaces.IBadgeManager)
+		component.provideUtility(bm)

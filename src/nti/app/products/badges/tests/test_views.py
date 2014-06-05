@@ -14,7 +14,7 @@ import urllib
 
 from nti.appserver.tests.test_application import TestApp
 
-from nti.app.products.badges.tests import NTIBadgesApplicationTestLayer
+from nti.app.products.badges.tests import NTISampleBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
@@ -24,8 +24,8 @@ import nti.dataserver.tests.mock_dataserver as mock_dataserver
 
 class TestViews(ApplicationLayerTest):
 
-	layer = NTIBadgesApplicationTestLayer
-			
+	layer = NTISampleBadgesApplicationTestLayer
+
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_open_badges(self):
 		username = 'ichigo@bleach.com'
@@ -42,4 +42,3 @@ class TestViews(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry(u'href', '/dataserver2/OpenBadges/badge.1'))
 		assert_that(res.json_body, has_entry(u'image', 'http://nti.com/files/badge_1.png'))
 		assert_that(res.json_body, has_entry(u'criteria', 'http://nti.com/criteria/1.html'))
-

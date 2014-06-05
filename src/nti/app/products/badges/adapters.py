@@ -28,8 +28,8 @@ from nti.badges.tahrir import interfaces as tahrir_interfaces
 
 from . import get_user_id
 
-@component.adapter(nti_interfaces.IUser)
 @interface.implementer(open_interfaces.IIdentityObject)
+@component.adapter(nti_interfaces.IUser)
 def user_to_identity_object(user):
     uid = get_user_id(user)
     result = IdentityObject(identity=uid,
@@ -44,9 +44,9 @@ def _set_common_person(user, person):
     profile = user_interfaces.IUserProfile(user)
     person.bio = getattr(profile, 'about', None) or u''
     person.website = getattr(profile, 'home_page', None) or u''
-    
-@component.adapter(nti_interfaces.IUser)
+
 @interface.implementer(tahrir_interfaces.IPerson)
+@component.adapter(nti_interfaces.IUser)
 def user_to_tahrir_person(user):
     result = Person()
     _set_common_person(user, result)
@@ -54,12 +54,20 @@ def user_to_tahrir_person(user):
     result.created_on = datetime.fromtimestamp(user.createdTime)
     return result
 
-@component.adapter(nti_interfaces.IUser)
+from nti.dataserver.users import User
+
+@interface.implementer(nti_interfaces.IUser)
+@component.adapter(tahrir_interfaces.IPerson)
+def tahrir_person_to_user(person):
+	# We have the strict dependency on using
+	# username as 'email' for now
+	return User.get_user(person.email)
+
 @interface.implementer(badges_interfaces.INTIPerson)
+@component.adapter(nti_interfaces.IUser)
 def user_to_ntiperson(user):
     result = NTIPerson()
     _set_common_person(user, result)
     result.name = user.username
     result.createdTime = user.createdTime
     return result
-

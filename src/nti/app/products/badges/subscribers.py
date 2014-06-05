@@ -89,6 +89,23 @@ class AssertionChange(Change):
 		return IBadgeClass(assertion.badge)
 
 
+	# for ease of rendering
+	@property
+	def badge(self):
+		obj = self.object
+		if obj is not None:
+			badge = self.externalObjectTransformationHook(obj)
+			return badge
+
+	@property
+	def badge_href(self):
+		return self.badge.image
+
+	@property
+	def badge_description(self):
+		return self.badge.description
+
+
 	# Eventually the assertion will have its own ACL,
 	# we want to use that. Right now it has no provider,
 	# so it gets no value from the superclass...

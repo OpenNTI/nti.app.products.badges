@@ -71,3 +71,13 @@ def user_to_ntiperson(user):
     result.name = user.username
     result.createdTime = user.createdTime
     return result
+
+
+from nti.app.pushnotifications.digest_email import AbstractClassifier
+
+from .interfaces import IStreamChangeBadgeEarnedEvent
+
+@component.adapter(IStreamChangeBadgeEarnedEvent)
+class _AssertionChangeEventClassifier(AbstractClassifier):
+
+	classification = 'assertion'

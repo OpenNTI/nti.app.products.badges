@@ -12,6 +12,7 @@ from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import has_entry
 from hamcrest import has_entries
+from hamcrest import contains_string
 
 import os
 from cStringIO import StringIO
@@ -21,6 +22,8 @@ from zope import component
 from nti.ntiids import ntiids
 
 from nti.badges import interfaces as badge_interfaces
+
+from nti.app.pushnotifications.tests.test_digest_email import send_notable_email
 
 from nti.app.products.badges.admin_views import bulk_import
 
@@ -75,6 +78,13 @@ class TestAdminViews(ApplicationLayerTest):
 		assert_that( item, has_entries( 'ChangeType', 'BadgeEarned',
 										'Class', 'Change',
 										'Item', has_entry('Class', 'Badge')))
+
+		# should be notable
+		msgs = send_notable_email(self.testapp)
+		msg = msgs[0]
+		assert_that( msg, contains_string( 'You earned a badge' ) )
+		assert_that( msg, contains_string( 'src="http://nti.com/files/badge_1.png"'))
+
 
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)

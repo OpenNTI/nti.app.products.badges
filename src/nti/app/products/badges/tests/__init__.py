@@ -32,62 +32,94 @@ from nti.dataserver.tests.mock_dataserver import DSInjectorMixin
 import zope.testing.cleanup
 
 def _change_ds_dir(cls):
-    cls.old_data_dir = os.getenv('DATASERVER_DATA_DIR')
-    cls.new_data_dir = tempfile.mkdtemp(dir="/tmp")
-    os.environ['DATASERVER_DATA_DIR'] = cls.new_data_dir
+	cls.old_data_dir = os.getenv('DATASERVER_DATA_DIR')
+	cls.new_data_dir = tempfile.mkdtemp(dir="/tmp")
+	os.environ['DATASERVER_DATA_DIR'] = cls.new_data_dir
 
 def _restore_ds_dir(cls):
-    shutil.rmtree(cls.new_data_dir, True)
-    os.environ['DATASERVER_DATA_DIR'] = cls.old_data_dir or '/tmp'
+	shutil.rmtree(cls.new_data_dir, True)
+	os.environ['DATASERVER_DATA_DIR'] = cls.old_data_dir or '/tmp'
 
 class SharedConfiguringTestLayer(ZopeComponentLayer,
-                                 GCLayerMixin,
-                                 ConfiguringLayerMixin,
-                                 DSInjectorMixin):
+								 GCLayerMixin,
+								 ConfiguringLayerMixin,
+								 DSInjectorMixin):
 
-    set_up_packages = ('nti.dataserver', 'nti.badges', 'nti.app.products.badges')
+	set_up_packages = ('nti.dataserver', 'nti.badges', 'nti.app.products.badges')
 
-    @classmethod
-    def setUp(cls):
-        cls.setUpPackages()
-        _change_ds_dir(cls)
+	@classmethod
+	def setUp(cls):
+		cls.setUpPackages()
+		_change_ds_dir(cls)
 
-    @classmethod
-    def tearDown(cls):
-        cls.tearDownPackages()
-        zope.testing.cleanup.cleanUp()
-        _restore_ds_dir(cls)
+	@classmethod
+	def tearDown(cls):
+		cls.tearDownPackages()
+		zope.testing.cleanup.cleanUp()
+		_restore_ds_dir(cls)
 
-    @classmethod
-    def testSetUp(cls, test=None):
-        cls.setUpTestDS(test)
-        
-    @classmethod
-    def testTearDown(cls):
-        pass
+	@classmethod
+	def testSetUp(cls, test=None):
+		cls.setUpTestDS(test)
+
+	@classmethod
+	def testTearDown(cls):
+		pass
 
 import unittest
 
 class NTIBadgesTestCase(unittest.TestCase):
-    layer = SharedConfiguringTestLayer
+	layer = SharedConfiguringTestLayer
 
 sample_size = 5
 
 class NTIBadgesApplicationTestLayer(ApplicationTestLayer):
 
-    @classmethod
-    def _register_sample(cls):
-        import transaction
-        with transaction.manager:
-            bm = manager.create_badge_manager(defaultSQLite=True)
-            generator.generate_db(bm.db, sample_size, sample_size, sample_size)
-            component.provideUtility(bm, badge_interfaces.IBadgeManager, "sample")
+	@classmethod
+	def setUp(cls):
+		_change_ds_dir(cls)
 
-    @classmethod
-    def setUp(cls):
-        _change_ds_dir(cls)
-        cls._register_sample()
+	@classmethod
+	def tearDown(cls):
+		_restore_ds_dir(cls)
 
-    @classmethod
-    def tearDown(cls):
-        _restore_ds_dir(cls)
+	@classmethod
+	def testSetUp(cls, test=None):
+		bm = manager.create_badge_manager(dburi="sqlite://")
+		component.provideUtility(bm, badge_interfaces.IBadgeManager)
+
+	@classmethod
+	def testTearDown(cls):
+		bm = manager.create_badge_manager(defaultSQLite=True)
+		component.provideUtility(bm, badge_interfaces.IBadgeManager)
+
+
+
+class NTISampleBadgesApplicationTestLayer(ApplicationTestLayer):
+
+	@classmethod
+	def _register_sample(cls):
+		import transaction
+		with transaction.manager:
+			bm = manager.create_badge_manager(dburi="sqlite://")
+			generator.generate_db(bm.db, sample_size, sample_size, sample_size)
+			component.provideUtility(bm, badge_interfaces.IBadgeManager)
+
+
+	@classmethod
+	def setUp(cls):
+		_change_ds_dir(cls)
+
+
+	@classmethod
+	def tearDown(cls):
+		_restore_ds_dir(cls)
+
+	@classmethod
+	def testSetUp(cls, test=None):
+		cls._register_sample()
+
+	@classmethod
+	def testTearDown(cls):
+		bm = manager.create_badge_manager(dburi="sqlite://")
+		component.provideUtility(bm, badge_interfaces.IBadgeManager)

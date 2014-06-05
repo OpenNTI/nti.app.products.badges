@@ -10,12 +10,14 @@ __docformat__ = "restructuredtext en"
 from hamcrest import is_
 from hamcrest import has_length
 from hamcrest import assert_that
+from hamcrest import has_entry
 
 import os
-import json
 from cStringIO import StringIO
 
 from zope import component
+
+from nti.ntiids import ntiids
 
 from nti.badges import interfaces as badge_interfaces
 
@@ -23,7 +25,7 @@ from nti.app.products.badges.admin_views import bulk_import
 
 from nti.appserver.tests.test_application import TestApp
 
-from nti.app.products.badges.tests import NTIBadgesApplicationTestLayer
+from nti.app.products.badges.tests import NTISampleBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
@@ -33,7 +35,7 @@ import nti.dataserver.tests.mock_dataserver as mock_dataserver
 
 class TestAdminViews(ApplicationLayerTest):
 
-	layer = NTIBadgesApplicationTestLayer
+	layer = NTISampleBadgesApplicationTestLayer
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_create_persons(self):
@@ -42,12 +44,10 @@ class TestAdminViews(ApplicationLayerTest):
 			self._create_user(username=username, external_value={'email':username})
 
 		create_persons_path = '/dataserver2/BadgeAdmin/@@create_persons'
-		testapp = TestApp(self.app)
-		testapp.post(create_persons_path,
-					 json.dumps({"term":"ichigo"}),
-					 extra_environ=self._make_extra_environ(),
-					 status=200)
-		manager = component.getUtility(badge_interfaces.IBadgeManager, "sample")
+		self.testapp.post_json(create_persons_path,
+						  {"term":"ichigo"},
+						  status=200)
+		manager = component.getUtility(badge_interfaces.IBadgeManager)
 		assert_that(manager.person_exists('ichigo@bleach.com'), is_(True))
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
@@ -57,14 +57,21 @@ class TestAdminViews(ApplicationLayerTest):
 			self._create_user(username=username, external_value={'email':username})
 
 		award_badge_path = '/dataserver2/BadgeAdmin/@@award'
-		testapp = TestApp(self.app)
-		testapp.post(award_badge_path,
-					 json.dumps({"username":"ichigo@bleach.com",
-								 "badge":"badge.1"}),
-					 extra_environ=self._make_extra_environ(),
-					 status=204)
-		manager = component.getUtility(badge_interfaces.IBadgeManager, "sample")
+
+		self.testapp.post_json(award_badge_path,
+							   {"username":"ichigo@bleach.com",
+								"badge":"badge.1"},
+							   status=204)
+		manager = component.getUtility(badge_interfaces.IBadgeManager)
 		assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'), is_(True))
+
+		# This had the side-effect of creating notable data about the award
+
+		path = '/dataserver2/users/%s/Pages(%s)/RUGDByOthersThatIMightBeInterestedIn/' % ( self.extra_environ_default_user, ntiids.ROOT )
+		res = self.testapp.get(path)
+		assert_that( res.json_body, has_entry( 'TotalItemCount', 1))
+		assert_that( res.json_body, has_entry( 'Items', has_length(1) ))
+
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_revoke(self):
@@ -73,20 +80,17 @@ class TestAdminViews(ApplicationLayerTest):
 			self._create_user(username=username, external_value={'email':username})
 
 		award_badge_path = '/dataserver2/BadgeAdmin/@@award'
-		testapp = TestApp(self.app)
-		testapp.post(award_badge_path,
-					 json.dumps({"username":"ichigo@bleach.com",
-								 "badge":"badge.1"}),
-					 extra_environ=self._make_extra_environ(),
-					 status=204)
+		self.testapp.post_json(award_badge_path,
+							   {"username":"ichigo@bleach.com",
+								"badge":"badge.1"},
+							   status=204)
 
 		revoke_badge_path = '/dataserver2/BadgeAdmin/@@revoke'
-		testapp.post(revoke_badge_path,
-					 json.dumps({"username":"ichigo@bleach.com",
-								 "badge":"badge.1"}),
-					 extra_environ=self._make_extra_environ(),
-					 status=204)
-		manager = component.getUtility(badge_interfaces.IBadgeManager, "sample")
+		self.testapp.post_json(revoke_badge_path,
+							   {"username":"ichigo@bleach.com",
+								"badge":"badge.1"},
+							   status=204)
+		manager = component.getUtility(badge_interfaces.IBadgeManager)
 		assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'), is_(False))
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
@@ -96,13 +100,11 @@ class TestAdminViews(ApplicationLayerTest):
 				self._create_user(username=username, external_value={'email':username+'@bleach.com'})
 
 		award_badge_path = '/dataserver2/BadgeAdmin/@@award'
-		testapp = TestApp(self.app)
-		testapp.post(award_badge_path,
-					 json.dumps({"username":"rukia",
-								 "badge":"badge.2"}),
-					 extra_environ=self._make_extra_environ(),
-					 status=204)
-		
+		self.testapp.post_json(award_badge_path,
+							   {"username":"rukia",
+								"badge":"badge.2"},
+							   status=204)
+
 		with mock_dataserver.mock_db_trans(self.ds):
 			source = "ichigo\tbadge.1\n"
 			source += "rukia@bleach.com\tbadge.2\trevoke\n"
@@ -122,11 +124,8 @@ class TestAdminViews(ApplicationLayerTest):
 		path = os.getenv('DATASERVER_DATA_DIR') or '/tmp'
 
 		sync_db_path = '/dataserver2/BadgeAdmin/@@sync_db'
-		testapp = TestApp(self.app)
-		testapp.post(sync_db_path,
-					 json.dumps({"directory":path,
-								 "dbname":"sample",
-								 "verify":True}),
-					 extra_environ=self._make_extra_environ(),
-					 status=200)
-
+		self.testapp.post_json(sync_db_path,
+							   {"directory":path,
+								"dbname":"sample",
+								"verify":True},
+							   status=200)

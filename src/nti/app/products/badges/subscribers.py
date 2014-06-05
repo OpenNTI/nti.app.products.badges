@@ -19,19 +19,41 @@ from nti.processlifetime import IAfterDatabaseOpenedEvent
 
 from . import get_user_badge_managers
 
+import sqlalchemy.exc
+
 @component.adapter(nti_interfaces.IUser, IObjectRemovedEvent)
 def _user_deleted(user, event):
-    for manager in get_user_badge_managers(user):
-        manager.delete_person(user)
+	for manager in get_user_badge_managers(user):
+		manager.delete_person(user)
 
 @component.adapter(IAfterDatabaseOpenedEvent)
 def _after_database_opened_listener(event):
-    logger.info("Adding registered tahrir issuers")
-    import transaction
-    with transaction.manager:
-        for _, issuer in component.getUtilitiesFor(tahrir_interfaces.IIssuer):
-            for _, manager in component.getUtilitiesFor(tahrir_interfaces.ITahrirBadgeManager):
-                if not manager.issuer_exists(issuer):
-                    manager.add_issuer(issuer)
-                    logger.debug("Issuer (%s,%s) added", issuer.name, issuer.origin)
-            
+	logger.info("Adding registered tahrir issuers")
+	import transaction
+	with transaction.manager:
+		# TODO: Should probably defer this until needed
+		# FIXME: It's wrong to be trying to control our own transaction here,
+		# that will fail at startup under certain scenarios.
+		# FIXME: Note that this event is fired for *every* configured
+		# database shard. We have some hacky defense against that below.
+		# It's also fired for every shard in every test case...not ideal
+		issuers = {x[1] for x in component.getUtilitiesFor(tahrir_interfaces.IIssuer)}
+		managers = {x[1] for x in component.getUtilitiesFor(tahrir_interfaces.ITahrirBadgeManager)}
+		for manager in managers:
+			if getattr(manager, '_v_installed', False):
+				continue
+
+			setattr(manager, str('_v_installed'), True)
+			for issuer in issuers:
+				if not manager.issuer_exists(issuer):
+					# FIXME: Under some circumstances, we can get an
+					# IntegrityError: ConstraintViolation, even though
+					# this code path only checks name and origin.
+					# So clearly there's some sort of race condition here.
+					# Is our transaction not actually isolated? Or at the wrong level?
+					try:
+						manager.add_issuer(issuer)
+					except sqlalchemy.exc.IntegrityError:
+						logger.warn("Integrity error", exc_info=True)
+					else:
+						logger.debug("Issuer (%s,%s) added", issuer.name, issuer.origin)

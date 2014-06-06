@@ -140,5 +140,5 @@ class AllBadgedView(object):
 	def __call__(self):
 		result = LocatedExternalDict()
 		result['Items'] = items = []
-		items.extend(get_all_badges())
+		items.extend(badge_interfaces.IBadgeClass(x) for x in get_all_badges())
 		return result

@@ -79,11 +79,22 @@ class TestAdminViews(ApplicationLayerTest):
 										'Class', 'Change',
 										'Item', has_entry('Class', 'Badge')))
 
-		# should be notable
+		# should be notable in email
 		msgs = send_notable_email(self.testapp)
 		msg = msgs[0]
 		assert_that( msg, contains_string( 'You earned a badge' ) )
 		assert_that( msg, contains_string( 'src="http://nti.com/files/badge_1.png"'))
+
+		# an in our activity
+		path = '/dataserver2/users/%s/Activity' % username
+		res = self.testapp.get(path, extra_environ=self._make_extra_environ(username))
+		assert_that( res.json_body, has_entry( 'TotalItemCount', 1))
+		assert_that( res.json_body, has_entry( 'Items', has_length(1) ))
+		item = res.json_body['Items'][0]
+
+		assert_that( item, has_entries( 'ChangeType', 'BadgeEarned',
+										'Class', 'Change',
+										'Item', has_entry('Class', 'Badge')))
 
 
 

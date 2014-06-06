@@ -30,7 +30,9 @@ from nti.externalization.interfaces import StandardExternalFields
 
 LINKS = StandardExternalFields.LINKS
 
+from . import ROOT
 from . import BADGES
+from . import ROOT_LOWER
 from . import HOSTED_BADGE_IMAGES
 
 @component.adapter(badge_interfaces.IBadgeClass)
@@ -55,13 +57,16 @@ class _BadgeLinkFixer(object):
 			return
 		scheme = urlparse(image).scheme
 		if not scheme:
-			if not image.startswith(HOSTED_BADGE_IMAGES):
-				image = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), image)
-			else:
-				image = urljoin(request.host_url, image)
+			# check root
+			lower = image.lower()
+			if not lower.startswith(ROOT_LOWER):
+				image = ROOT + image
+
 			# check ext
-			if not image.lower().endswith('.png'):
+			if not lower.endswith('.png'):
 				image += '.png'
+
+			image = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), image)
 			mapping['image'] = image
 
 @component.adapter(open_interfaces.IBadgeAssertion)

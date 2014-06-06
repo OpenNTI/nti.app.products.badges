@@ -17,6 +17,10 @@ from . import interfaces
 BADGES = 'Badges'
 HOSTED_BADGE_IMAGES = 'hosted_badge_images'
 
+# Base transformed root NTTID
+ROOT = 'tag:nextthought.com,'.replace(':', '_').replace(',', '_')
+ROOT_LOWER = ROOT.lower()
+
 def get_user_id(user):
 	result = user.username  # TODO: Switch to email when they can be verified
 	return result

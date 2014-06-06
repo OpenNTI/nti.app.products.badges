@@ -10,6 +10,8 @@ logger = __import__('logging').getLogger(__name__)
 
 import urllib
 import collections
+from urlparse import urljoin
+from urlparse import urlparse
 
 from zope import component
 from zope import interface
@@ -28,6 +30,7 @@ from nti.externalization.interfaces import StandardExternalFields
 LINKS = StandardExternalFields.LINKS
 
 from . import BADGES
+from . import HOSTED_BADGE_IMAGES
 
 @interface.implementer(ext_interfaces.IExternalObjectDecorator)
 class _BadgeHRefAdder(object):
@@ -36,10 +39,24 @@ class _BadgeHRefAdder(object):
 
 	def decorateExternalObject(self, context, mapping):
 		request = get_current_request()
-		if request is not None:
-			ds2 = '/'.join(request.path.split('/')[:2])
-			href = '%s/OpenBadges/%s' % (ds2, context.name)
-			mapping['href'] = href
+		if request is None:
+			return
+
+		# add open badge URL
+		ds2 = '/'.join(request.path.split('/')[:2])
+		href = '%s/OpenBadges/%s' % (ds2, context.name)
+		mapping['href'] = href
+
+		# image url fixer
+		image = mapping.get('image')
+		if image:
+			scheme = urlparse(image).scheme
+			if not scheme:
+				if not image.startswith(HOSTED_BADGE_IMAGES):
+					image = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), image)
+				else:
+					image = urljoin(request.host_url, image)
+				mapping['image'] = image
 
 @component.adapter(open_interfaces.IBadgeAssertion)
 @interface.implementer(ext_interfaces.IExternalObjectDecorator)

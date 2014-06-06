@@ -109,6 +109,10 @@
 		category="true" />
 
 	<!-- Email notifications -->
+	<!-- 
+		Temporarily disabled in production per Grey 
+		to avoid timing concerns.
+	-->
 	<browser:viewlet
 		name="assertion"
 		template="templates/digest_email_item_assertion.pt"
@@ -116,9 +120,11 @@
 		layer="pyramid.interfaces.IRequest"
 		permission="zope.Public"
 		manager="nti.app.pushnotifications.interfaces.INotableDataEmailViewletManager"
-		class="nti.app.pushnotifications.digest_email.DigestEmailNotableViewletBase"/>
+		class="nti.app.pushnotifications.digest_email.DigestEmailNotableViewletBase"
+		zcml:condition="have testmode" />
 
-	<adapter factory=".adapters._AssertionChangeEventClassifier" />
+	<adapter factory=".adapters._AssertionChangeEventClassifier" 
+		zcml:condition="have testmode" />
 
 
 

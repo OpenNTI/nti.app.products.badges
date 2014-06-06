@@ -18,6 +18,7 @@ from zope import interface
 
 from pyramid.threadlocal import get_current_request
 
+from nti.badges import interfaces as badge_interfaces
 from nti.badges.openbadges import interfaces as open_interfaces
 
 from nti.dataserver.links import Link
@@ -32,8 +33,9 @@ LINKS = StandardExternalFields.LINKS
 from . import BADGES
 from . import HOSTED_BADGE_IMAGES
 
+@component.adapter(badge_interfaces.IBadgeClass)
 @interface.implementer(ext_interfaces.IExternalObjectDecorator)
-class _BadgeHRefAdder(object):
+class _BadgeLinkFixer(object):
 
 	__metaclass__ = SingletonDecorator
 
@@ -49,14 +51,15 @@ class _BadgeHRefAdder(object):
 
 		# image url fixer
 		image = mapping.get('image')
-		if image:
-			scheme = urlparse(image).scheme
-			if not scheme:
-				if not image.startswith(HOSTED_BADGE_IMAGES):
-					image = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), image)
-				else:
-					image = urljoin(request.host_url, image)
-				mapping['image'] = image
+		if not image:
+			return
+		scheme = urlparse(image).scheme
+		if not scheme:
+			if not image.startswith(HOSTED_BADGE_IMAGES):
+				image = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), image)
+			else:
+				image = urljoin(request.host_url, image)
+			mapping['image'] = image
 
 @component.adapter(open_interfaces.IBadgeAssertion)
 @interface.implementer(ext_interfaces.IExternalObjectDecorator)

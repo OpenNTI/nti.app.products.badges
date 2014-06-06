@@ -31,28 +31,28 @@ from . import get_user_id
 @interface.implementer(open_interfaces.IIdentityObject)
 @component.adapter(nti_interfaces.IUser)
 def user_to_identity_object(user):
-    uid = get_user_id(user)
-    result = IdentityObject(identity=uid,
-                            type=open_interfaces.ID_TYPE_EMAIL,
-                            hashed=False,
-                            salt=None)
-    return result
+	uid = get_user_id(user)
+	result = IdentityObject(identity=uid,
+							type=open_interfaces.ID_TYPE_EMAIL,
+							hashed=False,
+							salt=None)
+	return result
 
 def _set_common_person(user, person):
-    uid = get_user_id(user)
-    person.email = uid
-    profile = user_interfaces.IUserProfile(user)
-    person.bio = getattr(profile, 'about', None) or u''
-    person.website = getattr(profile, 'home_page', None) or u''
+	uid = get_user_id(user)
+	person.email = uid
+	profile = user_interfaces.IUserProfile(user)
+	person.bio = getattr(profile, 'about', None) or u''
+	person.website = getattr(profile, 'home_page', None) or u''
 
 @interface.implementer(tahrir_interfaces.IPerson)
 @component.adapter(nti_interfaces.IUser)
 def user_to_tahrir_person(user):
-    result = Person()
-    _set_common_person(user, result)
-    result.nickname = user.username
-    result.created_on = datetime.fromtimestamp(user.createdTime)
-    return result
+	result = Person()
+	_set_common_person(user, result)
+	result.nickname = user.username
+	result.created_on = datetime.fromtimestamp(user.createdTime)
+	return result
 
 from nti.dataserver.users import User
 
@@ -66,12 +66,11 @@ def tahrir_person_to_user(person):
 @interface.implementer(badges_interfaces.INTIPerson)
 @component.adapter(nti_interfaces.IUser)
 def user_to_ntiperson(user):
-    result = NTIPerson()
-    _set_common_person(user, result)
-    result.name = user.username
-    result.createdTime = user.createdTime
-    return result
-
+	result = NTIPerson()
+	_set_common_person(user, result)
+	result.name = user.username
+	result.createdTime = user.createdTime
+	return result
 
 from nti.app.pushnotifications.digest_email import AbstractClassifier
 
@@ -79,5 +78,4 @@ from .interfaces import IStreamChangeBadgeEarnedEvent
 
 @component.adapter(IStreamChangeBadgeEarnedEvent)
 class _AssertionChangeEventClassifier(AbstractClassifier):
-
 	classification = 'assertion'

@@ -46,7 +46,7 @@ class _BadgeLinkFixer(object):
 
 		# add open badge URL
 		ds2 = '/'.join(request.path.split('/')[:2])
-		href = '%s/OpenBadges/%s' % (ds2, context.name)
+		href = '%s/OpenBadges/%s' % (ds2, urllib.quote(context.name))
 		mapping['href'] = href
 
 		# image url fixer

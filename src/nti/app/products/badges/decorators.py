@@ -59,6 +59,9 @@ class _BadgeLinkFixer(object):
 				image = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), image)
 			else:
 				image = urljoin(request.host_url, image)
+			# check ext
+			if not image.lower().endswith('.png'):
+				image += '.png'
 			mapping['image'] = image
 
 @component.adapter(open_interfaces.IBadgeAssertion)

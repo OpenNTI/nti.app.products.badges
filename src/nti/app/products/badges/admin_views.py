@@ -131,6 +131,7 @@ def award(request):
 	uid = get_user_id(user)
 	if not manager.assertion_exists(uid, badge_name):
 		manager.add_assertion(uid, badge_name)
+		logger.info("Badge '%s' added to user %s", badge_name, username)
 
 	return hexc.HTTPNoContent()
 
@@ -165,8 +166,9 @@ def revoke(request):
 	uid = get_user_id(user)
 	if manager.assertion_exists(uid, badge_name):
 		manager.remove_assertion(uid, badge_name)
+		logger.info("Badge '%s' revoked from user %s", badge_name, username)
 	else:
-		logger.debug('Assertion (%s,%s) not found', uid, badge_name)
+		logger.warn('Assertion (%s,%s) not found', uid, badge_name)
 
 	return hexc.HTTPNoContent()
 
@@ -254,11 +256,11 @@ def bulk_import(input_source, errors=[]):
 		if operation == 'award' and not manager.assertion_exists(uid, badge_name):
 			awards += 1
 			manager.add_assertion(uid, badge_name)
-			logger.debug('Badge %s awarded to %s', badge_name, username)
+			logger.info('Badge %s awarded to %s', badge_name, username)
 		elif operation == 'revoke' and manager.assertion_exists(uid, badge_name):
 			revokations += 1
 			manager.remove_assertion(uid, badge_name)
-			logger.debug('Badge %s revoked from %s', badge_name, username)
+			logger.info('Badge %s revoked from %s', badge_name, username)
 
 	return (awards, revokations)
 

@@ -28,9 +28,12 @@ from nti.dataserver import authorization as nauth
 from nti.dataserver.users import index as user_index
 from nti.dataserver import interfaces as nti_interfaces
 
+from nti.externalization.interfaces import LocatedExternalDict
+
 from nti.utils import maps
 
 from . import interfaces
+from . import get_all_badges
 from . import get_user_badge_managers
 
 @interface.implementer(IPathAdapter)
@@ -119,3 +122,23 @@ class OpenAssertionsView(object):
 				return badge_interfaces.IBadgeAssertion(result)
 
 		raise hexc.HTTPNotFound('Assertion not found')
+
+
+ALL_BADGES_VIEW = 'AllBadges'
+
+@view_config(route_name='objects.generic.traversal',
+			 name=ALL_BADGES_VIEW,
+			 renderer='rest',
+			 request_method='GET',
+			 context=nti_interfaces.IDataserverFolder,
+			 permission=nauth.ACT_MODERATE)
+class AllBadgedView(object):
+
+	def __init__(self, request):
+		self.request = request
+
+	def __call__(self):
+		result = LocatedExternalDict()
+		result['Items'] = items = []
+		items.extend(get_all_badges())
+		return result

@@ -70,6 +70,9 @@
 	<subscriber	factory=".filters._DefaultPrincipalEarnedBadgeFilter"
 				provides=".interfaces.IPrincipalEarnedBadgeFilter"/>
 
+	<subscriber	factory=".filters._DefaultPrincipalEarnableBadgeFilter"
+				provides=".interfaces.IPrincipalEarnableBadgeFilter"/>
+
 	<subscriber	factory=".managers._DefaultPrincipalBadgeManager"
 				provides=".interfaces.IPrincipalBadgeManager"/>
 

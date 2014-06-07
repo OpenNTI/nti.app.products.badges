@@ -38,3 +38,15 @@ class _DefaultPrincipalEarnedBadgeFilter(object):
 
 	def allow_badge(self, user, badge):
 		return True
+
+@component.adapter(nti_interfaces.IUser)
+@interface.implementer(interfaces.IPrincipalEarnableBadgeFilter)
+class _DefaultPrincipalEarnableBadgeFilter(object):
+
+	__slots__ = ()
+
+	def __init__(self, *args):
+		pass
+
+	def allow_badge(self, user, badge):
+		return True

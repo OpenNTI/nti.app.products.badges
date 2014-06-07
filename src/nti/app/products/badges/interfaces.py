@@ -59,6 +59,16 @@ class IPrincipalEarnedBadgeFilter(interface.Interface):
 		allow the specified badge
 		"""
 
+class IPrincipalEarnableBadgeFilter(interface.Interface):
+	"""
+	define subscriber badge earnable filter
+	"""
+
+	def allow_badge(user, badge):
+		"""
+		allow the specified badge
+		"""
+
 def get_principal_badge_filter(user):
 	filters = component.subscribers((user,), IPrincipalBadgeFilter)
 	filters = list(filters)
@@ -68,6 +78,13 @@ def get_principal_badge_filter(user):
 
 def get_principal_earned_badge_filter(user):
 	filters = component.subscribers((user,), IPrincipalEarnedBadgeFilter)
+	filters = list(filters)
+	def uber_filter(badge):
+		return all((f.allow_badge(user, badge) for f in filters))
+	return uber_filter
+
+def get_principal_earnable_badge_filter(user):
+	filters = component.subscribers((user,), IPrincipalEarnableBadgeFilter)
 	filters = list(filters)
 	def uber_filter(badge):
 		return all((f.allow_badge(user, badge) for f in filters))

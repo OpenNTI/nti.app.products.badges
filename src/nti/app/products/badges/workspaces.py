@@ -120,10 +120,10 @@ class EarnableBadgeCollection(contained.Contained):
 		container = LastModifiedCopyingUserList()
 		container.__parent__ = parent
 		container.__name__ = __name__
-
+		predicate = interfaces.get_principal_earnable_badge_filter(parent.user)
 		for subs in component.subscribers((user,), interfaces.IPrincipalErnableBadges):
 			for badge in subs.iter_badges():
-				if not self._has_been_earned(user, badge):
+				if not self._has_been_earned(user, badge) and predicate(badge):
 					container.append(IBadgeClass(badge))
 		return container
 

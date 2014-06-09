@@ -212,8 +212,8 @@ def sync_db(request):
 
 	# return
 	result = LocatedExternalDict()
-	result['BadgesAdded'] = badges
-	result['IssuersAdded'] = issuers
+	result['Badges'] = badges
+	result['Issuers'] = issuers
 	result['Elapsed'] = time.time() - now
 	return result
 

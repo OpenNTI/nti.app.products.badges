@@ -43,6 +43,7 @@ def sync_db(path, update=False, verify=False, **kwargs):
 			manager.add_badge(badge, issuer)
 			logger.debug('Badge %s added', badge.name)
 		elif update:
+			badges += 1
 			manager.update_badge(badge)
 			logger.debug('Badge %s updated', badge.name)
 

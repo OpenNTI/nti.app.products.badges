@@ -196,9 +196,9 @@ def sync_db(request):
 	if not directory or not os.path.exists(directory) or not os.path.isdir(directory):
 		raise hexc.HTTPNotFound('Directory not found')
 
-	# get database name
-	for name in ('dbid', 'dbname', 'db_id', 'db_name'):
-		dbname = values.get(name)
+	# update badges
+	update = values.get('update') or u''
+	update = str(update).lower() in ('1', 'true', 't', 'yes', 'y', 'on')
 
 	# verify object
 	verify = values.get('verify') or u''
@@ -208,7 +208,7 @@ def sync_db(request):
 	now = time.time()
 
 	# sync database
-	issuers, badges = sync.sync_db(directory, dbid=dbname, verify=verify, secret=secret)
+	issuers, badges = sync.sync_db(directory, update=update, verify=verify, secret=secret)
 
 	# return
 	result = LocatedExternalDict()

@@ -15,17 +15,10 @@ from zope import component
 from nti.badges.openbadges.utils import scanner
 from nti.badges import interfaces as badge_interfaces
 
-def sync_db(path, dbid=None, verify=False, **kwargs):
+def sync_db(path, update=False, verify=False, **kwargs):
 	badges = 0
 	issuers = 0
-	if dbid is not None:
-		manager = component.getUtility(badge_interfaces.IBadgeManager, name=dbid)
-		managers = (dbid, manager)
-	else:
-		managers = list(component.getUtilitiesFor(badge_interfaces.IBadgeManager))
-
-	if not managers:
-		return (issuers, badges)  # No badge manager was found
+	manager = component.getUtility(badge_interfaces.IBadgeManager)
 
 	path = os.path.expanduser(path)
 	logger.info("Scanning %s", path)
@@ -34,21 +27,23 @@ def sync_db(path, dbid=None, verify=False, **kwargs):
 		logger.warn("No badges found")
 		return (issuers, badges)
 
-	for _, manager in managers:
-		for badge, issuer in results:
-			if issuer is None:
-				logger.debug("Badge %s cannot be processed; issuer not found",
-							 badge.name)
-				continue
+	for badge, issuer in results:
+		if issuer is None:
+			logger.debug("Badge %s cannot be processed; issuer not found",
+						 badge.name)
+			continue
 
-			if not manager.issuer_exists(issuer):
-				issuers += 1
-				manager.add_issuer(issuer)
-				logger.debug("Issuer %s,%s added", issuer.name, issuer.url)
+		if not manager.issuer_exists(issuer):
+			issuers += 1
+			manager.add_issuer(issuer)
+			logger.debug("Issuer %s,%s added", issuer.name, issuer.url)
 
-			if not manager.badge_exists(badge):
-				badges += 1
-				manager.add_badge(badge, issuer)
-				logger.debug('Badge %s added', badge.name)
+		if not manager.badge_exists(badge):
+			badges += 1
+			manager.add_badge(badge, issuer)
+			logger.debug('Badge %s added', badge.name)
+		elif update:
+			manager.update_badge(badge)
+			logger.debug('Badge %s updated', badge.name)
 
 	return (issuers, badges)

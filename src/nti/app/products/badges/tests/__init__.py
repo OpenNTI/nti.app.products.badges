@@ -93,8 +93,6 @@ class NTIBadgesApplicationTestLayer(ApplicationTestLayer):
 		bm = manager.create_badge_manager(defaultSQLite=True)
 		component.provideUtility(bm)
 
-
-
 class NTISampleBadgesApplicationTestLayer(ApplicationTestLayer):
 
 	@classmethod
@@ -109,7 +107,6 @@ class NTISampleBadgesApplicationTestLayer(ApplicationTestLayer):
 	@classmethod
 	def setUp(cls):
 		_change_ds_dir(cls)
-
 
 	@classmethod
 	def tearDown(cls):

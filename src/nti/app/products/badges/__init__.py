@@ -21,34 +21,18 @@ def get_user_id(user):
 	result = user.username  # TODO: Switch to email when they can be verified
 	return result
 
-def get_user_badge_managers(user):
-	for pbm in component.subscribers((user,), interfaces.IPrincipalBadgeManager):
-		for manager in pbm.iter_managers():
-			yield manager
-
-def get_manager_and_badge(badge):
-	for _, manager in component.getUtilitiesFor(badge_interfaces.IBadgeManager):
-		result = manager.get_badge(badge)
-		if result is not None:
-			return (manager, result)
-	return (None, None)
-
-def get_manager(badge):
-	result = get_manager_and_badge(badge)
-	return result[0]
-
 def get_badge(badge):
-	result = get_manager_and_badge(badge)
-	return result[1]
+	manager = component.getUtility(badge_interfaces.IBadgeManager)
+	result = manager.get_badge(badge)
+	return result
 
 def get_all_badges():
-	for _, manager in component.getUtilitiesFor(badge_interfaces.IBadgeManager):
-		for badge in manager.get_all_badges():
-			yield badge
+	manager = component.getUtility(badge_interfaces.IBadgeManager)
+	for badge in manager.get_all_badges():
+		yield badge
 
 def assertion_exists(user, badge):
-	for pbm in component.subscribers((user,), interfaces.IPrincipalBadgeManager):
-		for manager in pbm.iter_managers():
-			if manager.assertion_exists(user, badge):
-				return True
+	manager = component.getUtility(badge_interfaces.IBadgeManager)
+	if manager.assertion_exists(user, badge):
+		return True
 	return False

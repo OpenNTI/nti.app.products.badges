@@ -25,13 +25,6 @@ class IBadgesWorkspace(app_interfaces.IWorkspace):
 	A workspace containing data for badges.
 	"""
 
-class IPrincipalBadgeManager(interface.Interface):
-
-	def iter_managers():
-		"""
-		Return an iterable of IBadgeManager objects
-		"""
-
 class IPrincipalBadgeFilter(interface.Interface):
 	"""
 	define subscriber badge filter

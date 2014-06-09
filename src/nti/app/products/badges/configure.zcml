@@ -73,9 +73,6 @@
 	<subscriber	factory=".filters._DefaultPrincipalEarnableBadgeFilter"
 				provides=".interfaces.IPrincipalEarnableBadgeFilter"/>
 
-	<subscriber	factory=".managers._DefaultPrincipalBadgeManager"
-				provides=".interfaces.IPrincipalBadgeManager"/>
-
 	<!-- Workspaces -->
 	<!-- A subscriber for enumeration -->
 	<subscriber factory=".workspaces.BadgesWorkspace"

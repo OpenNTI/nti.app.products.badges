@@ -17,6 +17,7 @@ from zope.container import contained
 
 from nti.appserver import interfaces as app_interfaces
 
+from nti.badges import interfaces as badge_interfaces
 from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.dataserver.datastructures import LastModifiedCopyingUserList
@@ -28,7 +29,6 @@ from . import BADGES
 from . import interfaces
 from . import get_user_id
 from . import assertion_exists
-from . import get_user_badge_managers
 
 @interface.implementer(interfaces.IBadgesWorkspace)
 class _BadgesWorkspace(contained.Contained):
@@ -85,9 +85,9 @@ class AllBadgesCollection(contained.Contained):
 		container.__parent__ = parent
 		container.__name__ = __name__
 		predicate = interfaces.get_principal_badge_filter(parent.user)
-		for manager in get_user_badge_managers(parent.user):
-			badges = manager.get_all_badges()
-			container.extend(IBadgeClass(b) for b in badges if predicate(b))
+		manager = component.getUtility(badge_interfaces.IBadgeManager)
+		badges = manager.get_all_badges()
+		container.extend(IBadgeClass(b) for b in badges if predicate(b))
 		return container
 
 	def __getitem__(self, key):
@@ -150,9 +150,9 @@ class EarnedBadgeCollection(contained.Contained):
 		container.__name__ = __name__
 		uid = get_user_id(parent.user)
 		predicate = interfaces.get_principal_earned_badge_filter(parent.user)
-		for manager in get_user_badge_managers(parent.user):
-			badges = manager.get_person_badges(uid)
-			container.extend(IBadgeClass(b) for b in badges if predicate(b))
+		manager = component.getUtility(badge_interfaces.IBadgeManager)
+		badges = manager.get_person_badges(uid)
+		container.extend(IBadgeClass(b) for b in badges if predicate(b))
 		return container
 
 	def __len__(self):

@@ -21,6 +21,8 @@ from zope.catalog.interfaces import ICatalog
 from pyramid.view import view_config
 from pyramid import httpexceptions as hexc
 
+from nti.badges import interfaces as badge_interfaces
+
 from nti.dataserver.users import User
 from nti.dataserver import authorization as nauth
 from nti.dataserver.users import index as user_index
@@ -34,8 +36,6 @@ from .utils import sync
 
 from . import views
 from . import get_user_id
-from . import get_manager_and_badge
-from . import get_user_badge_managers
 
 def _make_min_max_btree_range(search_term):
 	min_inclusive = search_term  # start here
@@ -81,14 +81,14 @@ def create_persons(request):
 
 	total = 0
 	now = time.time()
+	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	for username in usernames:
 		user = User.get_user(username.lower())
 		if not user or not nti_interfaces.IUser.providedBy(user):
 			continue
-		for manager in get_user_badge_managers(user):
-			if not manager.person_exists(user):
-				if manager.add_person(user):
-					total += 1
+		if not manager.person_exists(user):
+			if manager.add_person(user):
+				total += 1
 
 	result = LocatedExternalDict()
 	result['Total'] = total
@@ -119,13 +119,15 @@ def award(request):
 	if not badge_name:
 		raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
 
-	manager, badge = get_manager_and_badge(badge_name)
+	manager = component.getUtility(badge_interfaces.IBadgeManager)
+	badge = manager.get_badge(badge_name)
 	if badge is None:
 		raise hexc.HTTPNotFound('Badge not found')
 
 	# add person if required
 	# an adapter must exists to convert the user to a person
-	manager.add_person(user)
+	if not manager.person_exists(user):
+		manager.add_person(user)
 
 	# add assertion
 	uid = get_user_id(user)
@@ -159,7 +161,8 @@ def revoke(request):
 	if not badge_name:
 		raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
 
-	manager, badge = get_manager_and_badge(badge_name)
+	manager = component.getUtility(badge_interfaces.IBadgeManager)
+	badge = manager.get_badge(badge_name)
 	if badge is None:
 		raise hexc.HTTPNotFound('Badge not found')
 
@@ -215,7 +218,7 @@ def sync_db(request):
 	return result
 
 def bulk_import(input_source, errors=[]):
-	managers = {}
+	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
 
 	awards = 0
@@ -244,13 +247,10 @@ def bulk_import(input_source, errors=[]):
 			errors.append("Invalid user '%s' in line %s" % (username, line))
 			continue
 
-		manager = managers.get(badge_name)
-		if manager is None:
-			manager, _ = get_manager_and_badge(badge_name)
-			if manager is None:
-				errors.append("Invalid badge '%s' in line %s" % (badge_name, line))
-				continue
-			managers[badge_name] = manager
+		badge = manager.get_badge(badge_name)
+		if badge is None:
+			errors.append("Invalid badge '%s' in line %s" % (badge_name, line))
+			continue
 
 		uid = get_user_id(user)
 		if operation == 'award' and not manager.assertion_exists(uid, badge_name):

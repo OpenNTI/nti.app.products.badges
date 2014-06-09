@@ -18,7 +18,6 @@ from nti.dataserver.users import User
 from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_user_id
 from nti.app.products.badges import get_all_badges
-from nti.app.products.badges import get_user_badge_managers
 
 import nti.dataserver.tests.mock_dataserver as mock_dataserver
 from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
@@ -44,12 +43,6 @@ class TestBadges(NTIBadgesTestCase):
 		user = self._create_user()
 		uid = get_user_id(user)
 		assert_that(uid, is_('ntiuser'))
-
-	@WithMockDSTrans
-	def test_get_user_badge_managers(self):
-		user = self._create_user()
-		managers = list(get_user_badge_managers(user))
-		assert_that(managers, has_length(1))
 
 	@WithMockDSTrans
 	def test_get_badge(self):

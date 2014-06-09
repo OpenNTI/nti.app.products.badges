@@ -21,7 +21,8 @@ from pyramid import httpexceptions as hexc
 
 from nti.appserver.interfaces import IUserService
 
-from nti.badges.openbadges import interfaces as badge_interfaces
+from nti.badges import interfaces as badge_interfaces
+from nti.badges.openbadges import interfaces as open_interfaces
 
 from nti.dataserver.users import User
 from nti.dataserver import authorization as nauth
@@ -34,7 +35,6 @@ from nti.utils import maps
 
 from . import interfaces
 from . import get_all_badges
-from . import get_user_badge_managers
 
 @interface.implementer(IPathAdapter)
 @component.adapter(nti_interfaces.IUser, IRequest)
@@ -68,8 +68,6 @@ class OpenBadgeView(object):
 
 	def __call__(self):
 		request = self.request
-		username = request.authenticated_userid
-		user = User.get_user(username)
 		
 		splits = request.path_info.split('/')
 		if splits[-1] != OPEN_BADGES_VIEW:
@@ -82,10 +80,10 @@ class OpenBadgeView(object):
 		if not badge:
 			raise hexc.HTTPUnprocessableEntity('Badge not specified')
 
-		for manager in get_user_badge_managers(user):
-			result = manager.get_badge(badge)
-			if result is not None:
-				return badge_interfaces.IBadgeClass(result)
+		manager = component.getUtility(badge_interfaces.IBadgeManager)
+		result = manager.get_badge(badge)
+		if result is not None:
+			return open_interfaces.IBadgeClass(result)
 
 		raise hexc.HTTPNotFound('Badge not found')
 
@@ -116,10 +114,10 @@ class OpenAssertionsView(object):
 		if user is None:
 			raise hexc.HTTPNotFound('User not found')
 
-		for manager in get_user_badge_managers(user):
-			result = manager.get_assertion(user, badge)
-			if result is not None:
-				return badge_interfaces.IBadgeAssertion(result)
+		manager = component.getUtility(badge_interfaces.IBadgeManager)
+		result = manager.get_assertion(user, badge)
+		if result is not None:
+			return open_interfaces.IBadgeAssertion(result)
 
 		raise hexc.HTTPNotFound('Assertion not found')
 
@@ -140,5 +138,5 @@ class AllBadgedView(object):
 	def __call__(self):
 		result = LocatedExternalDict()
 		result['Items'] = items = []
-		items.extend(badge_interfaces.IBadgeClass(x) for x in get_all_badges())
+		items.extend(open_interfaces.IBadgeClass(x) for x in get_all_badges())
 		return result

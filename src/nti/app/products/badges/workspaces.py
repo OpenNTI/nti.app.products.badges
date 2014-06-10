@@ -17,7 +17,6 @@ from zope.container import contained
 
 from nti.appserver import interfaces as app_interfaces
 
-from nti.badges import interfaces as badge_interfaces
 from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.dataserver.datastructures import LastModifiedCopyingUserList
@@ -28,7 +27,9 @@ from nti.utils.property import alias
 from . import BADGES
 from . import interfaces
 from . import get_user_id
+from . import get_all_badges
 from . import assertion_exists
+from . import get_person_badges
 
 @interface.implementer(interfaces.IBadgesWorkspace)
 class _BadgesWorkspace(contained.Contained):
@@ -84,10 +85,9 @@ class AllBadgesCollection(contained.Contained):
 		container = LastModifiedCopyingUserList()
 		container.__parent__ = parent
 		container.__name__ = __name__
+		all_badges = get_all_badges()
 		predicate = interfaces.get_principal_badge_filter(parent.user)
-		manager = component.getUtility(badge_interfaces.IBadgeManager)
-		badges = manager.get_all_badges()
-		container.extend(IBadgeClass(b) for b in badges if predicate(b))
+		container.extend(IBadgeClass(b) for b in all_badges if predicate(b))
 		return container
 
 	def __getitem__(self, key):
@@ -110,9 +110,6 @@ class EarnableBadgeCollection(contained.Contained):
 	def __init__(self, parent):
 		self.__parent__ = parent
 
-	def _has_been_earned(self, user, badge):
-		return assertion_exists(user, badge)
-
 	@Lazy
 	def container(self):
 		parent = self.__parent__
@@ -123,7 +120,7 @@ class EarnableBadgeCollection(contained.Contained):
 		predicate = interfaces.get_principal_earnable_badge_filter(parent.user)
 		for subs in component.subscribers((user,), interfaces.IPrincipalErnableBadges):
 			for badge in subs.iter_badges():
-				if not self._has_been_earned(user, badge) and predicate(badge):
+				if not assertion_exists(user, badge) and predicate(badge):
 					container.append(IBadgeClass(badge))
 		return container
 
@@ -150,9 +147,8 @@ class EarnedBadgeCollection(contained.Contained):
 		container.__name__ = __name__
 		uid = get_user_id(parent.user)
 		predicate = interfaces.get_principal_earned_badge_filter(parent.user)
-		manager = component.getUtility(badge_interfaces.IBadgeManager)
-		badges = manager.get_person_badges(uid)
-		container.extend(IBadgeClass(b) for b in badges if predicate(b))
+		person_badges = get_person_badges(uid)
+		container.extend(IBadgeClass(b) for b in person_badges if predicate(b))
 		return container
 
 	def __len__(self):

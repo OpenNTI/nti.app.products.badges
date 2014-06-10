@@ -17,15 +17,12 @@ from hamcrest import assert_that
 from hamcrest import has_property
 from hamcrest import greater_than_or_equal_to
 
-from zope import component
-
 from nti.appserver.interfaces import IUserService
 from nti.appserver.interfaces import ICollection
 
 from nti.app.products.badges import get_user_id
+from nti.app.products.badges import add_assertion
 from nti.app.products.badges import interfaces as app_badge_interfaces
-
-from nti.badges import interfaces as badge_interfaces
 
 from nti.dataserver import traversal
 
@@ -106,8 +103,7 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(0))))
 
 		with mock_dataserver.mock_db_trans(self.ds):
-			manager = component.getUtility(badge_interfaces.IBadgeManager)
-			manager.add_assertion(uid, badge_name)
+			add_assertion(uid, badge_name)
 
 		res = testapp.get(earned_badges_path,
 						  extra_environ=self._make_extra_environ(user=username),

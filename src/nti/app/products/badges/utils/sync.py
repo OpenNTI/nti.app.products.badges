@@ -10,15 +10,17 @@ logger = __import__('logging').getLogger(__name__)
 
 import os
 
-from zope import component
-
 from nti.badges.openbadges.utils import scanner
-from nti.badges import interfaces as badge_interfaces
+
+from .. import add_badge
+from .. import add_issuer
+from .. import badge_exists
+from .. import update_badge
+from .. import issuer_exists
 
 def sync_db(path, update=False, verify=False, **kwargs):
 	badges = 0
 	issuers = 0
-	manager = component.getUtility(badge_interfaces.IBadgeManager)
 
 	path = os.path.expanduser(path)
 	logger.info("Scanning %s", path)
@@ -33,18 +35,18 @@ def sync_db(path, update=False, verify=False, **kwargs):
 						 badge.name)
 			continue
 
-		if not manager.issuer_exists(issuer):
+		if not issuer_exists(issuer):
 			issuers += 1
-			manager.add_issuer(issuer)
+			add_issuer(issuer)
 			logger.debug("Issuer %s,%s added", issuer.name, issuer.url)
 
-		if not manager.badge_exists(badge):
+		if not badge_exists(badge):
 			badges += 1
-			manager.add_badge(badge, issuer)
+			add_badge(badge, issuer)
 			logger.debug('Badge %s added', badge.name)
 		elif update:
 			badges += 1
-			manager.update_badge(badge)
+			update_badge(badge)
 			logger.debug('Badge %s updated', badge.name)
 
 	return (issuers, badges)

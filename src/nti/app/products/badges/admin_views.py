@@ -35,7 +35,13 @@ from nti.utils.maps import CaseInsensitiveDict
 from .utils import sync
 
 from . import views
+from . import get_badge
+from . import add_person
 from . import get_user_id
+from . import person_exists
+from . import add_assertion
+from . import assertion_exists
+from . import remove_assertion
 
 def _make_min_max_btree_range(search_term):
 	min_inclusive = search_term  # start here
@@ -81,13 +87,12 @@ def create_persons(request):
 
 	total = 0
 	now = time.time()
-	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	for username in usernames:
 		user = User.get_user(username.lower())
 		if not user or not nti_interfaces.IUser.providedBy(user):
 			continue
-		if not manager.person_exists(user):
-			if manager.add_person(user):
+		if not person_exists(user):
+			if add_person(user):
 				total += 1
 
 	result = LocatedExternalDict()
@@ -119,20 +124,19 @@ def award(request):
 	if not badge_name:
 		raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
 
-	manager = component.getUtility(badge_interfaces.IBadgeManager)
-	badge = manager.get_badge(badge_name)
+	badge = get_badge(badge_name)
 	if badge is None:
 		raise hexc.HTTPNotFound('Badge not found')
 
 	# add person if required
 	# an adapter must exists to convert the user to a person
-	if not manager.person_exists(user):
-		manager.add_person(user)
+	if not person_exists(user):
+		add_person(user)
 
 	# add assertion
 	uid = get_user_id(user)
-	if not manager.assertion_exists(uid, badge_name):
-		manager.add_assertion(uid, badge_name)
+	if not assertion_exists(uid, badge_name):
+		add_assertion(uid, badge_name)
 		logger.info("Badge '%s' added to user %s", badge_name, username)
 
 	return hexc.HTTPNoContent()
@@ -218,7 +222,6 @@ def sync_db(request):
 	return result
 
 def bulk_import(input_source, errors=[]):
-	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
 
 	awards = 0
@@ -247,19 +250,19 @@ def bulk_import(input_source, errors=[]):
 			errors.append("Invalid user '%s' in line %s" % (username, line))
 			continue
 
-		badge = manager.get_badge(badge_name)
+		badge = get_badge(badge_name)
 		if badge is None:
 			errors.append("Invalid badge '%s' in line %s" % (badge_name, line))
 			continue
 
 		uid = get_user_id(user)
-		if operation == 'award' and not manager.assertion_exists(uid, badge_name):
+		if operation == 'award' and not assertion_exists(uid, badge_name):
 			awards += 1
-			manager.add_assertion(uid, badge_name)
+			add_assertion(uid, badge_name)
 			logger.info('Badge %s awarded to %s', badge_name, username)
-		elif operation == 'revoke' and manager.assertion_exists(uid, badge_name):
+		elif operation == 'revoke' and assertion_exists(uid, badge_name):
 			revokations += 1
-			manager.remove_assertion(uid, badge_name)
+			remove_assertion(uid, badge_name)
 			logger.info('Badge %s revoked from %s', badge_name, username)
 
 	return (awards, revokations)

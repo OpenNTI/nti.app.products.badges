@@ -145,14 +145,3 @@ def _make_assertions_notable_to_target(assertion, event):
 	act_storage = IUserActivityStorage( user, None )
 	if act_storage is not None:
 		act_storage.addContainedObjectToContainer( change, '')
-
-from nti.utils.interfaces import IAfterTransactionEnd
-
-@component.adapter(IAfterTransactionEnd)
-def _after_transaction_end(event):
-	manager = component.queryUtility(tahrir_interfaces.ITahrirBadgeManager)
-	if manager is not None:
-		try:
-			manager.scoped_session.remove()
-		except AttributeError:
-			pass

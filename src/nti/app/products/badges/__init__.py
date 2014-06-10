@@ -17,12 +17,15 @@ from . import interfaces
 BADGES = 'Badges'
 HOSTED_BADGE_IMAGES = 'hosted_badge_images'
 
+from .utils import has_side_effects
+
 def get_user_id(user):
 	result = user.username  # TODO: Switch to email when they can be verified
 	return result
 
 # issuers
 
+@has_side_effects
 def issuer_exists(issuer):
 	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	result = manager.issuer_exists(issuer)
@@ -35,6 +38,7 @@ def add_issuer(issuer):
 
 # badges
 
+@has_side_effects
 def badge_exists(badge):
 	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	result = manager.badge_exists(badge)
@@ -50,11 +54,13 @@ def update_badge(badge):
 	result = manager.update_badge(badge)
 	return result
 
+@has_side_effects
 def get_badge(badge):
 	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	result = manager.get_badge(badge)
 	return result
 
+@has_side_effects
 def get_all_badges():
 	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	return manager.get_all_badges()
@@ -69,10 +75,12 @@ def delete_person(person):
 	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	return manager.delete_person(person)
 
+@has_side_effects
 def person_exists(person):
 	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	return manager.person_exists(person)
 
+@has_side_effects
 def get_person_badges(person):
 	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	return manager.get_person_badges(person)
@@ -87,6 +95,7 @@ def remove_assertion(person, badge):
 	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	return manager.remove_assertion(person, badge)
 
+@has_side_effects
 def assertion_exists(user, badge):
 	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	if manager.assertion_exists(user, badge):

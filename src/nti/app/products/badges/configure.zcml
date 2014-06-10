@@ -73,6 +73,8 @@
 	<subscriber	factory=".filters._DefaultPrincipalEarnableBadgeFilter"
 				provides=".interfaces.IPrincipalEarnableBadgeFilter"/>
 
+	<subscriber handler=".subscribers._after_transaction_end" />
+	
 	<!-- Workspaces -->
 	<!-- A subscriber for enumeration -->
 	<subscriber factory=".workspaces.BadgesWorkspace"

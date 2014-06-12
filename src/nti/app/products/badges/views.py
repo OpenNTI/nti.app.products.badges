@@ -130,7 +130,7 @@ ALL_BADGES_VIEW = 'AllBadges'
 			 request_method='GET',
 			 context=nti_interfaces.IDataserverFolder,
 			 permission=nauth.ACT_MODERATE)
-class AllBadgedView(object):
+class AllBadgesView(object):
 
 	def __init__(self, request):
 		self.request = request

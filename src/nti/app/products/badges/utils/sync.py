@@ -10,14 +10,8 @@ logger = __import__('logging').getLogger(__name__)
 
 import os
 import sys
-import argparse
-
-from zope.configuration import xmlconfig, config
-from zope.dottedname import resolve as dottedname
 
 from nti.badges.openbadges.utils import scanner, DEFAULT_SECRET
-
-from nti.dataserver.utils import run_with_dataserver
 
 from .. import add_badge
 from .. import add_issuer
@@ -59,6 +53,9 @@ def sync_db(path, update=False, verify=False, **kwargs):
 	return (issuers, badges)
 
 def _create_context(env_dir):
+	from zope.configuration import xmlconfig, config
+	from zope.dottedname import resolve as dottedname
+
 	env_dir = os.path.expanduser(env_dir)
 
 	# find the ds etc directory
@@ -83,6 +80,7 @@ def do_sync(path, update=False, verify=False, verbose=False, **kwargs):
 		print('Badges....', badges)
 
 def process_args(args=None):
+	import argparse
 	arg_parser = argparse.ArgumentParser(description="Sync badges")
 	arg_parser.add_argument('-v', '--verbose', help="Verbose", action='store_true',
 							 dest='verbose')
@@ -112,6 +110,8 @@ def process_args(args=None):
 	env_dir = os.getenv('DATASERVER_DIR')
 	context = _create_context(env_dir)
 	conf_packages = ('nti.appserver',)
+
+	from nti.dataserver.utils import run_with_dataserver
 	run_with_dataserver(environment_dir=env_dir,
 						xmlconfig_packages=conf_packages,
 						verbose=args.verbose,

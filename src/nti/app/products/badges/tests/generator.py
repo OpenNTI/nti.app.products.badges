@@ -62,7 +62,7 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
 		badge_id = random.choice(badge_ids)
 		person_id = random.choice(person_ids)
 		if not database.assertion_exists(badge_id, person_id):
-			database.add_assertion(badge_id, person_id, datetime.now())
+			database.add_assertion(badge_id, person_id, datetime.now(), notify=False)
 			if verbose:
 				print('Badge %s awarded to %s' % (badge_id, person_id))
 

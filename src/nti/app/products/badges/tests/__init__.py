@@ -103,7 +103,6 @@ class NTISampleBadgesApplicationTestLayer(ApplicationTestLayer):
 			generator.generate_db(bm.db, sample_size, sample_size, sample_size)
 			component.provideUtility(bm)
 
-
 	@classmethod
 	def setUp(cls):
 		_change_ds_dir(cls)

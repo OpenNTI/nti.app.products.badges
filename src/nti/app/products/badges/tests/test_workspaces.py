@@ -8,6 +8,8 @@ __docformat__ = "restructuredtext en"
 # pylint: disable=W0212,R0904
 
 from hamcrest import is_
+from hamcrest import none
+from hamcrest import is_not
 from hamcrest import contains
 from hamcrest import has_item
 from hamcrest import has_items
@@ -61,18 +63,21 @@ class TestWorkspaces(ApplicationLayerTest):
 			assert_that( traversal.resource_path( workspace ),
 						 is_(badges_path))
 
-			assert_that( workspace.collections, contains( verifiably_provides( ICollection ),
-														  verifiably_provides( ICollection ),
-														  verifiably_provides( ICollection )))
+			assert_that(workspace.collections, contains(verifiably_provides(ICollection),
+														verifiably_provides(ICollection),
+														verifiably_provides(ICollection),
+														verifiably_provides(ICollection)))
 
 			assert_that(workspace.collections, has_items(has_property('name', 'AllBadges'),
 														 has_property('name', 'EarnedBadges'),
-														 has_property('name', 'EarnableBadges')))
+														 has_property('name', 'EarnableBadges'),
+														 has_property('name', 'Assertions')))
 
 			assert_that( [traversal.resource_path(c) for c in workspace.collections],
 						 has_items(badges_path + '/AllBadges',
-								   badges_path + '/EarnedBadges' ,
-								   badges_path + '/EarnableBadges'))
+								   badges_path + '/EarnedBadges',
+								   badges_path + '/EarnableBadges',
+								   badges_path + '/Assertions'))
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_all_badges(self):
@@ -122,3 +127,26 @@ class TestWorkspaces(ApplicationLayerTest):
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(0))))
+
+	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
+	def test_assertions(self):
+		badge_name = "badge.2"
+		username = 'person.2@nti.com'
+		with mock_dataserver.mock_db_trans(self.ds):
+			user = self._create_user(username=username, external_value={'email':username})
+			uid = get_user_id(user)
+
+		with mock_dataserver.mock_db_trans(self.ds):
+			add_assertion(uid, badge_name)
+
+		earned_badges_path = '/dataserver2/users/person.2%40nti.com/Badges/Assertions'
+		testapp = TestApp(self.app)
+		res = testapp.get(earned_badges_path,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
+		
+		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(1))))
+		item = res.json_body['Items'][0]
+		assert_that(item, has_entry('uid', is_not(none())))
+		assert_that(item, has_entry('href', is_not(none())))
+		

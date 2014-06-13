@@ -44,7 +44,8 @@
 			 provides="nti.badges.interfaces.INTIPerson" />
 
 	<adapter factory=".adapters.tahrir_person_to_user" />
-
+	<adapter factory=".adapters.tahrir_assertion_to_user" />
+	
 	<!-- Decorators -->
 
 	<subscriber factory=".decorators._BadgeLinkFixer"

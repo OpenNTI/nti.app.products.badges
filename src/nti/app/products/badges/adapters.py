@@ -63,6 +63,11 @@ def tahrir_person_to_user(person):
 	# username as 'email' for now
 	return User.get_user(person.email)
 
+@interface.implementer(nti_interfaces.IUser)
+@component.adapter(tahrir_interfaces.IAssertion)
+def tahrir_assertion_to_user(assertion):
+	return nti_interfaces.IUser(assertion.person)
+
 @interface.implementer(badges_interfaces.INTIPerson)
 @component.adapter(nti_interfaces.IUser)
 def user_to_ntiperson(user):

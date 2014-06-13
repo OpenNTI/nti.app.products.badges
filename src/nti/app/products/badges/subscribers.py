@@ -62,7 +62,6 @@ def _after_database_opened_listener(event):
 				else:
 					logger.debug("Issuer (%s,%s) added", issuer.name, issuer.origin)
 
-from nti.badges.tahrir.interfaces import IAssertion
 from nti.badges.openbadges.interfaces import IBadgeClass
 
 from zope.lifecycleevent import IObjectAddedEvent
@@ -123,7 +122,7 @@ class AssertionChange(Change):
 			return acl_from_aces( ace_allowing( creator, ACT_READ ) )
 		return (ACE_DENY_ALL,)
 
-@component.adapter(IAssertion, IObjectAddedEvent)
+@component.adapter(badge_interfaces.IBadgeAssertion, IObjectAddedEvent)
 def _make_assertions_notable_to_target(assertion, event):
 	"""
 	When a badge assertion is recorded, the event is notable
@@ -131,7 +130,7 @@ def _make_assertions_notable_to_target(assertion, event):
 	"""
 	change = AssertionChange(SC_BADGE_EARNED, assertion)
 
-	user = IUser(assertion.person)
+	user = IUser(assertion)
 	# Set a creator...this may not be the best we can do in some cases
 	change.creator = user
 

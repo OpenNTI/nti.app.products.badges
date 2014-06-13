@@ -9,6 +9,7 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 from zope import component
+from zope import interface
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 
 from nti.badges import interfaces as badge_interfaces
@@ -66,7 +67,7 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 
 from zope.lifecycleevent import IObjectAddedEvent
 
-from .interfaces import SC_BADGE_EARNED
+from .interfaces import SC_BADGE_EARNED, IAssertionChange
 
 from nti.dataserver.activitystream_change import Change
 from nti.dataserver.interfaces import IUser
@@ -79,6 +80,7 @@ from nti.appserver.interfaces import IUserActivityStorage
 
 from nti.app.notabledata.interfaces import IUserNotableDataStorage
 
+@interface.implementer(IAssertionChange)
 class AssertionChange(Change):
 	"""
 	Gives some class-level defaults that are useful

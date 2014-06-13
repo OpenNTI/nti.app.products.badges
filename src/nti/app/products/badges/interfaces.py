@@ -14,6 +14,14 @@ from nti.appserver import interfaces as app_interfaces
 
 from nti.app.client_preferences.interfaces import TAG_EXTERNAL_PREFERENCE_GROUP
 
+from nti.dataserver import interfaces as nti_interfaces
+
+class IAssertionChange(nti_interfaces.IStreamChangeEvent,
+					   nti_interfaces.IZContained):
+	"""
+	Interface marker for an Assertion change
+	"""
+
 class IBadgeSettings(interface.Interface):
 	"""
 	The root of the settings tree for badges

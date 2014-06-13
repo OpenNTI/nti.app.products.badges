@@ -37,6 +37,8 @@ from nti.utils import maps
 
 from . import interfaces
 from . import get_all_badges
+from . import OPEN_BADGES_VIEW
+from . import OPEN_ASSERTIONS_VIEW
 
 @interface.implementer(IPathAdapter)
 @component.adapter(nti_interfaces.IUser, IRequest)
@@ -54,8 +56,6 @@ class BadgeAdminPathAdapter(zcontained.Contained):
 		self.context = context
 		self.request = request
 		self.__parent__ = context
-
-OPEN_BADGES_VIEW = 'OpenBadges'
 
 @view_config(route_name='objects.generic.traversal',
 			 name=OPEN_BADGES_VIEW,
@@ -81,8 +81,6 @@ class OpenBadgeView(object):
 			return open_interfaces.IBadgeClass(result)
 
 		raise hexc.HTTPNotFound('Badge not found')
-
-OPEN_ASSERTIONS_VIEW = 'OpenAssertions'
 
 @view_config(route_name='objects.generic.traversal',
 			 name=OPEN_ASSERTIONS_VIEW,

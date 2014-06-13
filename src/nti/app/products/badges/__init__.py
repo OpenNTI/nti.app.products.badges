@@ -16,6 +16,8 @@ from . import interfaces
 from .utils import has_side_effects
 
 BADGES = 'Badges'
+OPEN_BADGES_VIEW = 'OpenBadges'
+OPEN_ASSERTIONS_VIEW = 'OpenAssertions'
 HOSTED_BADGE_IMAGES = 'hosted_badge_images'
 
 def get_user_id(user):

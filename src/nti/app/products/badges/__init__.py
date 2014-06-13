@@ -80,6 +80,10 @@ def get_person_badges(person):
 	manager = component.getUtility(badge_interfaces.IBadgeManager)
 	return manager.get_person_badges(person)
 
+def get_person_assertions(person):
+	manager = component.getUtility(badge_interfaces.IBadgeManager)
+	return manager.get_person_assertions(person)
+
 # assertions
 
 def add_assertion(person, badge):

@@ -17,7 +17,7 @@ from zope.container import contained
 
 from nti.appserver import interfaces as app_interfaces
 
-from nti.badges.openbadges.interfaces import IBadgeClass
+from nti.badges.openbadges.interfaces import IBadgeClass, IBadgeAssertion
 
 from nti.dataserver.datastructures import LastModifiedCopyingUserList
 
@@ -30,6 +30,7 @@ from . import get_user_id
 from . import get_all_badges
 from . import assertion_exists
 from . import get_person_badges
+from . import get_person_assertions
 
 @interface.implementer(interfaces.IBadgesWorkspace)
 class _BadgesWorkspace(contained.Contained):
@@ -45,7 +46,8 @@ class _BadgesWorkspace(contained.Contained):
 	def collections(self):
 		return (AllBadgesCollection(self),
 				EarnableBadgeCollection(self),
-				EarnedBadgeCollection(self))
+				EarnedBadgeCollection(self),
+				AssertionCollection(self))
 
 	def __getitem__(self, key):
 		"Make us traversable to collections."
@@ -149,6 +151,36 @@ class EarnedBadgeCollection(contained.Contained):
 		predicate = interfaces.get_principal_earned_badge_filter(parent.user)
 		person_badges = get_person_badges(uid)
 		container.extend(IBadgeClass(b) for b in person_badges if predicate(b))
+		return container
+
+	def __len__(self):
+		return len(self.container)
+
+@interface.implementer(app_interfaces.IContainerCollection)
+class AssertionCollection(contained.Contained):
+
+	# : Our name, part of our URL.
+	__name__ = 'Assertions'
+	name = alias('__name__', __name__)
+
+	accepts = ()
+
+	def __init__(self, parent):
+		self.__parent__ = parent
+
+	@Lazy
+	def container(self):
+		parent = self.__parent__
+		container = LastModifiedCopyingUserList()
+		container.__parent__ = parent
+		container.__name__ = __name__
+		uid = get_user_id(parent.user)
+		predicate = interfaces.get_principal_earned_badge_filter(parent.user)
+		assertions = get_person_assertions(uid)
+		for assertion in assertions:
+			assertion = IBadgeAssertion(assertion)
+			if predicate(assertion.badge):
+				container.append(assertion)
 		return container
 
 	def __len__(self):

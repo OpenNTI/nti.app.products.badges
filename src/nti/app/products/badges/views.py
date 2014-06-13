@@ -8,6 +8,8 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import urllib
+
 from zope import component
 from zope import interface
 from zope.catalog.interfaces import ICatalog
@@ -69,16 +71,9 @@ class OpenBadgeView(object):
 	def __call__(self):
 		request = self.request
 		
-		splits = request.path_info.split('/')
-		if splits[-1] != OPEN_BADGES_VIEW:
-			badge = splits[-1]
-		else:
-			params = maps.CaseInsensitiveDict(request.params)
-			badge = params.get('badge') or params.get('badge_name') or \
-					params.get('badgeName')
-
+		badge = request.subpath[0] if request.subpath else ''
 		if not badge:
-			raise hexc.HTTPUnprocessableEntity('Badge not specified')
+			raise hexc.HTTPNotFound()
 
 		manager = component.getUtility(badge_interfaces.IBadgeManager)
 		result = manager.get_badge(badge)
@@ -101,26 +96,36 @@ class OpenAssertionsView(object):
 		self.request = request
 
 	def __call__(self):
+		result = None
 		request = self.request
 		params = maps.CaseInsensitiveDict(request.params)
 		username = params.get('user') or params.get('username') or params.get('email')
 		badge = params.get('badge') or params.get('badge_name') or params.get('badgeName')
+		if username and badge:
+			# find user
+			user = User.get_user(username)
+			if user is None:
+				ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
+				results = list(ent_catalog.searchResults(email=(username, username)))
+				user = results[0] if results else None
+			if user is None:
+				raise hexc.HTTPNotFound('User not found')
 
-		user = User.get_user(username)
-		if user is None:
-			ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
-			results = list(ent_catalog.searchResults(email=(username, username)))
-			user = results[0] if results else None
-		if user is None:
-			raise hexc.HTTPNotFound('User not found')
+			# find assertion
+			manager = component.getUtility(badge_interfaces.IBadgeManager)
+			result = manager.get_assertion(user, badge)
+		else:
+			assertion_id = request.subpath[0] if request.subpath else ''
+			if not assertion_id:
+				raise hexc.HTTPNotFound()
+			assertion_id = urllib.unquote(assertion_id)
+			manager = component.getUtility(badge_interfaces.IBadgeManager)
+			result = manager.get_assertion_by_id(assertion_id)
 
-		manager = component.getUtility(badge_interfaces.IBadgeManager)
-		result = manager.get_assertion(user, badge)
 		if result is not None:
 			return open_interfaces.IBadgeAssertion(result)
 
 		raise hexc.HTTPNotFound('Assertion not found')
-
 
 ALL_BADGES_VIEW = 'AllBadges'
 

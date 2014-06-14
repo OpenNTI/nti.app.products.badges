@@ -150,3 +150,12 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(item, has_entry('uid', is_not(none())))
 		assert_that(item, has_entry('href', is_not(none())))
 		
+		assertion_path = item['href']
+		res = testapp.get(assertion_path,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
+		assert_that(res.json_body, has_entry('uid', item['uid']))
+		assert_that(res.json_body, has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.assertion'))
+		assert_that(res.json_body, has_entry(u'image', u'http://nti.com/files/badge_2.png'))
+		assert_that(res.json_body, has_entry(u'recipient',
+											 has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.identityobject')))

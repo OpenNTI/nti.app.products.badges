@@ -68,9 +68,9 @@ def tahrir_person_to_user(person):
 def tahrir_assertion_to_user(assertion):
 	return nti_interfaces.IUser(assertion.person)
 
-@interface.implementer(badges_interfaces.IBadgeClass)
+@interface.implementer(tahrir_interfaces.IBadge)
 @component.adapter(tahrir_interfaces.IAssertion)
-def tahrir_assertion_to_badge(assertion):
+def tahrir_assertion_to_tahrir_badge(assertion):
 	return assertion.badge
 
 @interface.implementer(badges_interfaces.INTIPerson)

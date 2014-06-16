@@ -94,6 +94,10 @@
 			 factory=".views.BadgeAdminPathAdapter"
 			 provides="zope.traversing.interfaces.IPathAdapter" />
 
+	<adapter name="OpenAssertions"
+			 factory=".views.OpenAssertionsPathAdapter"
+			 provides="zope.traversing.interfaces.IPathAdapter" />
+			 
 	<!-- Preferences -->
 
 	<include package="zope.security" file="permissions.zcml"/>

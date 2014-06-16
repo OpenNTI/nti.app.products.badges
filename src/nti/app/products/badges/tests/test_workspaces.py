@@ -12,6 +12,7 @@ from hamcrest import none
 from hamcrest import is_not
 from hamcrest import contains
 from hamcrest import has_item
+from hamcrest import ends_with
 from hamcrest import has_items
 from hamcrest import has_entry
 from hamcrest import has_length
@@ -154,8 +155,10 @@ class TestWorkspaces(ApplicationLayerTest):
 		res = testapp.get(assertion_path,
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
-		assert_that(res.json_body, has_entry('uid', item['uid']))
+
+		uid = item['uid']
+		assert_that(res.json_body, has_entry('uid', uid))
 		assert_that(res.json_body, has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.assertion'))
-		assert_that(res.json_body, has_entry(u'image', u'http://nti.com/files/badge_2.png'))
+		assert_that(res.json_body, has_entry(u'image', ends_with(uid + '/image.png')))
 		assert_that(res.json_body, has_entry(u'recipient',
 											 has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.identityobject')))

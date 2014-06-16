@@ -8,7 +8,10 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import six
 import urllib
+from io import BytesIO
+from urlparse import urljoin
 
 from zope import component
 from zope import interface
@@ -25,6 +28,7 @@ from nti.app.base.abstract_views import AbstractAuthenticatedView
 from nti.appserver.interfaces import IUserService
 
 from nti.badges import interfaces as badge_interfaces
+from nti.badges.openbadges.utils.badgebakery import bake_badge
 from nti.badges.openbadges import interfaces as open_interfaces
 
 from nti.dataserver import authorization as nauth
@@ -33,6 +37,7 @@ from nti.dataserver.authorization_acl import ace_allowing
 from nti.dataserver.authorization_acl import acl_from_aces
 
 from nti.externalization.interfaces import LocatedExternalDict
+from nti.externalization.externalization import to_external_object
 
 from . import interfaces
 from . import get_all_badges
@@ -110,10 +115,43 @@ class OpenAssertionsPathAdapter(zcontained.Contained):
 			 request_method='GET',
 			 context=OpenAssertionsPathAdapter,
 			 permission=nauth.ACT_READ)
-class OpenAssertionsView(AbstractAuthenticatedView):
+class OpenAssertionView(AbstractAuthenticatedView):
 
 	def __call__(self):
 		return self.request.context
+
+@view_config(route_name='objects.generic.traversal',
+			 request_method='GET',
+			 context=open_interfaces.IBadgeAssertion,
+			 permission=nauth.ACT_READ,
+			 name="image.png")
+class OpenAssertionImageView(AbstractAuthenticatedView):
+
+	def __call__(self):
+		external = to_external_object(self.request.context)
+		badge = external.get('badge')
+		if isinstance(badge, six.string_types):
+			badge_url = badge
+		else:
+			badge_url = badge.get('image')
+
+		if not badge_url:
+			raise hexc.HTTPNotFound("Badge url not found")
+
+		response = urllib.urlopen(badge_url)
+		source = BytesIO(response.read())
+		source.seek(0)
+		
+		url = urljoin(self.request.host_url, external['href'])
+		target = BytesIO()
+		bake_badge(source, target, url=url)
+		target.seek(0)
+
+		response = self.request.response
+		response.body_file = target
+		response.content_type = b'image/png; charset=UTF-8'
+		response.content_disposition = b'attachment; filename="image.png"'
+		return response
 
 ALL_BADGES_VIEW = 'AllBadges'
 

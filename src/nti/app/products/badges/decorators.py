@@ -73,6 +73,8 @@ class _BadgeAssertionDecorator(object):
 		ds2 = request.path_info_peek()
 		href = '/%s/%s/%s' % (ds2, OPEN_ASSERTIONS_VIEW, urllib.quote(context.uid))
 		mapping['href'] = href
+		image = "%s/image.png" % urljoin(request.host_url, href)
+		mapping['image'] = image
 
 @component.adapter(nti_interfaces.IUser)
 @interface.implementer(ext_interfaces.IExternalMappingDecorator)

@@ -90,7 +90,7 @@ class AssertionChange(Change):
 	# When we write this out, turn the assertion into the actual
 	# badge
 	def externalObjectTransformationHook(self, assertion):
-		return IBadgeClass(assertion.badge)
+		return IBadgeClass(assertion)
 
 
 	# for ease of rendering

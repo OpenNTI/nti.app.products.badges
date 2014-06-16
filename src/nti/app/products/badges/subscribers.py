@@ -92,7 +92,6 @@ class AssertionChange(Change):
 	def externalObjectTransformationHook(self, assertion):
 		return IBadgeClass(assertion)
 
-
 	# for ease of rendering
 	@property
 	def badge(self):
@@ -108,7 +107,6 @@ class AssertionChange(Change):
 	@property
 	def badge_description(self):
 		return self.badge.description
-
 
 	# Eventually the assertion will have its own ACL,
 	# we want to use that. Right now it has no provider,
@@ -137,12 +135,12 @@ def _make_assertions_notable_to_target(assertion, event):
 	change.creator = user
 
 	storage = IUserNotableDataStorage(user)
-	storage.store_object( change, safe=True, take_ownership=True )
+	storage.store_object(change, safe=True, take_ownership=True)
 
 	# At this point we can now put it in the default container in the
 	# intid-based activity stream for the user...pending ACL work. To
 	# be able to do that smoothly, we define a subclass of Change so
 	# we can easily toggle the values.
-	act_storage = IUserActivityStorage( user, None )
+	act_storage = IUserActivityStorage(user, None)
 	if act_storage is not None:
-		act_storage.addContainedObjectToContainer( change, '')
+		act_storage.addContainedObjectToContainer(change, '')

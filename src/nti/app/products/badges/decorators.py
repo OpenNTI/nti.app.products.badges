@@ -85,6 +85,5 @@ class _UserBadgesLinkDecorator(object):
 		if  req is None or req.authenticated_userid is None or \
 			req.authenticated_userid == context.username:
 			return
-
 		_links = result.setdefault(LINKS, [])
 		_links.append(Link(context, elements=(BADGES,), rel=BADGES))

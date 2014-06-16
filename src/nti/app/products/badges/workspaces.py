@@ -17,6 +17,7 @@ from zope.container import contained
 
 from nti.appserver import interfaces as app_interfaces
 
+from nti.badges import interfaces as badge_interfaces
 from nti.badges.openbadges.interfaces import IBadgeClass, IBadgeAssertion
 
 from nti.dataserver.datastructures import LastModifiedCopyingUserList
@@ -123,7 +124,9 @@ class EarnableBadgeCollection(contained.Contained):
 		for subs in component.subscribers((user,), interfaces.IPrincipalErnableBadges):
 			for badge in subs.iter_badges():
 				if not assertion_exists(user, badge) and predicate(badge):
-					container.append(IBadgeClass(badge))
+					badge = IBadgeClass(badge)
+					interface.alsoProvides(badge, badge_interfaces.IEarnableBadge)
+					container.append(badge)
 		return container
 
 	def __len__(self):
@@ -150,7 +153,11 @@ class EarnedBadgeCollection(contained.Contained):
 		uid = get_user_id(parent.user)
 		predicate = interfaces.get_principal_earned_badge_filter(parent.user)
 		person_badges = get_person_badges(uid)
-		container.extend(IBadgeClass(b) for b in person_badges if predicate(b))
+		for badge in person_badges:
+			if predicate(badge):
+				badge = IBadgeClass(badge)
+				interface.alsoProvides(badge, badge_interfaces.IEarnedBadge)
+				container.append(badge)
 		return container
 
 	def __len__(self):

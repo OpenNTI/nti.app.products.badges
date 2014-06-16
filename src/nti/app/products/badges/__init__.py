@@ -99,3 +99,7 @@ def assertion_exists(user, badge):
 	if manager.assertion_exists(user, badge):
 		return True
 	return False
+
+def get_assertion(user, badge):
+	manager = component.getUtility(badge_interfaces.IBadgeManager)
+	return manager.get_assertion(user, badge)

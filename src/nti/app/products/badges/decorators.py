@@ -20,6 +20,7 @@ from pyramid.threadlocal import get_current_request
 from nti.badges import interfaces as badge_interfaces
 
 from nti.dataserver.links import Link
+from nti.dataserver.users import User
 from nti.dataserver import interfaces as nti_interfaces
 
 from nti.externalization import interfaces as ext_interfaces
@@ -32,6 +33,8 @@ from . import BADGES
 from . import OPEN_BADGES_VIEW
 from . import HOSTED_BADGE_IMAGES
 from . import OPEN_ASSERTIONS_VIEW
+
+from . import get_assertion
 
 @component.adapter(badge_interfaces.IBadgeClass)
 @interface.implementer(ext_interfaces.IExternalObjectDecorator)
@@ -48,15 +51,24 @@ class _BadgeLinkFixer(object):
 		href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, urllib.quote(context.name))
 		mapping['href'] = href
 
+		if badge_interfaces.IEarnedBadge.providedBy(context):
+			username = request.authenticated_userid
+			user = User.get_user(username) if username else None
+			assertion = get_assertion(user, context) if user is not None else None
+			if assertion is not None:
+				# add assertion baked image
+				uid = urllib.quote(assertion.uid)
+				href = '/%s/%s/%s/image.png' % (ds2, OPEN_ASSERTIONS_VIEW, uid)
+				mapping['image'] = urljoin(request.host_url, href)
+				return
+
 		# image url fixer
 		image = mapping.get('image')
 		if not image:
 			return
 		scheme = urlparse(image).scheme
 		if not scheme:
-			# check ext
-			if not image.lower().endswith('.png'):
-				image += '.png'
+			image = image if image.lower().endswith('.png') else image + '.png'
 			image = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), image)
 			mapping['image'] = image
 

@@ -21,10 +21,8 @@ from nti.processlifetime import IAfterDatabaseOpenedEvent
 
 import sqlalchemy.exc
 
-from . import add_issuer
 from . import person_exists
 from . import delete_person
-from . import issuer_exists
 
 @component.adapter(nti_interfaces.IUser, IObjectRemovedEvent)
 def _user_deleted(user, event):
@@ -43,21 +41,22 @@ def _after_database_opened_listener(event):
 		# FIXME: Note that this event is fired for *every* configured
 		# database shard. We have some hacky defense against that below.
 		# It's also fired for every shard in every test case...not ideal
-		issuers = {x[1] for x in component.getUtilitiesFor(tahrir_interfaces.IIssuer)}
-		manager = component.getUtility(badge_interfaces.IBadgeManager)
-		if getattr(manager, '_v_installed', False):
+		manager = component.queryUtility(badge_interfaces.IBadgeManager)
+		if manager is None or getattr(manager, '_v_installed', False):
 			return
+
+		issuers = {x[1] for x in component.getUtilitiesFor(tahrir_interfaces.IIssuer)}
 
 		setattr(manager, str('_v_installed'), True)
 		for issuer in issuers:
-			if not issuer_exists(issuer):
+			if not manager.issuer_exists(issuer):
 				# FIXME: Under some circumstances, we can get an
 				# IntegrityError: ConstraintViolation, even though
 				# this code path only checks name and origin.
 				# So clearly there's some sort of race condition here.
 				# Is our transaction not actually isolated? Or at the wrong level?
 				try:
-					add_issuer(issuer)
+					manager.add_issuer(issuer)
 				except sqlalchemy.exc.IntegrityError:
 					logger.warn("Integrity error", exc_info=True)
 				else:

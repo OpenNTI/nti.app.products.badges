@@ -10,6 +10,7 @@ logger = __import__('logging').getLogger(__name__)
 
 import six
 import urllib
+import requests
 from io import BytesIO
 from urlparse import urljoin
 
@@ -139,8 +140,12 @@ class OpenAssertionImageView(AbstractAuthenticatedView):
 		if not badge_url:
 			raise hexc.HTTPNotFound("Badge url not found")
 
-		response = urllib.urlopen(badge_url)
-		source = BytesIO(response.read())
+		__traceback_info__ = badge_url
+		res = requests.get(badge_url)
+		if res.status_code != 200:
+			raise hexc.HTTPNotFound("Could not find badge image")
+
+		source = BytesIO(res.content)
 		source.seek(0)
 		
 		url = urljoin(self.request.host_url, external['href'])

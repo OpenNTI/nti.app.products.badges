@@ -95,7 +95,7 @@ class OpenAssertionsPathAdapter(zcontained.Contained):
 
 	def __getitem__(self, assertion_id):
 		if not assertion_id:
-			raise KeyError(assertion_id)
+			raise hexc.HTTPNotFound()
 
 		assertion_id = urllib.unquote(assertion_id)
 		manager = component.getUtility(badge_interfaces.IBadgeManager)

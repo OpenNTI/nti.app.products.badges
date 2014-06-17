@@ -65,8 +65,7 @@ class BadgeAdminPathAdapter(zcontained.Contained):
 			 name=OPEN_BADGES_VIEW,
 			 renderer='rest',
 			 request_method='GET',
-			 context=nti_interfaces.IDataserverFolder,
-			 permission=nauth.ACT_READ)
+			 context=nti_interfaces.IDataserverFolder)
 class OpenBadgeView(object):
 
 	def __init__(self, request):
@@ -104,7 +103,7 @@ class OpenAssertionsPathAdapter(zcontained.Contained):
 		if result is not None:
 			result = open_interfaces.IBadgeAssertion(result)
 			result. __acl__ = acl_from_aces(
-								ace_allowing(nti_interfaces.AUTHENTICATED_GROUP_NAME,
+								ace_allowing(nti_interfaces.EVERYONE_USER_NAME,
 											 nauth.ACT_READ))
 			return result
 
@@ -113,9 +112,11 @@ class OpenAssertionsPathAdapter(zcontained.Contained):
 @view_config(route_name='objects.generic.traversal',
 			 renderer='rest',
 			 request_method='GET',
-			 context=OpenAssertionsPathAdapter,
-			 permission=nauth.ACT_READ)
-class OpenAssertionView(AbstractAuthenticatedView):
+			 context=OpenAssertionsPathAdapter)
+class OpenAssertionView(object):
+
+	def __init__(self, request):
+		self.request = request
 
 	def __call__(self):
 		return self.request.context

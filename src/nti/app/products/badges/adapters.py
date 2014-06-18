@@ -59,9 +59,9 @@ from nti.dataserver.users import User
 @interface.implementer(nti_interfaces.IUser)
 @component.adapter(tahrir_interfaces.IPerson)
 def tahrir_person_to_user(person):
-	# We have the strict dependency on using
-	# username as 'email' for now
-	return User.get_user(person.email)
+	__traceback_info__ = person.nickname, person.email
+	result = User.get_user(person.nickname)
+	return result
 
 @interface.implementer(nti_interfaces.IUser)
 @component.adapter(tahrir_interfaces.IAssertion)

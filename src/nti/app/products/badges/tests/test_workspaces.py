@@ -23,7 +23,6 @@ from hamcrest import greater_than_or_equal_to
 from nti.appserver.interfaces import IUserService
 from nti.appserver.interfaces import ICollection
 
-from nti.app.products.badges import get_user_id
 from nti.app.products.badges import add_assertion
 from nti.app.products.badges import interfaces as app_badge_interfaces
 
@@ -98,8 +97,7 @@ class TestWorkspaces(ApplicationLayerTest):
 		badge_name = "badge.1"
 		username = 'person.1@nti.com'
 		with mock_dataserver.mock_db_trans(self.ds):
-			user = self._create_user(username=username, external_value={'email':username})
-			uid = get_user_id(user)
+			self._create_user(username=username, external_value={'email':username})
 
 		earned_badges_path = '/dataserver2/users/person.1%40nti.com/Badges/EarnedBadges'
 		testapp = TestApp(self.app)
@@ -109,7 +107,7 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(0))))
 
 		with mock_dataserver.mock_db_trans(self.ds):
-			add_assertion(uid, badge_name)
+			add_assertion(username, badge_name)
 
 		res = testapp.get(earned_badges_path,
 						  extra_environ=self._make_extra_environ(user=username),
@@ -134,11 +132,10 @@ class TestWorkspaces(ApplicationLayerTest):
 		badge_name = "badge.2"
 		username = 'person.2@nti.com'
 		with mock_dataserver.mock_db_trans(self.ds):
-			user = self._create_user(username=username, external_value={'email':username})
-			uid = get_user_id(user)
+			self._create_user(username=username, external_value={'email':username})
 
 		with mock_dataserver.mock_db_trans(self.ds):
-			add_assertion(uid, badge_name)
+			add_assertion(username, badge_name)
 
 		earned_badges_path = '/dataserver2/users/person.2%40nti.com/Badges/Assertions'
 		testapp = TestApp(self.app)

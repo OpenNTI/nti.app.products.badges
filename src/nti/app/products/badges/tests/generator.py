@@ -50,8 +50,9 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
 
 	for code in xrange(persons):
 		code += 1
-		person_id = database.add_person(email=u'%s.%s@nti.com' % (person_prefix, code),
-										nickname='%s.%s' % (person_prefix, code),
+		email = u'%s.%s@nti.com' % (person_prefix, code)
+		person_id = database.add_person(email=email,
+										nickname=email,
 						   				website='http://nti.com/persons/%s.htm' % code,
 						   				bio=u'I am person %s' % code)
 		person_ids.append(person_id)

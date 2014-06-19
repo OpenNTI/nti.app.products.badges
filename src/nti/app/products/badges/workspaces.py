@@ -27,7 +27,6 @@ from nti.utils.property import alias
 
 from . import BADGES
 from . import interfaces
-from . import get_user_id
 from . import get_all_badges
 from . import assertion_exists
 from . import get_person_badges
@@ -150,9 +149,8 @@ class EarnedBadgeCollection(contained.Contained):
 		container = LastModifiedCopyingUserList()
 		container.__parent__ = parent
 		container.__name__ = __name__
-		uid = get_user_id(parent.user)
 		predicate = interfaces.get_principal_earned_badge_filter(parent.user)
-		person_badges = get_person_badges(uid)
+		person_badges = get_person_badges(parent.user)
 		for badge in person_badges:
 			if predicate(badge):
 				badge = IBadgeClass(badge)
@@ -181,9 +179,8 @@ class AssertionCollection(contained.Contained):
 		container = LastModifiedCopyingUserList()
 		container.__parent__ = parent
 		container.__name__ = __name__
-		uid = get_user_id(parent.user)
 		predicate = interfaces.get_principal_earned_badge_filter(parent.user)
-		assertions = get_person_assertions(uid)
+		assertions = get_person_assertions(parent.user)
 		for assertion in assertions:
 			assertion = IBadgeAssertion(assertion)
 			if predicate(assertion.badge):

@@ -37,7 +37,6 @@ from .utils import sync
 from . import views
 from . import get_badge
 from . import add_person
-from . import get_user_id
 from . import person_exists
 from . import add_assertion
 from . import assertion_exists
@@ -134,9 +133,8 @@ def award(request):
 		add_person(user)
 
 	# add assertion
-	uid = get_user_id(user)
-	if not assertion_exists(uid, badge_name):
-		add_assertion(uid, badge_name)
+	if not assertion_exists(user, badge_name):
+		add_assertion(user, badge_name)
 		logger.info("Badge '%s' added to user %s", badge_name, username)
 
 	return hexc.HTTPNoContent()
@@ -170,12 +168,11 @@ def revoke(request):
 	if badge is None:
 		raise hexc.HTTPNotFound('Badge not found')
 
-	uid = get_user_id(user)
-	if manager.assertion_exists(uid, badge_name):
-		manager.remove_assertion(uid, badge_name)
+	if manager.assertion_exists(user, badge_name):
+		manager.remove_assertion(user, badge_name)
 		logger.info("Badge '%s' revoked from user %s", badge_name, username)
 	else:
-		logger.warn('Assertion (%s,%s) not found', uid, badge_name)
+		logger.warn('Assertion (%s,%s) not found', user, badge_name)
 
 	return hexc.HTTPNoContent()
 
@@ -255,14 +252,13 @@ def bulk_import(input_source, errors=[]):
 			errors.append("Invalid badge '%s' in line %s" % (badge_name, line))
 			continue
 
-		uid = get_user_id(user)
-		if operation == 'award' and not assertion_exists(uid, badge_name):
+		if operation == 'award' and not assertion_exists(user, badge_name):
 			awards += 1
-			add_assertion(uid, badge_name)
+			add_assertion(user, badge_name)
 			logger.info('Badge %s awarded to %s', badge_name, username)
-		elif operation == 'revoke' and assertion_exists(uid, badge_name):
+		elif operation == 'revoke' and assertion_exists(user, badge_name):
 			revokations += 1
-			remove_assertion(uid, badge_name)
+			remove_assertion(user, badge_name)
 			logger.info('Badge %s revoked from %s', badge_name, username)
 
 	return (awards, revokations)

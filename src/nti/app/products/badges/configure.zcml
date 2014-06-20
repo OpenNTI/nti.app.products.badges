@@ -62,6 +62,8 @@
 
 	<!-- Subscribers -->
 
+	<!-- <subscriber handler=".subscribers._user_modified" /> -->
+	
 	<subscriber handler=".subscribers._user_deleted" />
 	<subscriber handler=".subscribers._after_database_opened_listener" />
 	<subscriber handler=".subscribers._make_assertions_notable_to_target" />

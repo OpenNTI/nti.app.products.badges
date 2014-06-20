@@ -273,8 +273,16 @@ def bulk_import_view(request):
 	now = time.time()
 	result = LocatedExternalDict()
 	result['Errors'] = errors = []
-	source = request.POST['source'].file
-	source.seek(0)
+	if request.POST:
+		values = CaseInsensitiveDict(request.POST)
+		source=values['source'].file
+		source.seek(0)
+	else:
+		values = simplejson.loads(unicode(request.body, request.charset))
+		values = CaseInsensitiveDict(values)
+		source = os.path.expanduser(values['source'])
+		source = open(source, "r")
+
 	awards, revokations = bulk_import(source, errors)
 	result['Awards'] = awards
 	result['Revokations'] = revokations

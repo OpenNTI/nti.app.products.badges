@@ -44,10 +44,14 @@ class _BadgesWorkspace(contained.Contained):
 
 	@Lazy
 	def collections(self):
-		return (AllBadgesCollection(self),
-				EarnableBadgeCollection(self),
-				EarnedBadgeCollection(self),
-				AssertionCollection(self))
+		# If there is no badge manager for this site,
+		# don't even try to pretend we have collections
+		if component.queryUtility(badge_interfaces.IBadgeManager) is not None:
+			return (AllBadgesCollection(self),
+					EarnableBadgeCollection(self),
+					EarnedBadgeCollection(self),
+					AssertionCollection(self))
+		return ()
 
 	def __getitem__(self, key):
 		"Make us traversable to collections."

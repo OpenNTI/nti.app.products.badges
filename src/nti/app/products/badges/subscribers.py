@@ -21,7 +21,7 @@ from nti.badges.tahrir import interfaces as tahrir_interfaces
 
 from nti.dataserver import interfaces as nti_interfaces
 
-from nti.processlifetime import IAfterDatabaseOpenedEvent
+from nti.processlifetime import IApplicationTransactionOpenedEvent
 
 import sqlalchemy.exc
 
@@ -48,39 +48,33 @@ def _user_modified(user, event):
 		if email_changed:
 			# TODO Update person
 			pass
-		
-@component.adapter(IAfterDatabaseOpenedEvent)
+
+@component.adapter(IApplicationTransactionOpenedEvent)
 def _after_database_opened_listener(event):
 	logger.info("Adding registered tahrir issuers")
 
-	import transaction
-	with transaction.manager:
-		# TODO: Should probably defer this until needed
-		# FIXME: It's wrong to be trying to control our own transaction here,
-		# that will fail at startup under certain scenarios.
-		# FIXME: Note that this event is fired for *every* configured
-		# database shard. We have some hacky defense against that below.
-		# It's also fired for every shard in every test case...not ideal
-		manager = component.queryUtility(badge_interfaces.IBadgeManager)
-		if manager is None or getattr(manager, '_v_installed', False):
-			return
 
-		issuers = {x[1] for x in component.getUtilitiesFor(tahrir_interfaces.IIssuer)}
+	# TODO: Should probably defer this until needed
+	manager = component.queryUtility(badge_interfaces.IBadgeManager)
+	if manager is None or getattr(manager, '_v_installed', False):
+		return
 
-		setattr(manager, str('_v_installed'), True)
-		for issuer in issuers:
+	issuers = {x[1] for x in component.getUtilitiesFor(tahrir_interfaces.IIssuer)}
+
+	setattr(manager, str('_v_installed'), True)
+	for issuer in issuers:
+		# FIXME: Under some circumstances, we can get an
+		# IntegrityError: ConstraintViolation, even though
+		# this code path only checks name and origin (even on the exists call!).
+		# So clearly there's some sort of race condition here.
+		# Is our transaction not actually isolated? Or at the wrong level?
+		try:
 			if not manager.issuer_exists(issuer):
-				# FIXME: Under some circumstances, we can get an
-				# IntegrityError: ConstraintViolation, even though
-				# this code path only checks name and origin.
-				# So clearly there's some sort of race condition here.
-				# Is our transaction not actually isolated? Or at the wrong level?
-				try:
-					manager.add_issuer(issuer)
-				except sqlalchemy.exc.IntegrityError:
-					logger.warn("Integrity error", exc_info=True)
-				else:
-					logger.debug("Issuer (%s,%s) added", issuer.name, issuer.origin)
+				manager.add_issuer(issuer)
+		except (sqlalchemy.exc.IntegrityError,sqlalchemy.exc.InvalidRequestError):
+			logger.warn("Integrity error", exc_info=True)
+		else:
+			logger.debug("Issuer (%s,%s) added", issuer.name, issuer.origin)
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 

@@ -6,7 +6,10 @@ VERSION = '0.0.0'
 entry_points = {
     'console_scripts': [
         "nti_badge_sync_db = nti.app.products.badges.utils.sync:main",
-    ]
+    ],
+    "z3c.autoinclude.plugin": [
+		'target = nti.app.products',
+	],
 }
 
 import platform

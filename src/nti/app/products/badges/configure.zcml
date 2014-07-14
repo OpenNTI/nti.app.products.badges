@@ -5,7 +5,7 @@
 			xmlns:ext="http://nextthought.com/ntp/ext"
 			xmlns:sp="http://nextthought.com/ntp/securitypolicy"
 			xmlns:zcml="http://namespaces.zope.org/zcml"
-			xmlns:z3c="http://namespaces.zope.org/z3c" 
+			xmlns:z3c="http://namespaces.zope.org/z3c"
 			i18n_domain="zope" >
 
 
@@ -24,6 +24,7 @@
 	<include package="zope.viewlet" />
 
 	<include package="nti.contentfragments" />
+	<include package="nti.badges" />
 
 	<!-- Generations -->
 
@@ -48,7 +49,7 @@
 	<adapter factory=".adapters.tahrir_person_to_user" />
 	<adapter factory=".adapters.tahrir_assertion_to_user" />
 	<adapter factory=".adapters.tahrir_assertion_to_badge" />
-	
+
 	<!-- Decorators -->
 
 	<subscriber factory=".decorators._BadgeLinkFixer"
@@ -65,7 +66,7 @@
 	<!-- Subscribers -->
 
 	<!-- <subscriber handler=".subscribers._user_modified" /> -->
-	
+
 	<subscriber handler=".subscribers._user_deleted" />
 	<subscriber handler=".subscribers._after_database_opened_listener" />
 	<subscriber handler=".subscribers._make_assertions_notable_to_target" />
@@ -101,7 +102,7 @@
 	<adapter name="OpenAssertions"
 			 factory=".views.OpenAssertionsPathAdapter"
 			 provides="zope.traversing.interfaces.IPathAdapter" />
-			 
+
 	<!-- Preferences -->
 
 	<include package="zope.security" file="permissions.zcml"/>
@@ -115,8 +116,8 @@
 		category="true" />
 
 	<!-- Email notifications -->
-	<!-- 
-		Temporarily disabled in production per Grey 
+	<!--
+		Temporarily disabled in production per Grey
 		to avoid timing concerns.
 	-->
 	<browser:viewlet
@@ -129,7 +130,7 @@
 		class="nti.app.pushnotifications.digest_email.DigestEmailNotableViewletBase"
 		zcml:condition="have testmode" />
 
-	<adapter factory=".adapters._AssertionChangeEventClassifier" 
+	<adapter factory=".adapters._AssertionChangeEventClassifier"
 		zcml:condition="have testmode" />
 
 

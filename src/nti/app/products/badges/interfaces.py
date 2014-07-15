@@ -10,14 +10,14 @@ from zope import component
 from zope import interface
 from zope.interface.interface import taggedValue
 
-from nti.appserver import interfaces as app_interfaces
+from nti.appserver.interfaces import IWorkspace
 
 from nti.app.client_preferences.interfaces import TAG_EXTERNAL_PREFERENCE_GROUP
 
-from nti.dataserver import interfaces as nti_interfaces
+from nti.dataserver.interfaces import IZContained
+from nti.dataserver.interfaces import IStreamChangeEvent
 
-class IAssertionChange(nti_interfaces.IStreamChangeEvent,
-					   nti_interfaces.IZContained):
+class IAssertionChange(IStreamChangeEvent, IZContained):
 	"""
 	Interface marker for an Assertion change
 	"""
@@ -28,7 +28,7 @@ class IBadgeSettings(interface.Interface):
 	"""
 	taggedValue(TAG_EXTERNAL_PREFERENCE_GROUP, 'write')
 
-class IBadgesWorkspace(app_interfaces.IWorkspace):
+class IBadgesWorkspace(IWorkspace):
 	"""
 	A workspace containing data for badges.
 	"""

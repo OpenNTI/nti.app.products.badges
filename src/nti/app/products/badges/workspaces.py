@@ -15,10 +15,14 @@ from zope import interface
 from zope import component
 from zope.container import contained
 
-from nti.appserver import interfaces as app_interfaces
+from nti.appserver.interfaces import IUserService
+from nti.appserver.interfaces import IContainerCollection
 
-from nti.badges import interfaces as badge_interfaces
-from nti.badges.openbadges.interfaces import IBadgeClass, IBadgeAssertion
+from nti.badges.interfaces import IEarnedBadge
+from nti.badges.interfaces import IBadgeManager
+from nti.badges.interfaces import IEarnableBadge
+from nti.badges.openbadges.interfaces import IBadgeClass
+from nti.badges.openbadges.interfaces import IBadgeAssertion
 
 from nti.dataserver.datastructures import LastModifiedCopyingUserList
 
@@ -26,13 +30,18 @@ from nti.utils.property import Lazy
 from nti.utils.property import alias
 
 from . import BADGES
-from . import interfaces
 from . import get_all_badges
 from . import assertion_exists
 from . import get_person_badges
 from . import get_person_assertions
 
-@interface.implementer(interfaces.IBadgesWorkspace)
+from .interfaces import IBadgesWorkspace
+from .interfaces import IPrincipalErnableBadges
+from .interfaces import get_principal_badge_filter
+from .interfaces import get_principal_earned_badge_filter
+from .interfaces import get_principal_earnable_badge_filter
+
+@interface.implementer(IBadgesWorkspace)
 class _BadgesWorkspace(contained.Contained):
 
 	__name__ = BADGES
@@ -46,7 +55,7 @@ class _BadgesWorkspace(contained.Contained):
 	def collections(self):
 		# If there is no badge manager for this site,
 		# don't even try to pretend we have collections
-		if component.queryUtility(badge_interfaces.IBadgeManager) is not None:
+		if component.queryUtility(IBadgeManager) is not None:
 			return (AllBadgesCollection(self),
 					EarnableBadgeCollection(self),
 					EarnedBadgeCollection(self),
@@ -63,8 +72,8 @@ class _BadgesWorkspace(contained.Contained):
 	def __len__(self):
 		return len(self.collections)
 
-@interface.implementer(interfaces.IBadgesWorkspace)
-@component.adapter(app_interfaces.IUserService)
+@interface.implementer(IBadgesWorkspace)
+@component.adapter(IUserService)
 def BadgesWorkspace(user_service):
 	"""
 	The badges for a user reside at the path ``/users/$ME/Badges``.
@@ -73,7 +82,7 @@ def BadgesWorkspace(user_service):
 	workspace.__parent__ = workspace.user
 	return workspace
 
-@interface.implementer(app_interfaces.IContainerCollection)
+@interface.implementer(IContainerCollection)
 class AllBadgesCollection(contained.Contained):
 
 	#: Our name, part of our URL.
@@ -92,7 +101,7 @@ class AllBadgesCollection(contained.Contained):
 		container.__parent__ = parent
 		container.__name__ = __name__
 		all_badges = get_all_badges()
-		predicate = interfaces.get_principal_badge_filter(parent.user)
+		predicate = get_principal_badge_filter(parent.user)
 		container.extend(IBadgeClass(b) for b in all_badges if predicate(b))
 		return container
 
@@ -104,7 +113,7 @@ class AllBadgesCollection(contained.Contained):
 	def __len__(self):
 		return 1
 
-@interface.implementer(app_interfaces.IContainerCollection)
+@interface.implementer(IContainerCollection)
 class EarnableBadgeCollection(contained.Contained):
 
 	# : Our name, part of our URL.
@@ -123,19 +132,19 @@ class EarnableBadgeCollection(contained.Contained):
 		container = LastModifiedCopyingUserList()
 		container.__parent__ = parent
 		container.__name__ = __name__
-		predicate = interfaces.get_principal_earnable_badge_filter(parent.user)
-		for subs in component.subscribers((user,), interfaces.IPrincipalErnableBadges):
+		predicate = get_principal_earnable_badge_filter(parent.user)
+		for subs in component.subscribers((user,), IPrincipalErnableBadges):
 			for badge in subs.iter_badges():
 				if not assertion_exists(user, badge) and predicate(badge):
 					badge = IBadgeClass(badge)
-					interface.alsoProvides(badge, badge_interfaces.IEarnableBadge)
+					interface.alsoProvides(badge, IEarnableBadge)
 					container.append(badge)
 		return container
 
 	def __len__(self):
 		return len(self.container)
 
-@interface.implementer(app_interfaces.IContainerCollection)
+@interface.implementer(IContainerCollection)
 class EarnedBadgeCollection(contained.Contained):
 
 	# : Our name, part of our URL.
@@ -153,19 +162,19 @@ class EarnedBadgeCollection(contained.Contained):
 		container = LastModifiedCopyingUserList()
 		container.__parent__ = parent
 		container.__name__ = __name__
-		predicate = interfaces.get_principal_earned_badge_filter(parent.user)
+		predicate = get_principal_earned_badge_filter(parent.user)
 		person_badges = get_person_badges(parent.user)
 		for badge in person_badges:
 			if predicate(badge):
 				badge = IBadgeClass(badge)
-				interface.alsoProvides(badge, badge_interfaces.IEarnedBadge)
+				interface.alsoProvides(badge, IEarnedBadge)
 				container.append(badge)
 		return container
 
 	def __len__(self):
 		return len(self.container)
 
-@interface.implementer(app_interfaces.IContainerCollection)
+@interface.implementer(IContainerCollection)
 class AssertionCollection(contained.Contained):
 
 	# : Our name, part of our URL.
@@ -183,7 +192,7 @@ class AssertionCollection(contained.Contained):
 		container = LastModifiedCopyingUserList()
 		container.__parent__ = parent
 		container.__name__ = __name__
-		predicate = interfaces.get_principal_earned_badge_filter(parent.user)
+		predicate = get_principal_earned_badge_filter(parent.user)
 		assertions = get_person_assertions(parent.user)
 		for assertion in assertions:
 			assertion = IBadgeAssertion(assertion)

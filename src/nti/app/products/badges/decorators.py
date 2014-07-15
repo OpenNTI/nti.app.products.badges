@@ -17,15 +17,18 @@ from zope import interface
 
 from pyramid.threadlocal import get_current_request
 
+from nti.badges.interfaces import IBadgeClass
+from nti.badges.interfaces import IBadgeAssertion
 from nti.badges import interfaces as badge_interfaces
 
 from nti.dataserver.links import Link
 from nti.dataserver.users import User
-from nti.dataserver import interfaces as nti_interfaces
+from nti.dataserver.interfaces import IUser
 
-from nti.externalization import interfaces as ext_interfaces
 from nti.externalization.singleton import SingletonDecorator
 from nti.externalization.interfaces import StandardExternalFields
+from nti.externalization.interfaces import IExternalObjectDecorator
+from nti.externalization.interfaces import IExternalMappingDecorator
 
 LINKS = StandardExternalFields.LINKS
 
@@ -36,8 +39,8 @@ from . import OPEN_ASSERTIONS_VIEW
 
 from . import get_assertion
 
-@component.adapter(badge_interfaces.IBadgeClass)
-@interface.implementer(ext_interfaces.IExternalObjectDecorator)
+@component.adapter(IBadgeClass)
+@interface.implementer(IExternalObjectDecorator)
 class _BadgeLinkFixer(object):
 
 	__metaclass__ = SingletonDecorator
@@ -72,8 +75,8 @@ class _BadgeLinkFixer(object):
 			image = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), image)
 			mapping['image'] = image
 
-@component.adapter(badge_interfaces.IBadgeAssertion)
-@interface.implementer(ext_interfaces.IExternalObjectDecorator)
+@component.adapter(IBadgeAssertion)
+@interface.implementer(IExternalObjectDecorator)
 class _BadgeAssertionDecorator(object):
 
 	__metaclass__ = SingletonDecorator
@@ -88,8 +91,8 @@ class _BadgeAssertionDecorator(object):
 		image = "%s/image.png" % urljoin(request.host_url, href)
 		mapping['image'] = image
 
-@component.adapter(nti_interfaces.IUser)
-@interface.implementer(ext_interfaces.IExternalMappingDecorator)
+@component.adapter(IUser)
+@interface.implementer(IExternalMappingDecorator)
 class _UserBadgesLinkDecorator(object):
 
 	__metaclass__ = SingletonDecorator

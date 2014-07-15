@@ -11,12 +11,14 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
-from nti.dataserver import interfaces as nti_interfaces
+from nti.dataserver.interfaces import IUser
 
-from . import interfaces
+from .interfaces import IPrincipalBadgeFilter
+from .interfaces import IPrincipalEarnedBadgeFilter
+from .interfaces import IPrincipalEarnableBadgeFilter
 
-@component.adapter(nti_interfaces.IUser)
-@interface.implementer(interfaces.IPrincipalBadgeFilter)
+@component.adapter(IUser)
+@interface.implementer(IPrincipalBadgeFilter)
 class _DefaultPrincipalBadgeFilter(object):
 
 	__slots__ = ()
@@ -27,8 +29,8 @@ class _DefaultPrincipalBadgeFilter(object):
 	def allow_badge(self, user, badge):
 		return True
 
-@component.adapter(nti_interfaces.IUser)
-@interface.implementer(interfaces.IPrincipalEarnedBadgeFilter)
+@component.adapter(IUser)
+@interface.implementer(IPrincipalEarnedBadgeFilter)
 class _DefaultPrincipalEarnedBadgeFilter(object):
 
 	__slots__ = ()
@@ -39,8 +41,8 @@ class _DefaultPrincipalEarnedBadgeFilter(object):
 	def allow_badge(self, user, badge):
 		return True
 
-@component.adapter(nti_interfaces.IUser)
-@interface.implementer(interfaces.IPrincipalEarnableBadgeFilter)
+@component.adapter(IUser)
+@interface.implementer(IPrincipalEarnableBadgeFilter)
 class _DefaultPrincipalEarnableBadgeFilter(object):
 
 	__slots__ = ()

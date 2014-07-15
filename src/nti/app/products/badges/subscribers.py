@@ -16,14 +16,16 @@ from zope.lifecycleevent.interfaces import IAttributes
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 from zope.lifecycleevent.interfaces import IObjectModifiedEvent
 
-from nti.badges import interfaces as badge_interfaces
-from nti.badges.tahrir import interfaces as tahrir_interfaces
+import sqlalchemy.exc
+
+from nti.badges.interfaces import IBadgeManager
+from nti.badges.interfaces import IBadgeAssertion
+
+from nti.badges.tahrir.interfaces import IIssuer
 
 from nti.dataserver import interfaces as nti_interfaces
 
 from nti.processlifetime import IApplicationTransactionOpenedEvent
-
-import sqlalchemy.exc
 
 from . import person_exists
 from . import delete_person
@@ -55,11 +57,11 @@ def _after_database_opened_listener(event):
 
 
 	# TODO: Should probably defer this until needed
-	manager = component.queryUtility(badge_interfaces.IBadgeManager)
+	manager = component.queryUtility(IBadgeManager)
 	if manager is None or getattr(manager, '_v_installed', False):
 		return
 
-	issuers = {x[1] for x in component.getUtilitiesFor(tahrir_interfaces.IIssuer)}
+	issuers = {x[1] for x in component.getUtilitiesFor(IIssuer)}
 
 	setattr(manager, str('_v_installed'), True)
 	for issuer in issuers:
@@ -135,7 +137,7 @@ class AssertionChange(Change):
 			return acl_from_aces( ace_allowing( creator, ACT_READ ) )
 		return (ACE_DENY_ALL,)
 
-@component.adapter(badge_interfaces.IBadgeAssertion, IObjectAddedEvent)
+@component.adapter(IBadgeAssertion, IObjectAddedEvent)
 def _make_assertions_notable_to_target(assertion, event):
 	"""
 	When a badge assertion is recorded, the event is notable

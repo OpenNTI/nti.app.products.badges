@@ -31,8 +31,6 @@ def do_evolve(dscontext):
 	manager = component.getUtility(ITahrirBadgeManager)
 	mc = MigrationContext.configure(manager.engine.connect())
 	op = Operations(mc)
-	
-	sa.Table('badges', mc, auto_load=True)
 	op.add_column("badges", sa.Column('stl', sa.Unicode(128)))
 
 def evolve(context):

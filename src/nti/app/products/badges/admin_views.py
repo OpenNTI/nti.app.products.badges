@@ -11,7 +11,6 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 import os
-import six
 import time
 import simplejson
 
@@ -21,23 +20,22 @@ from zope.catalog.interfaces import ICatalog
 from pyramid.view import view_config
 from pyramid import httpexceptions as hexc
 
+from nti.app.base.abstract_views import AbstractAuthenticatedView
+from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
+
 from nti.badges.interfaces import IBadgeManager
 
 from nti.dataserver.users import User
 from nti.dataserver import authorization as nauth
 from nti.dataserver.users import index as user_index
 
-from nti.dataserver.interfaces import IUser
-from nti.dataserver.interfaces import IDataserver
-from nti.dataserver.interfaces import IShardLayout
-
 from nti.externalization.interfaces import LocatedExternalDict
 
 from nti.utils.maps import CaseInsensitiveDict
 
 from .utils import sync
+from .views import BadgeAdminPathAdapter
 
-from . import views
 from . import get_badge
 from . import add_person
 from . import person_exists
@@ -45,181 +43,145 @@ from . import add_assertion
 from . import assertion_exists
 from . import remove_assertion
 
-def _make_min_max_btree_range(search_term):
-	min_inclusive = search_term  # start here
-	max_exclusive = search_term[0:-1] + unichr(ord(search_term[-1]) + 1)
-	return min_inclusive, max_exclusive
-
-def username_search(search_term):
-	min_inclusive, max_exclusive = _make_min_max_btree_range(search_term)
-	dataserver = component.getUtility(IDataserver)
-	_users = IShardLayout(dataserver).users_folder
-	usernames = list(_users.iterkeys(min_inclusive, max_exclusive, excludemax=True))
-	return usernames
-
-def readInput(request):
-	body = request.body
-	result = CaseInsensitiveDict()
-	if body:
-		try:
-			values = simplejson.loads(unicode(body, request.charset))
-		except UnicodeError:
-			values = simplejson.loads(unicode(body, 'iso-8859-1'))
-		result.update(**values)
-	return result
-
-@view_config(route_name='objects.generic.traversal',
-			 name='create_persons',
-			 renderer='rest',
-			 request_method='POST',
-			 context=views.BadgeAdminPathAdapter,
-			 permission=nauth.ACT_MODERATE)
-def create_persons(request):
-	values = readInput(request)
-	usernames = values.get('usernames')
-	term = values.get('term', values.get('search', None))
-	if term:
-		usernames = username_search(term)
-	elif usernames and isinstance(usernames, six.string_types):
-		usernames = usernames.split(',')
-	else:
-		dataserver = component.getUtility(IDataserver)
-		_users = IShardLayout(dataserver).users_folder
-		usernames = _users.keys()
-
-	total = 0
-	now = time.time()
-	for username in usernames:
-		user = User.get_user(username.lower())
-		if not user or not IUser.providedBy(user):
-			continue
-		if not person_exists(user):
-			if add_person(user):
-				total += 1
-
-	result = LocatedExternalDict()
-	result['Total'] = total
-	result['Elapsed'] = time.time() - now
-	return result
-
 @view_config(route_name='objects.generic.traversal',
 			 name='award',
 			 renderer='rest',
 			 request_method='POST',
-			 context=views.BadgeAdminPathAdapter,
+			 context=BadgeAdminPathAdapter,
 			 permission=nauth.ACT_MODERATE)
-def award(request):
-	values = readInput(request)
-	username = values.get('username', request.authenticated_userid)
-	user = User.get_user(username)
-	if user is None:
-		ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
-		results = list(ent_catalog.searchResults(email=(username, username)))
-		user = results[0] if results else None
-	if user is None:
-		raise hexc.HTTPNotFound('User not found')
+class AwardBadgeView(AbstractAuthenticatedView, ModeledContentUploadRequestUtilsMixin):
 	
-	for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
-		badge_name = values.get(name)
-		if badge_name:
-			break
-	if not badge_name:
-		raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
+	def readInput(self):
+		values = super(AwardBadgeView, self).readInput()
+		result = CaseInsensitiveDict(values)
+		return result
 
-	badge = get_badge(badge_name)
-	if badge is None:
-		raise hexc.HTTPNotFound('Badge not found')
-
-	# add person if required
-	# an adapter must exists to convert the user to a person
-	if not person_exists(user):
-		add_person(user)
-
-	# add assertion
-	if not assertion_exists(user, badge_name):
-		add_assertion(user, badge_name)
-		logger.info("Badge '%s' added to user %s", badge_name, username)
-
-	return hexc.HTTPNoContent()
+	def __call__(self):
+		vls = self.readInput()
+		username = vls.get('username') or vls.get('email') or self.remoteUser.username
+		user = User.get_user(username)
+		if user is None:
+			ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
+			results = list(ent_catalog.searchResults(email=(username, username)))
+			user = results[0] if results else None
+		if user is None:
+			raise hexc.HTTPUnprocessableEntity('User not found')
+		
+		for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
+			badge_name = vls.get(name)
+			if badge_name:
+				break
+		if not badge_name:
+			raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
+	
+		badge = get_badge(badge_name)
+		if badge is None:
+			raise hexc.HTTPNotFound('Badge not found')
+	
+		# add person if required
+		# an adapter must exists to convert the user to a person
+		if not person_exists(user):
+			add_person(user)
+	
+		# add assertion
+		if not assertion_exists(user, badge_name):
+			add_assertion(user, badge_name)
+			logger.info("Badge '%s' added to user %s", badge_name, username)
+	
+		return hexc.HTTPNoContent()
 
 @view_config(route_name='objects.generic.traversal',
 			 name='revoke',
 			 renderer='rest',
 			 request_method='POST',
-			 context=views.BadgeAdminPathAdapter,
+			 context=BadgeAdminPathAdapter,
 			 permission=nauth.ACT_MODERATE)
-def revoke(request):
-	values = readInput(request)
-	username = values.get('username', request.authenticated_userid)
-	user = User.get_user(username)
-	if user is None:
-		ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
-		results = list(ent_catalog.searchResults(email=(username, username)))
-		user = results[0] if results else None
-	if user is None:
-		raise hexc.HTTPNotFound('User not found')
-
-	for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
-		badge_name = values.get(name)
-		if badge_name:
-			break
-	if not badge_name:
-		raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
-
-	manager = component.getUtility(IBadgeManager)
-	badge = manager.get_badge(badge_name)
-	if badge is None:
-		raise hexc.HTTPNotFound('Badge not found')
-
-	if manager.assertion_exists(user, badge_name):
-		manager.remove_assertion(user, badge_name)
-		logger.info("Badge '%s' revoked from user %s", badge_name, username)
-	else:
-		logger.warn('Assertion (%s,%s) not found', user, badge_name)
-
-	return hexc.HTTPNoContent()
+class RevokeBadgeView(AbstractAuthenticatedView, ModeledContentUploadRequestUtilsMixin):
+	
+	def readInput(self):
+		values = super(RevokeBadgeView, self).readInput()
+		result = CaseInsensitiveDict(values)
+		return result
+	
+	def __call__(self):
+		vls = self.readInput()
+		username = vls.get('username') or vls.get('email') or self.remoteUser.username
+		user = User.get_user(username)
+		if user is None:
+			ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
+			results = list(ent_catalog.searchResults(email=(username, username)))
+			user = results[0] if results else None
+		if user is None:
+			raise hexc.HTTPNotFound('User not found')
+	
+		for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
+			badge_name = vls.get(name)
+			if badge_name:
+				break
+		if not badge_name:
+			raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
+	
+		manager = component.getUtility(IBadgeManager)
+		badge = manager.get_badge(badge_name)
+		if badge is None:
+			raise hexc.HTTPNotFound('Badge not found')
+	
+		if manager.assertion_exists(user, badge_name):
+			manager.remove_assertion(user, badge_name)
+			logger.info("Badge '%s' revoked from user %s", badge_name, username)
+		else:
+			logger.warn('Assertion (%s,%s) not found', user, badge_name)
+	
+		return hexc.HTTPNoContent()
 
 @view_config(route_name='objects.generic.traversal',
 			 name='sync_db',
 			 renderer='rest',
 			 request_method='POST',
-			 context=views.BadgeAdminPathAdapter,
+			 context=BadgeAdminPathAdapter,
 			 permission=nauth.ACT_MODERATE)
-def sync_db(request):
-	values = readInput(request)
-
-	# get badge directory
-	for name in ('directory', 'dir', 'path', 'hosted_badge_images'):
-		directory = values.get(name)
-		if directory:
-			break
-
-	if not directory:
-		directory = os.getenv('HOSTED_BADGE_IMAGES_DIR')
-
-	if not directory or not os.path.exists(directory) or not os.path.isdir(directory):
-		raise hexc.HTTPNotFound('Directory not found')
-
-	# update badges
-	update = values.get('update') or u''
-	update = str(update).lower() in ('1', 'true', 't', 'yes', 'y', 'on')
-
-	# verify object
-	verify = values.get('verify') or u''
-	verify = str(verify).lower() in ('1', 'true', 't', 'yes', 'y', 'on')
-
-	secret = values.get('secret')
-	now = time.time()
-
-	# sync database
-	issuers, badges = sync.sync_db(directory, update=update, verify=verify, secret=secret)
-
-	# return
-	result = LocatedExternalDict()
-	result['Badges'] = badges
-	result['Issuers'] = issuers
-	result['Elapsed'] = time.time() - now
-	return result
+class SyncDbView(AbstractAuthenticatedView, ModeledContentUploadRequestUtilsMixin):
+	
+	def readInput(self):
+		values = super(SyncDbView, self).readInput()
+		result = CaseInsensitiveDict(values)
+		return result
+	
+	def __call__(self):
+		values = self.readInput()
+	
+		# get badge directory
+		for name in ('directory', 'dir', 'path', 'hosted_badge_images'):
+			directory = values.get(name)
+			if directory:
+				break
+	
+		if not directory:
+			directory = os.getenv('HOSTED_BADGE_IMAGES_DIR')
+	
+		if not directory or not os.path.exists(directory) or not os.path.isdir(directory):
+			raise hexc.HTTPNotFound('Directory not found')
+	
+		# update badges
+		update = values.get('update') or u''
+		update = str(update).lower() in ('1', 'true', 't', 'yes', 'y', 'on')
+	
+		# verify object
+		verify = values.get('verify') or u''
+		verify = str(verify).lower() in ('1', 'true', 't', 'yes', 'y', 'on')
+	
+		secret = values.get('secret')
+		now = time.time()
+	
+		# sync database
+		issuers, badges = sync.sync_db(directory, update=update, verify=verify, secret=secret)
+	
+		# return
+		result = LocatedExternalDict()
+		result['Badges'] = badges
+		result['Issuers'] = issuers
+		result['Elapsed'] = time.time() - now
+		return result
 
 def bulk_import(input_source, errors=[]):
 	ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
@@ -270,24 +232,27 @@ def bulk_import(input_source, errors=[]):
 			 name='bulk_import',
 			 renderer='rest',
 			 request_method='POST',
-			 context=views.BadgeAdminPathAdapter,
+			 context=BadgeAdminPathAdapter,
 			 permission=nauth.ACT_MODERATE)
-def bulk_import_view(request):
-	now = time.time()
-	result = LocatedExternalDict()
-	result['Errors'] = errors = []
-	if request.POST:
-		values = CaseInsensitiveDict(request.POST)
-		source=values['source'].file
-		source.seek(0)
-	else:
-		values = simplejson.loads(unicode(request.body, request.charset))
-		values = CaseInsensitiveDict(values)
-		source = os.path.expanduser(values['source'])
-		source = open(source, "r")
-
-	awards, revokations = bulk_import(source, errors)
-	result['Awards'] = awards
-	result['Revokations'] = revokations
-	result['Elapsed'] = time.time() - now
-	return result
+class BulkImportView(AbstractAuthenticatedView):
+	
+	def __call__(self):
+		now = time.time()
+		request = self.request
+		result = LocatedExternalDict()
+		result['Errors'] = errors = []
+		if request.POST:
+			values = CaseInsensitiveDict(request.POST)
+			source=values['source'].file
+			source.seek(0)
+		else:
+			values = simplejson.loads(unicode(request.body, request.charset))
+			values = CaseInsensitiveDict(values)
+			source = os.path.expanduser(values['source'])
+			source = open(source, "r")
+	
+		awards, revokations = bulk_import(source, errors)
+		result['Awards'] = awards
+		result['Revokations'] = revokations
+		result['Elapsed'] = time.time() - now
+		return result

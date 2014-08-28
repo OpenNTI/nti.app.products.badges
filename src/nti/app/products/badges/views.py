@@ -16,8 +16,7 @@ from urlparse import urljoin
 
 from zope import component
 from zope import interface
-from zope.location.interfaces import IContained
-from zope.container import contained as zcontained
+from zope.container.contained import Contained
 from zope.traversing.interfaces import IPathAdapter
 
 from pyramid.view import view_config
@@ -57,8 +56,8 @@ def BadgesWorkspacePathAdapter(context, request):
 	workspace = IBadgesWorkspace(service)
 	return workspace
 
-@interface.implementer(IPathAdapter, IContained)
-class BadgeAdminPathAdapter(zcontained.Contained):
+@interface.implementer(IPathAdapter)
+class BadgeAdminPathAdapter(Contained):
 
 	__name__ = 'BadgeAdmin'
 
@@ -93,7 +92,7 @@ class OpenBadgeView(object):
 
 @interface.implementer(IPathAdapter)
 @component.adapter(IDataserverFolder, IRequest)
-class OpenAssertionsPathAdapter(zcontained.Contained):
+class OpenAssertionsPathAdapter(Contained):
 
 	def __init__(self, dataserver, request):
 		self.__parent__ = dataserver

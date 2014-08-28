@@ -13,7 +13,7 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import interface
 from zope import component
-from zope.container import contained
+from zope.container.contained import Contained
 
 from nti.appserver.interfaces import IUserService
 from nti.appserver.interfaces import IContainerCollection
@@ -42,7 +42,7 @@ from .interfaces import get_principal_earned_badge_filter
 from .interfaces import get_principal_earnable_badge_filter
 
 @interface.implementer(IBadgesWorkspace)
-class _BadgesWorkspace(contained.Contained):
+class _BadgesWorkspace(Contained):
 
 	__name__ = BADGES
 	name = alias('__name__', __name__)
@@ -83,7 +83,7 @@ def BadgesWorkspace(user_service):
 	return workspace
 
 @interface.implementer(IContainerCollection)
-class AllBadgesCollection(contained.Contained):
+class AllBadgesCollection(Contained):
 
 	#: Our name, part of our URL.
 	__name__ = 'AllBadges'
@@ -114,7 +114,7 @@ class AllBadgesCollection(contained.Contained):
 		return 1
 
 @interface.implementer(IContainerCollection)
-class EarnableBadgeCollection(contained.Contained):
+class EarnableBadgeCollection(Contained):
 
 	# : Our name, part of our URL.
 	__name__ = 'EarnableBadges'
@@ -145,7 +145,7 @@ class EarnableBadgeCollection(contained.Contained):
 		return len(self.container)
 
 @interface.implementer(IContainerCollection)
-class EarnedBadgeCollection(contained.Contained):
+class EarnedBadgeCollection(Contained):
 
 	# : Our name, part of our URL.
 	__name__ = 'EarnedBadges'
@@ -175,7 +175,7 @@ class EarnedBadgeCollection(contained.Contained):
 		return len(self.container)
 
 @interface.implementer(IContainerCollection)
-class AssertionCollection(contained.Contained):
+class AssertionCollection(Contained):
 
 	# : Our name, part of our URL.
 	__name__ = 'Assertions'

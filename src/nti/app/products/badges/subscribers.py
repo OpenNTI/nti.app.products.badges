@@ -78,22 +78,24 @@ def _after_database_opened_listener(event):
 		else:
 			logger.debug("Issuer (%s,%s) added", issuer.name, issuer.origin)
 
-from nti.badges.openbadges.interfaces import IBadgeClass
 
 from zope.lifecycleevent import IObjectAddedEvent
-
-from .interfaces import SC_BADGE_EARNED, IAssertionChange
-
-from nti.dataserver.activitystream_change import Change
-from nti.dataserver.interfaces import IUser
-from nti.dataserver.interfaces import ACE_DENY_ALL
-from nti.dataserver.authorization_acl import acl_from_aces
-from nti.dataserver.authorization_acl import ace_allowing
-from nti.dataserver.authorization import ACT_READ
 
 from nti.appserver.interfaces import IUserActivityStorage
 
 from nti.app.notabledata.interfaces import IUserNotableDataStorage
+
+from nti.badges.openbadges.interfaces import IBadgeClass
+
+from nti.dataserver.interfaces import IUser
+from nti.dataserver.interfaces import ACE_DENY_ALL
+from nti.dataserver.activitystream_change import Change
+
+from nti.dataserver.authorization import ACT_READ
+from nti.dataserver.authorization_acl import ace_allowing
+from nti.dataserver.authorization_acl import acl_from_aces
+
+from .interfaces import SC_BADGE_EARNED, IAssertionChange
 
 @interface.implementer(IAssertionChange)
 class AssertionChange(Change):

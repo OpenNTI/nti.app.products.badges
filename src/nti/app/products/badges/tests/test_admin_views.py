@@ -8,10 +8,10 @@ __docformat__ = "restructuredtext en"
 # pylint: disable=W0212,R0904
 
 from hamcrest import is_
-from hamcrest import has_length
-from hamcrest import assert_that
 from hamcrest import has_entry
+from hamcrest import has_length
 from hamcrest import has_entries
+from hamcrest import assert_that
 from hamcrest import contains_string
 
 import os
@@ -38,19 +38,6 @@ import nti.dataserver.tests.mock_dataserver as mock_dataserver
 class TestAdminViews(ApplicationLayerTest):
 
 	layer = NTISampleBadgesApplicationTestLayer
-
-	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
-	def test_create_persons(self):
-		username = 'ichigo@bleach.com'
-		with mock_dataserver.mock_db_trans(self.ds):
-			self._create_user(username=username, external_value={'email':username})
-
-		create_persons_path = '/dataserver2/BadgeAdmin/@@create_persons'
-		self.testapp.post_json(create_persons_path,
-						  {"term":"ichigo"},
-						  status=200)
-		manager = component.getUtility(badge_interfaces.IBadgeManager)
-		assert_that(manager.person_exists('ichigo@bleach.com'), is_(True))
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_award(self):

@@ -55,7 +55,6 @@ def _user_modified(user, event):
 def _after_database_opened_listener(event):
 	logger.info("Adding registered tahrir issuers")
 
-
 	# TODO: Should probably defer this until needed
 	manager = component.queryUtility(IBadgeManager)
 	if manager is None or getattr(manager, '_v_installed', False):
@@ -77,7 +76,6 @@ def _after_database_opened_listener(event):
 			logger.warn("Integrity error", exc_info=True)
 		else:
 			logger.debug("Issuer (%s,%s) added", issuer.name, issuer.origin)
-
 
 from zope.lifecycleevent import IObjectAddedEvent
 

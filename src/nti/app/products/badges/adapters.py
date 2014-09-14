@@ -19,7 +19,7 @@ from nti.dataserver.interfaces import IUser
 from nti.dataserver.users.interfaces import IUserProfile
 
 from nti.badges.model import NTIPerson
-from nti.badges import interfaces as badges_interfaces
+from nti.badges.interfaces import INTIPerson
 
 from nti.badges.openbadges.model import IdentityObject
 from nti.badges.openbadges.interfaces import IBadgeClass
@@ -76,7 +76,7 @@ def tahrir_assertion_to_user(assertion):
 def tahrir_assertion_to_badge(assertion):
 	return assertion.badge
 
-@interface.implementer(badges_interfaces.INTIPerson)
+@interface.implementer(INTIPerson)
 @component.adapter(IUser)
 def user_to_ntiperson(user):
 	result = NTIPerson()

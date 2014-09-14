@@ -12,9 +12,6 @@ from zope import component
 
 from nti.badges.interfaces import IBadgeManager
 
-from . import interfaces
-from .utils import has_side_effects
-
 BADGES = 'Badges'
 OPEN_BADGES_VIEW = 'OpenBadges'
 OPEN_ASSERTIONS_VIEW = 'OpenAssertions'

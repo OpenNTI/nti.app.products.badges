@@ -33,15 +33,15 @@ from nti.externalization.interfaces import LocatedExternalDict
 
 from nti.utils.maps import CaseInsensitiveDict
 
-from .utils import sync
-from .views import BadgeAdminPathAdapter
-
 from . import get_badge
 from . import add_person
 from . import person_exists
 from . import add_assertion
 from . import assertion_exists
 from . import remove_assertion
+
+from .utils import sync
+from .views import BadgeAdminPathAdapter
 
 @view_config(route_name='objects.generic.traversal',
 			 name='award',

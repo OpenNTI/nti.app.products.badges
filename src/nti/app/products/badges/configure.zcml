@@ -53,15 +53,19 @@
 	<!-- Decorators -->
 
 	<subscriber factory=".decorators._BadgeLinkFixer"
-				for="nti.badges.interfaces.IBadgeClass"
-				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
-
+				provides="nti.externalization.interfaces.IExternalMappingDecorator"
+				for="nti.badges.interfaces.IBadgeClass
+					 pyramid.interfaces.IRequest" />
+	
 	<subscriber factory=".decorators._BadgeAssertionDecorator"
-				for="nti.badges.openbadges.interfaces.IBadgeAssertion"
-				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
-
+				provides="nti.externalization.interfaces.IExternalMappingDecorator"
+				for="nti.badges.openbadges.interfaces.IBadgeAssertion
+					 pyramid.interfaces.IRequest" />
+					 
 	<subscriber factory=".decorators._UserBadgesLinkDecorator"
-				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
+				provides="nti.externalization.interfaces.IExternalMappingDecorator"
+				for="nti.dataserver.interfaces.IUser
+					 pyramid.interfaces.IRequest" />
 
 	<!-- Subscribers -->
 

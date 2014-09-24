@@ -72,10 +72,9 @@ def _after_database_opened_listener(event):
 		try:
 			if not manager.issuer_exists(issuer):
 				manager.add_issuer(issuer)
-		except (sqlalchemy.exc.IntegrityError,sqlalchemy.exc.InvalidRequestError):
+				logger.debug("Issuer (%s,%s) added", issuer.name, issuer.origin)
+		except (sqlalchemy.exc.IntegrityError, sqlalchemy.exc.InvalidRequestError):
 			logger.warn("Integrity error", exc_info=True)
-		else:
-			logger.debug("Issuer (%s,%s) added", issuer.name, issuer.origin)
 
 from zope.lifecycleevent import IObjectAddedEvent
 

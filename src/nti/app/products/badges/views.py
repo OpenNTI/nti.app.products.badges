@@ -13,6 +13,7 @@ import urllib
 import requests
 from io import BytesIO
 from urlparse import urljoin
+from urlparse import urlparse
 
 from zope import component
 from zope import interface
@@ -47,6 +48,7 @@ from .interfaces import IBadgesWorkspace
 
 from . import get_all_badges
 from . import OPEN_BADGES_VIEW
+from . import HOSTED_BADGE_IMAGES
 from . import OPEN_ASSERTIONS_VIEW
 
 @interface.implementer(IPathAdapter)
@@ -133,7 +135,8 @@ class OpenAssertionView(object):
 class OpenAssertionImageView(AbstractAuthenticatedView):
 
 	def __call__(self):
-		external = to_external_object(self.request.context)
+		request = self.request
+		external = to_external_object(request.context)
 		badge = external.get('badge')
 		if isinstance(badge, six.string_types):
 			badge_url = badge
@@ -143,6 +146,12 @@ class OpenAssertionImageView(AbstractAuthenticatedView):
 		if not badge_url:
 			raise hexc.HTTPNotFound("Badge url not found")
 
+		p = urlparse(badge_url)
+		if not p.scheme:
+			## CS: Handle the case where the badge url is an image name.
+			## make sure we complete with the correct path
+			badge_url = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), badge_url)
+		
 		__traceback_info__ = badge_url
 		res = requests.get(badge_url)
 		if res.status_code != 200:

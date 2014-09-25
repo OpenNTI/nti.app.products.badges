@@ -18,13 +18,20 @@ from hamcrest import has_entry
 from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import has_property
+from hamcrest import contains_string
 from hamcrest import greater_than_or_equal_to
+
+import os
+import fudge
+from io import BytesIO
 
 from nti.appserver.interfaces import IUserService
 from nti.appserver.interfaces import ICollection
 
 from nti.app.products.badges import add_assertion
 from nti.app.products.badges import interfaces as app_badge_interfaces
+
+from nti.badges.openbadges.utils.badgebakery import get_baked_data
 
 from nti.dataserver import traversal
 
@@ -128,7 +135,8 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(0))))
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
-	def test_assertions(self):
+	@fudge.patch('nti.app.products.badges.views.get_badge_image_content')
+	def test_assertions(self, mock_ic):
 		badge_name = "badge.2"
 		username = 'person.2@nti.com'
 		with mock_dataserver.mock_db_trans(self.ds):
@@ -159,3 +167,15 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry(u'image', ends_with(uid + '/image.png')))
 		assert_that(res.json_body, has_entry(u'recipient',
 											 has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.identityobject')))
+		
+		icon  = os.path.join(os.path.dirname(__file__), 'icon.png')
+		with open(icon, "rb") as fp:
+			icon = fp.read()
+		mock_ic.is_callable().with_args().returns(icon)
+
+		image_assertion_path = assertion_path + "/image.png"
+		res = testapp.get(image_assertion_path,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
+		data = get_baked_data(BytesIO(res.body))
+		assert_that(data, contains_string('http://localhost/dataserver2/OpenAssertions/'))

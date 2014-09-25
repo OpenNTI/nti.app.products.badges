@@ -127,6 +127,13 @@ class OpenAssertionView(object):
 	def __call__(self):
 		return self.request.context
 
+def get_badge_image_content(badge_url):
+	__traceback_info__ = badge_url
+	res = requests.get(badge_url)
+	if res.status_code != 200:
+		raise hexc.HTTPNotFound("Could not find badge image")
+	return res.content
+		
 @view_config(route_name='objects.generic.traversal',
 			 request_method='GET',
 			 context=IBadgeAssertion,
@@ -153,11 +160,8 @@ class OpenAssertionImageView(AbstractAuthenticatedView):
 			badge_url = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), badge_url)
 		
 		__traceback_info__ = badge_url
-		res = requests.get(badge_url)
-		if res.status_code != 200:
-			raise hexc.HTTPNotFound("Could not find badge image")
-
-		source = BytesIO(res.content)
+		content = get_badge_image_content(badge_url)
+		source = BytesIO(content)
 		source.seek(0)
 		
 		url = urljoin(self.request.host_url, external['href'])

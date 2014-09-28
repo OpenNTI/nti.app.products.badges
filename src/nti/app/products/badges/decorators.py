@@ -18,8 +18,8 @@ from zope import interface
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.badges.interfaces import IBadgeClass
+from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeAssertion
-from nti.badges import interfaces as badge_interfaces
 
 from nti.dataserver.links import Link
 from nti.dataserver.interfaces import IUser
@@ -48,7 +48,7 @@ class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 		href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, quote(context.name))
 		mapping['href'] = href
 
-		if badge_interfaces.IEarnedBadge.providedBy(context):
+		if IEarnedBadge.providedBy(context):
 			user = self.remoteUser
 			assertion = get_assertion(user, context) if user is not None else None
 			if assertion is not None:

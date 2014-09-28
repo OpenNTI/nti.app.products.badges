@@ -157,7 +157,8 @@ class OpenAssertionImageView(AbstractAuthenticatedView):
 		if not p.scheme:
 			## CS: Handle the case where the badge url is an image name.
 			## make sure we complete with the correct path
-			badge_url = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), badge_url)
+			badge_url = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), 
+								   badge_url)
 		
 		__traceback_info__ = badge_url
 		content = get_badge_image_content(badge_url)

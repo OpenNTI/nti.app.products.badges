@@ -23,19 +23,19 @@ from nti.badges.interfaces import IBadgeAssertion
 
 from nti.badges.tahrir.interfaces import IIssuer
 
-from nti.dataserver import interfaces as nti_interfaces
+from nti.dataserver.interfaces import IUser
 
 from nti.processlifetime import IApplicationTransactionOpenedEvent
 
 from . import person_exists
 from . import delete_person
 
-@component.adapter(nti_interfaces.IUser, IObjectRemovedEvent)
+@component.adapter(IUser, IObjectRemovedEvent)
 def _user_deleted(user, event):
 	if person_exists(user):
 		delete_person(user)
 
-@component.adapter(nti_interfaces.IUser, IObjectModifiedEvent)
+@component.adapter(IUser, IObjectModifiedEvent)
 def _user_modified(user, event):
 	if not person_exists(user):
 		return
@@ -84,7 +84,6 @@ from nti.app.notabledata.interfaces import IUserNotableDataStorage
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 
-from nti.dataserver.interfaces import IUser
 from nti.dataserver.interfaces import ACE_DENY_ALL
 from nti.dataserver.activitystream_change import Change
 

@@ -6,12 +6,20 @@
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
+from nti.monkey import relstorage_patch_all_except_gevent_on_import
+relstorage_patch_all_except_gevent_on_import.patch()
+
 logger = __import__('logging').getLogger(__name__)
 
 import os
 import sys
-
-from nti.badges.openbadges.utils import scanner, DEFAULT_SECRET
+import argparse
+	
+from zope.configuration import xmlconfig, config
+from zope.dottedname import resolve as dottedname
+	
+from nti.badges.openbadges.utils import scanner
+from nti.badges.openbadges.utils import DEFAULT_SECRET 
 
 from .. import add_badge
 from .. import add_issuer
@@ -25,7 +33,9 @@ def sync_db(path, update=False, verify=False, **kwargs):
 
 	path = os.path.expanduser(path)
 	logger.info("Scanning %s", path)
-	results = scanner.flat_scan(path, verify=verify, **kwargs)  # pairs mozilla badge/issuer
+	
+	# pairs mozilla badge/issuer
+	results = scanner.flat_scan(path, verify=verify, **kwargs) 
 	if not results:
 		logger.warn("No badges found")
 		return (issuers, badges)
@@ -53,9 +63,6 @@ def sync_db(path, update=False, verify=False, **kwargs):
 	return (issuers, badges)
 
 def _create_context(env_dir):
-	from zope.configuration import xmlconfig, config
-	from zope.dottedname import resolve as dottedname
-
 	env_dir = os.path.expanduser(env_dir)
 
 	# find the ds etc directory
@@ -71,6 +78,12 @@ def _create_context(env_dir):
 		context = xmlconfig.file('configure.zcml', package=package, context=context)
 		xmlconfig.include(context, files=os.path.join(slugs, '*.zcml'),
 						  package='nti.appserver')
+		
+	library_zcml = os.path.join(etc, 'library.zcml')
+	if not os.path.exists(library_zcml):
+		raise Exception("could not locate library zcml file %s", library_zcml)
+	xmlconfig.include(context, file=library_zcml, package='nti.appserver')
+
 	return context
 
 def do_sync(path, update=False, verify=False, verbose=False, **kwargs):
@@ -80,7 +93,6 @@ def do_sync(path, update=False, verify=False, verbose=False, **kwargs):
 		print('Badges....', badges)
 
 def process_args(args=None):
-	import argparse
 	arg_parser = argparse.ArgumentParser(description="Sync badges")
 	arg_parser.add_argument('-v', '--verbose', help="Verbose", action='store_true',
 							 dest='verbose')
@@ -93,7 +105,8 @@ def process_args(args=None):
 							 help="JSON web signature secret")
 	arg_parser.add_argument('-u', '--update', help="Update", action='store_true',
 							 dest='update')
-	arg_parser.add_argument('-y', '--verify', help="Verify badge data", action='store_true',
+	arg_parser.add_argument('-y', '--verify', help="Verify badge data", 
+							 action='store_true',
 							 dest='verify')
 
 	args = arg_parser.parse_args(args=args)

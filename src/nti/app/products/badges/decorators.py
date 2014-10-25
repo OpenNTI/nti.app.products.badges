@@ -43,11 +43,13 @@ class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 	def _do_decorate_external(self, context, mapping):
 		request = self.request
 		
-		# add open badge URL
-		ds2 = request.path_info_peek()  # e.g. /dataserver2/AllBadges
+		## add open badge URL
+		ds2 = request.path_info_peek()  # e.g. /dataserver2
 		href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, quote(context.name))
 		mapping['href'] = href
 
+		## If it's an earned badge then add make sure
+		## we send an image for the assertion
 		if IEarnedBadge.providedBy(context):
 			user = self.remoteUser
 			assertion = get_assertion(user, context) if user is not None else None
@@ -58,11 +60,9 @@ class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 				mapping['image'] = urljoin(request.host_url, href)
 				return
 
-		# image url fixer
-		image = mapping.get('image')
-		if not image:
-			return
-		scheme = urlparse(image).scheme
+		## image url fixer
+		image = mapping.get('image') or context.image
+		scheme = urlparse(image).scheme if image else None
 		if not scheme:
 			image = image if image.lower().endswith('.png') else image + '.png'
 			image = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), image)
@@ -74,7 +74,7 @@ class _BadgeAssertionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 
 	def _do_decorate_external(self, context, mapping):
 		request = self.request
-		ds2 = request.path_info_peek()
+		ds2 = request.path_info_peek() # e.g. /dataserver2
 		href = '/%s/%s/%s' % (ds2, OPEN_ASSERTIONS_VIEW, quote(context.uid))
 		mapping['href'] = href
 		image = "%s/image.png" % urljoin(request.host_url, href)

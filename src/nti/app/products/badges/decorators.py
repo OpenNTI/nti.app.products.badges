@@ -10,7 +10,6 @@ logger = __import__('logging').getLogger(__name__)
 
 from urllib import quote
 from urlparse import urljoin
-from urlparse import urlparse
 
 from zope import component
 from zope import interface
@@ -18,7 +17,6 @@ from zope import interface
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.badges.interfaces import IBadgeClass
-from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeAssertion
 
 from nti.dataserver.links import Link
@@ -30,11 +28,9 @@ from nti.externalization.interfaces import IExternalMappingDecorator
 LINKS = StandardExternalFields.LINKS
 
 from . import BADGES
-from . import OPEN_BADGES_VIEW
-from . import HOSTED_BADGE_IMAGES
 from . import OPEN_ASSERTIONS_VIEW
 
-from . import get_assertion
+from .utils import get_badge_image_url_and_href
 
 @component.adapter(IBadgeClass)
 @interface.implementer(IExternalMappingDecorator)
@@ -42,31 +38,9 @@ class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 
 	def _do_decorate_external(self, context, mapping):
 		request = self.request
-		
-		## add open badge URL
-		ds2 = request.path_info_peek()  # e.g. /dataserver2
-		href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, quote(context.name))
+		image, href = get_badge_image_url_and_href(context, request, self.remoteUser)	
 		mapping['href'] = href
-
-		## If it's an earned badge then add make sure
-		## we send an image for the assertion
-		if IEarnedBadge.providedBy(context):
-			user = self.remoteUser
-			assertion = get_assertion(user, context) if user is not None else None
-			if assertion is not None:
-				# add assertion baked image
-				uid = quote(assertion.uid)
-				href = '/%s/%s/%s/image.png' % (ds2, OPEN_ASSERTIONS_VIEW, uid)
-				mapping['image'] = urljoin(request.host_url, href)
-				return
-
-		## image url fixer
-		image = mapping.get('image') or context.image
-		scheme = urlparse(image).scheme if image else None
-		if not scheme:
-			image = image if image.lower().endswith('.png') else image + '.png'
-			image = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), image)
-			mapping['image'] = image
+		mapping['image'] = image
 
 @component.adapter(IBadgeAssertion)
 @interface.implementer(IExternalMappingDecorator)

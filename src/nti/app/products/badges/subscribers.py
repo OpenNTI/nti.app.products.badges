@@ -21,6 +21,8 @@ import sqlalchemy.exc
 from nti.badges.interfaces import IBadgeManager
 from nti.badges.interfaces import IBadgeAssertion
 
+from nti.badges.openbadges.interfaces import IBadgeClass
+
 from nti.badges.tahrir.interfaces import IIssuer
 
 from nti.dataserver.interfaces import IUser
@@ -29,6 +31,7 @@ from nti.processlifetime import IApplicationTransactionOpenedEvent
 
 from . import person_exists
 from . import delete_person
+from .utils import get_badge_image_url_and_href
 
 @component.adapter(IUser, IObjectRemovedEvent)
 def _user_deleted(user, event):
@@ -82,8 +85,6 @@ from nti.appserver.interfaces import IUserActivityStorage
 
 from nti.app.notabledata.interfaces import IUserNotableDataStorage
 
-from nti.badges.openbadges.interfaces import IBadgeClass
-
 from nti.dataserver.interfaces import ACE_DENY_ALL
 from nti.dataserver.activitystream_change import Change
 
@@ -99,7 +100,8 @@ class AssertionChange(Change):
 	Gives some class-level defaults that are useful
 	for assertions/badges.
 	"""
-
+	image = None
+	
 	# When we write this out, turn the assertion into the actual
 	# badge
 	def externalObjectTransformationHook(self, assertion):
@@ -115,7 +117,7 @@ class AssertionChange(Change):
 
 	@property
 	def badge_href(self):
-		return self.badge.image
+		return self.image or self.badge.image
 
 	@property
 	def badge_description(self):
@@ -142,7 +144,12 @@ def _make_assertions_notable_to_target(assertion, event):
 	for the target user.
 	"""
 	change = AssertionChange(SC_BADGE_EARNED, assertion)
-
+	
+	# set badge image
+	badge = IBadgeClass(assertion)
+	image, _ = get_badge_image_url_and_href(badge)
+	change.image = image if image else None
+	
 	user = IUser(assertion)
 	# Set a creator...this may not be the best we can do in some cases
 	change.creator = user

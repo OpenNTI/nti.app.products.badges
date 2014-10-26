@@ -48,13 +48,17 @@ def has_side_effects(func):
 	return wrapper
 
 def get_badge_image_url_and_href(context, request=None, user=None):
+	image = None
 	request = request or get_current_request()
 	if not request:
 		return (context.image, None)
 	
-	## add open badge URL
-	image = None
-	ds2 = request.path_info_peek()  # e.g. /dataserver2
+	try:
+		ds2 = request.path_info_peek()  # e.g. /dataserver2
+	except AttributeError: # in unit test we may see this
+		return (context.image, None)
+	
+	## href is the open badge URL
 	href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, quote(context.name))
 
 	## If it's an earned badge then add make sure

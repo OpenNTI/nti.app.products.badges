@@ -36,10 +36,17 @@ from . import get_person_badges
 from . import get_person_assertions
 
 from .interfaces import IBadgesWorkspace
+from .interfaces import IOpenBadgeAdapter
 from .interfaces import IPrincipalErnableBadges
 from .interfaces import get_principal_badge_filter
 from .interfaces import get_principal_earned_badge_filter
 from .interfaces import get_principal_earnable_badge_filter
+
+def get_openbadge(context):
+	adapter = component.queryUtility(IOpenBadgeAdapter)
+	result = adapter.adapt(context) if adapter else None
+	result = IBadgeClass(context) if result is None else result
+	return result
 
 @interface.implementer(IBadgesWorkspace)
 class _BadgesWorkspace(Contained):
@@ -102,7 +109,7 @@ class AllBadgesCollection(Contained):
 		container.__name__ = __name__
 		all_badges = get_all_badges()
 		predicate = get_principal_badge_filter(parent.user)
-		container.extend(IBadgeClass(b) for b in all_badges if predicate(b))
+		container.extend(get_openbadge(b) for b in all_badges if predicate(b))
 		return container
 
 	def __getitem__(self, key):
@@ -136,7 +143,7 @@ class EarnableBadgeCollection(Contained):
 		for subs in component.subscribers((user,), IPrincipalErnableBadges):
 			for badge in subs.iter_badges():
 				if not assertion_exists(user, badge) and predicate(badge):
-					badge = IBadgeClass(badge)
+					badge = get_openbadge(badge)
 					interface.alsoProvides(badge, IEarnableBadge)
 					container.append(badge)
 		return container
@@ -166,7 +173,7 @@ class EarnedBadgeCollection(Contained):
 		person_badges = get_person_badges(parent.user)
 		for badge in person_badges:
 			if predicate(badge):
-				badge = IBadgeClass(badge)
+				badge = get_openbadge(badge)
 				interface.alsoProvides(badge, IEarnedBadge)
 				container.append(badge)
 		return container

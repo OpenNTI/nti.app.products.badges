@@ -70,6 +70,17 @@ class IPrincipalEarnableBadgeFilter(interface.Interface):
 		allow the specified badge
 		"""
 
+class IOpenBadgeAdapter(interface.Interface):
+	
+	"""
+	Utility to adapt an object to a :class:`nti.badges.openbadges.interfaces.IBadgeClass` 
+	"""
+	
+	def adapt(context):
+		"""
+		adpapt the specified context to a IBadgeClass
+		"""
+
 def get_principal_badge_filter(user):
 	filters = component.subscribers((user,), IPrincipalBadgeFilter)
 	filters = list(filters)

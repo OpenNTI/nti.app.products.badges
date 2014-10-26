@@ -269,4 +269,5 @@ class AllBadgesView(object):
 		result = LocatedExternalDict()
 		result['Items'] = items = []
 		items.extend(IBadgeClass(x) for x in get_all_badges())
+		result['Total'] = len(items)
 		return result

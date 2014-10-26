@@ -24,6 +24,7 @@ from nti.app.base.abstract_views import AbstractAuthenticatedView
 from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
 
 from nti.badges.interfaces import IBadgeManager
+from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.dataserver.users import User
 from nti.dataserver import authorization as nauth
@@ -35,8 +36,9 @@ from nti.utils.maps import CaseInsensitiveDict
 
 from . import get_badge
 from . import add_person
-from . import person_exists
 from . import add_assertion
+from . import person_exists
+from . import get_all_badges
 from . import assertion_exists
 from . import remove_assertion
 
@@ -250,4 +252,21 @@ class BulkImportView(AbstractAuthenticatedView):
 		result['Awards'] = awards
 		result['Revokations'] = revokations
 		result['Elapsed'] = time.time() - now
+		return result
+
+@view_config(route_name='objects.generic.traversal',
+			 name='AllBadges',
+			 renderer='rest',
+			 request_method='GET',
+			 context=BadgeAdminPathAdapter,
+			 permission=nauth.ACT_MODERATE)
+class AllBadgesView(object):
+
+	def __init__(self, request):
+		self.request = request
+
+	def __call__(self):
+		result = LocatedExternalDict()
+		result['Items'] = items = []
+		items.extend(IBadgeClass(x) for x in get_all_badges())
 		return result

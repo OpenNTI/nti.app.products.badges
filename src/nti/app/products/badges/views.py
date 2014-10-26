@@ -41,12 +41,10 @@ from nti.dataserver.interfaces import IUser
 from nti.dataserver.interfaces import IDataserverFolder
 from nti.dataserver.interfaces import EVERYONE_USER_NAME
 
-from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.externalization import to_external_object
 
 from .interfaces import IBadgesWorkspace
 
-from . import get_all_badges
 from . import OPEN_BADGES_VIEW
 from . import HOSTED_BADGE_IMAGES
 from . import OPEN_ASSERTIONS_VIEW
@@ -175,22 +173,3 @@ class OpenAssertionImageView(AbstractAuthenticatedView):
 		response.content_type = b'image/png; charset=UTF-8'
 		response.content_disposition = b'attachment; filename="image.png"'
 		return response
-
-ALL_BADGES_VIEW = 'AllBadges'
-
-@view_config(route_name='objects.generic.traversal',
-			 name=ALL_BADGES_VIEW,
-			 renderer='rest',
-			 request_method='GET',
-			 context=IDataserverFolder,
-			 permission=nauth.ACT_MODERATE)
-class AllBadgesView(object):
-
-	def __init__(self, request):
-		self.request = request
-
-	def __call__(self):
-		result = LocatedExternalDict()
-		result['Items'] = items = []
-		items.extend(IBadgeClass(x) for x in get_all_badges())
-		return result

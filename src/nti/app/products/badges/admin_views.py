@@ -40,22 +40,27 @@ from . import add_assertion
 from . import assertion_exists
 from . import remove_assertion
 
-from .utils import sync
+from .utils.sync import sync_db
 from .views import BadgeAdminPathAdapter
 
+class BaseBadgePostView(AbstractAuthenticatedView, 
+						ModeledContentUploadRequestUtilsMixin):
+	
+	def readInput(self, value=None):
+		result = CaseInsensitiveDict()
+		if self.request.body:
+			values = super(BaseBadgePostView, self).readInput(value=value)
+			result.update(values)
+		return result
+	
 @view_config(route_name='objects.generic.traversal',
 			 name='award',
 			 renderer='rest',
 			 request_method='POST',
 			 context=BadgeAdminPathAdapter,
 			 permission=nauth.ACT_MODERATE)
-class AwardBadgeView(AbstractAuthenticatedView, ModeledContentUploadRequestUtilsMixin):
+class AwardBadgeView(BaseBadgePostView):
 	
-	def readInput(self):
-		values = super(AwardBadgeView, self).readInput()
-		result = CaseInsensitiveDict(values)
-		return result
-
 	def __call__(self):
 		vls = self.readInput()
 		username = vls.get('username') or vls.get('email') or self.remoteUser.username
@@ -96,12 +101,7 @@ class AwardBadgeView(AbstractAuthenticatedView, ModeledContentUploadRequestUtils
 			 request_method='POST',
 			 context=BadgeAdminPathAdapter,
 			 permission=nauth.ACT_MODERATE)
-class RevokeBadgeView(AbstractAuthenticatedView, ModeledContentUploadRequestUtilsMixin):
-	
-	def readInput(self):
-		values = super(RevokeBadgeView, self).readInput()
-		result = CaseInsensitiveDict(values)
-		return result
+class RevokeBadgeView(BaseBadgePostView):
 	
 	def __call__(self):
 		vls = self.readInput()
@@ -140,13 +140,8 @@ class RevokeBadgeView(AbstractAuthenticatedView, ModeledContentUploadRequestUtil
 			 request_method='POST',
 			 context=BadgeAdminPathAdapter,
 			 permission=nauth.ACT_MODERATE)
-class SyncDbView(AbstractAuthenticatedView, ModeledContentUploadRequestUtilsMixin):
-	
-	def readInput(self):
-		values = super(SyncDbView, self).readInput()
-		result = CaseInsensitiveDict(values)
-		return result
-	
+class SyncDbView(BaseBadgePostView):
+
 	def __call__(self):
 		values = self.readInput()
 	
@@ -174,7 +169,7 @@ class SyncDbView(AbstractAuthenticatedView, ModeledContentUploadRequestUtilsMixi
 		now = time.time()
 	
 		# sync database
-		issuers, badges = sync.sync_db(directory, update=update, verify=verify, secret=secret)
+		issuers, badges = sync_db(directory, update=update, verify=verify, secret=secret)
 	
 		# return
 		result = LocatedExternalDict()

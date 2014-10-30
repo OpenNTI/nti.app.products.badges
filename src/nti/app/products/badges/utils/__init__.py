@@ -39,14 +39,6 @@ from .. import OPEN_ASSERTIONS_VIEW
 
 from .. import get_assertion
 
-def has_side_effects(func):
-	def wrapper(*args, **kwargs):
-		request = get_current_request()
-		if request is not None:
-			request.environ[b'nti.request_had_transaction_side_effects'] = b'True'
-		return func(*args, **kwargs)
-	return wrapper
-
 def get_badge_image_url_and_href(context, request=None, user=None):
 	image = None
 	request = request or get_current_request()

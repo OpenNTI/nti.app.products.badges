@@ -165,6 +165,7 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry('uid', uid))
 		assert_that(res.json_body, has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.assertion'))
 		assert_that(res.json_body, has_entry(u'image', ends_with(uid + '/image.png')))
+		assert_that(res.json_body, has_entry(u'assertion', ends_with(uid + '/assertion.json')))
 		assert_that(res.json_body, has_entry(u'recipient',
 											 has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.identityobject')))
 		

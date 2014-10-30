@@ -48,11 +48,17 @@ class _BadgeAssertionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 
 	def _do_decorate_external(self, context, mapping):
 		request = self.request
-		ds2 = request.path_info_peek() # e.g. /dataserver2
+		try:
+			ds2 = request.path_info_peek() # e.g. /dataserver2
+		except AttributeError:
+			return
+		
 		href = '/%s/%s/%s' % (ds2, OPEN_ASSERTIONS_VIEW, quote(context.uid))
 		mapping['href'] = href
-		image = "%s/image.png" % urljoin(request.host_url, href)
-		mapping['image'] = image
+		# external links
+		for key, name in (('image', 'image.png'), ('assertion', 'assertion.json')):
+			url = "%s/%s" % (urljoin(request.host_url, href), name)
+			mapping[key] = url
 
 @component.adapter(IUser)
 @interface.implementer(IExternalMappingDecorator)

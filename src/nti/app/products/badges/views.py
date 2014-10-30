@@ -14,6 +14,7 @@ import requests
 from io import BytesIO
 from urlparse import urljoin
 from urlparse import urlparse
+from collections import Mapping
 
 from zope import component
 from zope import interface
@@ -41,6 +42,7 @@ from nti.dataserver.interfaces import IUser
 from nti.dataserver.interfaces import IDataserverFolder
 from nti.dataserver.interfaces import EVERYONE_USER_NAME
 
+from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.externalization import to_external_object
 
 from .interfaces import IBadgesWorkspace
@@ -132,12 +134,7 @@ def get_badge_image_content(badge_url):
 		raise hexc.HTTPNotFound("Could not find badge image")
 	return res.content
 		
-@view_config(route_name='objects.generic.traversal',
-			 request_method='GET',
-			 context=IBadgeAssertion,
-			 permission=nauth.ACT_READ,
-			 name="image.png")
-class OpenAssertionImageView(AbstractAuthenticatedView):
+class BaseOpenAssertionView(object):
 
 	def __call__(self):
 		request = self.request
@@ -158,7 +155,17 @@ class OpenAssertionImageView(AbstractAuthenticatedView):
 			badge_url = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), 
 								   badge_url)
 		
-		__traceback_info__ = badge_url
+		return external, badge_url
+
+@view_config(route_name='objects.generic.traversal',
+			 request_method='GET',
+			 context=IBadgeAssertion,
+			 permission=nauth.ACT_READ,
+			 name="image.png")
+class OpenAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
+
+	def __call__(self):
+		external, badge_url = super(OpenAssertionImageView, self).__call__()
 		content = get_badge_image_content(badge_url)
 		source = BytesIO(content)
 		source.seek(0)
@@ -173,3 +180,34 @@ class OpenAssertionImageView(AbstractAuthenticatedView):
 		response.content_type = b'image/png; charset=UTF-8'
 		response.content_disposition = b'attachment; filename="image.png"'
 		return response
+
+@view_config(route_name='objects.generic.traversal',
+			 request_method='GET',
+			 context=IBadgeAssertion,
+			 name="assertion.json")
+class OpenAssertionJSONView(BaseOpenAssertionView):
+
+	def __init__(self, request):
+		self.request = request
+
+	def _clean(self, external):
+		external.pop('href', None)
+		def _m(ext):
+			if isinstance(ext, Mapping):
+				for key in StandardExternalFields.ALL:
+					ext.pop(key, None)
+				for key, value in ext.items():
+					if value is None:
+						ext.pop(key, None)
+					else:
+						_m(value)
+			elif isinstance(ext, (tuple, list)):
+				for value in ext:
+					_m(value)
+		_m(external)
+		return external
+	
+	def __call__(self):
+		external, _ = super(OpenAssertionJSONView, self).__call__()
+		external = self._clean(external)
+		return external

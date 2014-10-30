@@ -14,7 +14,6 @@ import tempfile
 from zope import component
 
 from nti.badges.tahrir import manager
-from nti.badges import interfaces as badge_interfaces
 
 from nti.dataserver.tests.mock_dataserver import WithMockDS
 from nti.dataserver.tests.mock_dataserver import mock_db_trans

@@ -8,13 +8,9 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-import collections
-
 from zope import component
 from zope import interface
-from zope.lifecycleevent.interfaces import IAttributes
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
-from zope.lifecycleevent.interfaces import IObjectModifiedEvent
 
 import sqlalchemy.exc
 
@@ -37,22 +33,6 @@ from .utils import get_badge_image_url_and_href
 def _user_deleted(user, event):
 	if person_exists(user):
 		delete_person(user)
-
-@component.adapter(IUser, IObjectModifiedEvent)
-def _user_modified(user, event):
-	if not person_exists(user):
-		return
-
-	descriptions = event.descriptions
-	if descriptions and isinstance(descriptions, collections.Sequence):
-		email_changed = False
-		for desc in descriptions:
-			if IAttributes.providedBy(desc) and 'email' in desc.attributes:
-				email_changed = True
-				break
-		if email_changed:
-			# TODO Update person
-			pass
 
 @component.adapter(IApplicationTransactionOpenedEvent)
 def _after_database_opened_listener(event):

@@ -27,11 +27,13 @@ from nti.processlifetime import IApplicationTransactionOpenedEvent
 
 from . import person_exists
 from . import delete_person
+
 from .utils import get_badge_image_url_and_href
 
 @component.adapter(IUser, IObjectRemovedEvent)
 def _user_deleted(user, event):
 	if person_exists(user):
+		logger.info("Removing badge data for user %s", user)
 		delete_person(user)
 
 @component.adapter(IApplicationTransactionOpenedEvent)

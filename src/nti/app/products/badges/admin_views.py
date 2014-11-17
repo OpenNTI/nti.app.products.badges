@@ -31,6 +31,7 @@ from nti.dataserver import authorization as nauth
 from nti.dataserver.users import index as user_index
 
 from nti.externalization.interfaces import LocatedExternalDict
+from nti.externalization.interfaces import StandardExternalFields
 
 from nti.utils.maps import CaseInsensitiveDict
 
@@ -267,7 +268,7 @@ class AllBadgesView(object):
 
 	def __call__(self):
 		result = LocatedExternalDict()
-		result['Items'] = items = []
+		result[StandardExternalFields.ITEMS] = items = []
 		items.extend(IBadgeClass(x) for x in get_all_badges())
 		result['Total'] = len(items)
 		return result

@@ -51,6 +51,8 @@ from . import OPEN_BADGES_VIEW
 from . import HOSTED_BADGE_IMAGES
 from . import OPEN_ASSERTIONS_VIEW
 
+ALL = getattr(StandardExternalFields, 'ALL', ())
+
 @interface.implementer(IPathAdapter)
 @component.adapter(IUser, IRequest)
 def BadgesWorkspacePathAdapter(context, request):
@@ -194,7 +196,7 @@ class OpenAssertionJSONView(BaseOpenAssertionView):
 		external.pop('href', None)
 		def _m(ext):
 			if isinstance(ext, Mapping):
-				for key in StandardExternalFields.ALL:
+				for key in ALL:
 					ext.pop(key, None)
 				for key, value in ext.items():
 					if value is None:

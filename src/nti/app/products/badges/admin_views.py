@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-admin views.
-
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -61,7 +60,7 @@ class BaseBadgePostView(AbstractAuthenticatedView,
 			 renderer='rest',
 			 request_method='POST',
 			 context=BadgeAdminPathAdapter,
-			 permission=nauth.ACT_MODERATE)
+			 permission=nauth.ACT_NTI_ADMIN)
 class AwardBadgeView(BaseBadgePostView):
 	
 	def __call__(self):
@@ -103,7 +102,7 @@ class AwardBadgeView(BaseBadgePostView):
 			 renderer='rest',
 			 request_method='POST',
 			 context=BadgeAdminPathAdapter,
-			 permission=nauth.ACT_MODERATE)
+			 permission=nauth.ACT_NTI_ADMIN)
 class RevokeBadgeView(BaseBadgePostView):
 	
 	def __call__(self):
@@ -142,7 +141,7 @@ class RevokeBadgeView(BaseBadgePostView):
 			 renderer='rest',
 			 request_method='POST',
 			 context=BadgeAdminPathAdapter,
-			 permission=nauth.ACT_MODERATE)
+			 permission=nauth.ACT_NTI_ADMIN)
 class SyncDbView(BaseBadgePostView):
 
 	def __call__(self):
@@ -231,7 +230,7 @@ def bulk_import(input_source, errors=[]):
 			 renderer='rest',
 			 request_method='POST',
 			 context=BadgeAdminPathAdapter,
-			 permission=nauth.ACT_MODERATE)
+			 permission=nauth.ACT_NTI_ADMIN)
 class BulkImportView(AbstractAuthenticatedView):
 	
 	def __call__(self):
@@ -260,7 +259,7 @@ class BulkImportView(AbstractAuthenticatedView):
 			 renderer='rest',
 			 request_method='GET',
 			 context=BadgeAdminPathAdapter,
-			 permission=nauth.ACT_MODERATE)
+			 permission=nauth.ACT_NTI_ADMIN)
 class AllBadgesView(object):
 
 	def __init__(self, request):

@@ -3,11 +3,11 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
-
 
 from urllib import quote
 from urlparse import urljoin
@@ -30,14 +30,14 @@ from nti.dataserver.interfaces import IUser
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalMappingDecorator
 
-LINKS = StandardExternalFields.LINKS
-
 from .. import BADGES
 from .. import OPEN_BADGES_VIEW
 from .. import HOSTED_BADGE_IMAGES
 from .. import OPEN_ASSERTIONS_VIEW
 
 from .. import get_assertion
+
+LINKS = StandardExternalFields.LINKS
 
 def get_badge_image_url_and_href(context, request=None, user=None):
 	image = None

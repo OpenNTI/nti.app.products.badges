@@ -58,39 +58,47 @@ def get_badge(badge):
 
 def get_all_badges():
 	manager = component.getUtility(IBadgeManager)
-	return manager.get_all_badges()
+	result = manager.get_all_badges()
+	return result
 
 # persons
 
 def add_person(person):
 	manager = component.getUtility(IBadgeManager)
-	return manager.add_person(person)
+	result = manager.add_person(person)
+	return result
 
 def delete_person(person):
 	manager = component.getUtility(IBadgeManager)
-	return manager.delete_person(person)
+	result = manager.delete_person(person)
+	return result
 
 def person_exists(person):
 	manager = component.getUtility(IBadgeManager)
-	return manager.person_exists(person)
+	result = manager.person_exists(person)
+	return result
 
 def get_person_badges(person):
 	manager = component.getUtility(IBadgeManager)
-	return manager.get_person_badges(person)
+	result = manager.get_person_badges(person)
+	return result
 
 def get_person_assertions(person):
 	manager = component.getUtility(IBadgeManager)
-	return manager.get_person_assertions(person)
+	result = manager.get_person_assertions(person)
+	return result
 
 # assertions
 
 def add_assertion(person, badge):
 	manager = component.getUtility(IBadgeManager)
-	return manager.add_assertion(person, badge)
+	result = manager.add_assertion(person, badge)
+	return result
 	
 def remove_assertion(person, badge):
 	manager = component.getUtility(IBadgeManager)
-	return manager.remove_assertion(person, badge)
+	result = manager.remove_assertion(person, badge)
+	return result
 
 def assertion_exists(user, badge):
 	manager = component.getUtility(IBadgeManager)
@@ -100,4 +108,6 @@ def assertion_exists(user, badge):
 
 def get_assertion(user, badge):
 	manager = component.getUtility(IBadgeManager)
-	return manager.get_assertion(user, badge)
+	result = manager.get_assertion(user, badge)
+	return result
+

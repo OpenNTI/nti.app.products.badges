@@ -28,7 +28,7 @@ from .. import OPEN_ASSERTIONS_VIEW
 # 
 from .. import get_assertion
 
-def get_user(user):
+def get_user(user=None):
 	result = None
 	if user is not None:
 		result = user if IUser.providedBy(user) else User.get_user(str(user))
@@ -45,14 +45,16 @@ def get_badge_image_url_and_href(context, request=None, user=None):
 	except AttributeError: # in unit test we may see this
 		return (context.image, None)
 	
+	## resolve requesting user
+	user = get_user(user)
+	
 	## href is the open badge URL
 	href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, quote(context.name))
-	user = get_user(user)
 	
 	## If it's an earned badge then add make sure
 	## we send an image for the assertion
-	if 	IEarnedBadge.providedBy(context) and user and \
-		get_remote_user() == get_user(user):
+	if 	IEarnedBadge.providedBy(context) and user is not None and \
+		get_remote_user() == user:
 		## make sure the remote user is the user requesting the assertion
 		## to avoid sending it to a wrong person
 		assertion = get_assertion(user, context)

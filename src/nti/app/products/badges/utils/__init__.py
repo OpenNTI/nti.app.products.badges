@@ -62,7 +62,8 @@ def get_badge_image_url_and_href(context, request=None, user=None):
 			uid = quote(assertion.uid)
 			href = '/%s/%s/%s/image.png' % (ds2, OPEN_ASSERTIONS_VIEW, uid)
 			image = urljoin(request.host_url, href)
-	else:
+			
+	if not image:
 		## image url fixer
 		image = context.image
 		scheme = urlparse(image).scheme if image else None

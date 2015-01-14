@@ -13,31 +13,26 @@ from urllib import quote
 from urlparse import urljoin
 from urlparse import urlparse
 
-from zope import component
-from zope import interface
-
 from pyramid.threadlocal import get_current_request
 
-from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
+from nti.app.authentication import get_remote_user
 
-from nti.badges.interfaces import IBadgeClass
 from nti.badges.interfaces import IEarnedBadge
-from nti.badges.interfaces import IBadgeAssertion
 
-from nti.dataserver.links import Link
+from nti.dataserver.users import User
 from nti.dataserver.interfaces import IUser
 
-from nti.externalization.interfaces import StandardExternalFields
-from nti.externalization.interfaces import IExternalMappingDecorator
-
-from .. import BADGES
 from .. import OPEN_BADGES_VIEW
 from .. import HOSTED_BADGE_IMAGES
 from .. import OPEN_ASSERTIONS_VIEW
-
+# 
 from .. import get_assertion
 
-LINKS = StandardExternalFields.LINKS
+def get_user(user):
+	result = None
+	if user is not None:
+		result = user if IUser.providedBy(user) else User.get_user(str(user))
+	return result
 
 def get_badge_image_url_and_href(context, request=None, user=None):
 	image = None
@@ -52,10 +47,14 @@ def get_badge_image_url_and_href(context, request=None, user=None):
 	
 	## href is the open badge URL
 	href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, quote(context.name))
-
+	user = get_user(user)
+	
 	## If it's an earned badge then add make sure
 	## we send an image for the assertion
-	if IEarnedBadge.providedBy(context) and user:
+	if 	IEarnedBadge.providedBy(context) and user and \
+		get_remote_user() == get_user(user):
+		## make sure the remote user is the user requesting the assertion
+		## to avoid sending it to a wrong person
 		assertion = get_assertion(user, context)
 		if assertion is not None:
 			# add assertion baked image

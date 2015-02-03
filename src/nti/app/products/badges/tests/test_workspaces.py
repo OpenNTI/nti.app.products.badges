@@ -135,8 +135,13 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(0))))
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
-	@fudge.patch('nti.app.products.badges.views.get_badge_image_content')
-	def test_assertions(self, mock_ic):
+	@fudge.patch('nti.app.products.badges.views.get_badge_image_content',
+				 'nti.app.products.badges.decorators.is_exported',
+				 'nti.app.products.badges.views.is_exported')
+	def test_assertions(self, mock_ic, mock_ie1, mock_ie2):		
+		mock_ie1.is_callable().with_args().returns(True)
+		mock_ie2.is_callable().with_args().returns(True)
+
 		badge_name = "badge.2"
 		username = 'person.2@nti.com'
 		with mock_dataserver.mock_db_trans(self.ds):

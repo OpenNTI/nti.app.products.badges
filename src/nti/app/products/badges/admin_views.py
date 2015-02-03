@@ -25,6 +25,8 @@ from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtils
 from nti.badges.interfaces import IBadgeManager
 from nti.badges.openbadges.interfaces import IBadgeClass
 
+from nti.common.maps import CaseInsensitiveDict
+
 from nti.dataserver import authorization as nauth
 
 from nti.dataserver.users import User
@@ -33,8 +35,6 @@ from nti.dataserver.users.interfaces import IUserProfile
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
-
-from nti.utils.maps import CaseInsensitiveDict
 
 from . import get_badge
 from . import add_person

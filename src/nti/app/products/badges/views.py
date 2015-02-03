@@ -160,6 +160,10 @@ class BaseOpenAssertionView(object):
 		
 		return external, badge_url
 
+def is_exported(context):
+	result = getattr(context, 'exported', None) or False
+	return result
+
 @view_config(route_name='objects.generic.traversal',
 			 request_method='GET',
 			 context=IBadgeAssertion,
@@ -170,13 +174,14 @@ class OpenAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
 	def __call__(self):
 		external, badge_url = super(OpenAssertionImageView, self).__call__()
 		content = get_badge_image_content(badge_url)
-		source = BytesIO(content)
+		target = source = BytesIO(content)
 		source.seek(0)
 		
-		url = urljoin(self.request.host_url, external['href'])
-		target = BytesIO()
-		bake_badge(source, target, url=url)
-		target.seek(0)
+		if is_exported(self.request.context):
+			url = urljoin(self.request.host_url, external['href'])
+			target = BytesIO()
+			bake_badge(source, target, url=url)
+			target.seek(0)
 
 		response = self.request.response
 		response.body_file = target

@@ -102,9 +102,9 @@ def get_all_persons(person):
 
 # assertions
 
-def add_assertion(person, badge):
+def add_assertion(person, badge, exported=False):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.add_assertion(person, badge)
+	result = manager.add_assertion(person, badge, exported=exported)
 	return result
 	
 def remove_assertion(person, badge):

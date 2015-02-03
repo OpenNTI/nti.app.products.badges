@@ -33,6 +33,10 @@ from . import OPEN_ASSERTIONS_VIEW
 
 from .utils import get_badge_image_url_and_href
 
+def is_exported(context):
+	result = getattr(context, 'exported', None) or False
+	return result
+
 @component.adapter(IBadgeClass)
 @interface.implementer(IExternalMappingDecorator)
 class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
@@ -54,10 +58,14 @@ class _BadgeAssertionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 		except AttributeError:
 			return
 		
+		url_links = (('image', 'image.png'),)
+		if is_exported(context):
+			url_links += (('assertion', 'assertion.json'),)
+
 		href = '/%s/%s/%s' % (ds2, OPEN_ASSERTIONS_VIEW, quote(context.uid))
 		mapping['href'] = href
-		# external links
-		for key, name in (('image', 'image.png'), ('assertion', 'assertion.json')):
+		
+		for key, name in url_links:
 			url = "%s/%s" % (urljoin(request.host_url, href), name)
 			mapping[key] = url
 

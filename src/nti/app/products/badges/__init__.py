@@ -13,13 +13,19 @@ from zope import component
 
 from nti.badges.interfaces import IBadgeManager
 
+from nti.dataserver.users.interfaces import IUserProfile
+
 BADGES = 'Badges'
 OPEN_BADGES_VIEW = 'OpenBadges'
 OPEN_ASSERTIONS_VIEW = 'OpenAssertions'
 HOSTED_BADGE_IMAGES = 'hosted_badge_images'
 
 def get_user_id(user):
-	result = user.username  # TODO: Switch to email when they can be verified
+	profile = IUserProfile(user, None)
+	if profile is not None and profile.email_verified:
+		result = getattr(profile, 'email', None) or user.username
+	else:
+		result = user.username
 	return result
 
 # issuers
@@ -88,6 +94,11 @@ def get_person_assertions(person):
 	result = manager.get_person_assertions(person)
 	return result
 
+def get_all_persons(person):
+	manager = component.getUtility(IBadgeManager)
+	result = manager.get_all_persons()
+	return result
+
 # assertions
 
 def add_assertion(person, badge):
@@ -110,4 +121,3 @@ def get_assertion(user, badge):
 	manager = component.getUtility(IBadgeManager)
 	result = manager.get_assertion(user, badge)
 	return result
-

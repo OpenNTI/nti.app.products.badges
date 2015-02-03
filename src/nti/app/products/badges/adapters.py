@@ -42,10 +42,10 @@ def user_to_identity_object(user):
 							salt=None)
 	return result
 
-def _set_common_person(user, person):
+def set_common_person(user, person):
 	uid = get_user_id(user)
 	person.email = uid
-	profile = IUserProfile(user)
+	profile = IUserProfile(user, None)
 	person.bio = getattr(profile, 'about', None) or u''
 	person.website = getattr(profile, 'home_page', None) or u''
 
@@ -53,7 +53,7 @@ def _set_common_person(user, person):
 @component.adapter(IUser)
 def user_to_tahrir_person(user):
 	result = Person()
-	_set_common_person(user, result)
+	set_common_person(user, result)
 	result.nickname = user.username
 	result.created_on = datetime.fromtimestamp(user.createdTime)
 	return result
@@ -81,8 +81,8 @@ def tahrir_assertion_to_badge(assertion):
 @component.adapter(IUser)
 def user_to_ntiperson(user):
 	result = NTIPerson()
-	_set_common_person(user, result)
 	result.name = user.username
+	set_common_person(user, result)
 	result.createdTime = user.createdTime
 	return result
 

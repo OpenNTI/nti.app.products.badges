@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-generation 2.
+generation 3.
 
 .. $Id$
 """
@@ -11,7 +11,7 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-generation = 2
+generation = 3
 
 import sqlalchemy as sa
 
@@ -28,14 +28,13 @@ from nti.badges.tahrir.interfaces import ITahrirBadgeManager
 
 def do_evolve(dscontext):
 	setHooks()
-	
 	manager = component.getUtility(ITahrirBadgeManager)
 	mc = MigrationContext.configure(manager.engine.connect())
 	op = Operations(mc)
-	op.add_column("badges", sa.Column('stl', sa.Unicode(128)))
+	op.add_column("assertions", sa.Column('exported', sa.Boolean()))
 
 def evolve(context):
 	"""
-	Evolve to generation 2 by adding the stl column to badges
+	Evolve to generation 3 by adding the exported column to assertions table
 	"""
 	do_evolve(context)

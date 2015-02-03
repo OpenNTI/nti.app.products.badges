@@ -26,6 +26,7 @@ def get_user_id(user):
 		result = getattr(profile, 'email', None) or user.username
 	else:
 		result = user.username
+	result = result.lower()
 	return result
 
 # issuers

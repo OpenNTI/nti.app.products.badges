@@ -25,9 +25,11 @@ from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtils
 from nti.badges.interfaces import IBadgeManager
 from nti.badges.openbadges.interfaces import IBadgeClass
 
-from nti.dataserver.users import User
 from nti.dataserver import authorization as nauth
+
+from nti.dataserver.users import User
 from nti.dataserver.users import index as user_index
+from nti.dataserver.users.interfaces import IUserProfile
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
@@ -252,6 +254,67 @@ class BulkImportView(AbstractAuthenticatedView):
 		result['Awards'] = awards
 		result['Revokations'] = revokations
 		result['Elapsed'] = time.time() - now
+		return result
+
+@view_config(route_name='objects.generic.traversal',
+			 name='update_persons',
+			 renderer='rest',
+			 request_method='POST',
+			 context=BadgeAdminPathAdapter,
+			 permission=nauth.ACT_NTI_ADMIN)
+class UpdatePersonsView(AbstractAuthenticatedView):
+	
+	def check(self, s):
+		return u'' if not s else s.lower()
+	
+	def get_user(self, person):
+		username = person.nickname
+		result = User.get_user(username)
+		return result
+
+	def update_person(self, manager, person, messages, errors):
+		user = self.get_user(person)
+		if user is None:
+			errors.append("User %s could not be found" % person.nickname)
+			return False
+
+		result = False
+		profile = IUserProfile(user, None)
+		username = self.check(user.username)
+		
+		# check email
+		email = self.check(getattr(profile, "email", u'')) or username
+		email_verified = getattr(profile, "email_verified", False)
+		if email_verified and email != self.check(person.email):
+			result = True
+			messages.append("Email updated for person %s" % person.nickname)
+
+		# check other fields
+		bio = getattr(profile, 'about', None) or u''
+		website = getattr(profile, 'home_page', None) or u''
+		
+		result = result or (bio != person.bio)
+		result = result or (website != person.website)
+		if result:
+			manager.update_person(person, 
+								  email=email, 
+							  	  name=username,
+							  	  website=website,
+							  	  bio=bio)
+		return result
+
+	def __call__(self):
+		count = 0
+		now = time.time()
+		result = LocatedExternalDict()
+		result['Errors'] = errors = []
+		result['Messages'] = messages = []
+		manager = component.getUtility(IBadgeManager)
+		for person in manager.get_all_persons():
+			if self.update_person(manager, person, messages, errors):
+				count += 1
+		result['Elapsed'] = time.time() - now
+		result['Total'] = result['Count'] = count
 		return result
 
 @view_config(route_name='objects.generic.traversal',

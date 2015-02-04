@@ -9,6 +9,9 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import zope.i18nmessageid
+MessageFactory = zope.i18nmessageid.MessageFactory('nti.app.products.badges')
+
 from zope import component
 
 from nti.badges.interfaces import IBadgeManager
@@ -121,4 +124,9 @@ def assertion_exists(user, badge):
 def get_assertion(user, badge):
 	manager = component.getUtility(IBadgeManager)
 	result = manager.get_assertion(user, badge)
+	return result
+
+def update_assertion(assertion_id, email=None, exported=True):
+	manager = component.getUtility(IBadgeManager)
+	result = manager.update_assertion(assertion_id, email=email, exported=exported)
 	return result

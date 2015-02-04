@@ -9,6 +9,8 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+from . import MessageFactory as _
+
 import six
 import urllib
 import requests
@@ -43,6 +45,8 @@ from nti.dataserver.interfaces import IUser
 from nti.dataserver.interfaces import IDataserverFolder
 from nti.dataserver.interfaces import EVERYONE_USER_NAME
 
+from nti.dataserver.users.interfaces import IUserProfile
+
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.externalization import to_external_object
 
@@ -51,6 +55,8 @@ from .interfaces import IBadgesWorkspace
 from . import OPEN_BADGES_VIEW
 from . import HOSTED_BADGE_IMAGES
 from . import OPEN_ASSERTIONS_VIEW
+
+from . import update_assertion
 
 ALL = getattr(StandardExternalFields, 'ALL', ())
 
@@ -93,7 +99,7 @@ class OpenBadgeView(object):
 		if result is not None:
 			return IBadgeClass(result)
 
-		raise hexc.HTTPNotFound('Badge not found')
+		raise hexc.HTTPNotFound(_('Badge not found.'))
 
 @interface.implementer(IPathAdapter)
 @component.adapter(IDataserverFolder, IRequest)
@@ -134,7 +140,7 @@ def get_badge_image_content(badge_url):
 	__traceback_info__ = badge_url
 	res = requests.get(badge_url)
 	if res.status_code != 200:
-		raise hexc.HTTPNotFound("Could not find badge image")
+		raise hexc.HTTPNotFound(_("Could not find badge image."))
 	return res.content
 		
 class BaseOpenAssertionView(object):
@@ -149,7 +155,7 @@ class BaseOpenAssertionView(object):
 			badge_url = badge.get('image')
 
 		if not badge_url:
-			raise hexc.HTTPNotFound("Badge url not found")
+			raise hexc.HTTPNotFound(_("Badge url not found."))
 
 		p = urlparse(badge_url)
 		if not p.scheme:
@@ -157,7 +163,6 @@ class BaseOpenAssertionView(object):
 			## make sure we complete with the correct path
 			badge_url = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), 
 								   badge_url)
-		
 		return external, badge_url
 
 def is_exported(context):
@@ -171,18 +176,51 @@ def is_exported(context):
 			 name="image.png")
 class OpenAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
 
-	def __call__(self):
-		external, badge_url = super(OpenAssertionImageView, self).__call__()
+	def _get_image(self, external, badge_url, exported=False):
 		content = get_badge_image_content(badge_url)
 		target = source = BytesIO(content)
 		source.seek(0)
-		
-		if is_exported(self.request.context):
+		if exported:
 			url = urljoin(self.request.host_url, external['href'])
 			target = BytesIO()
 			bake_badge(source, target, url=url)
 			target.seek(0)
+		return target
 
+	def __call__(self):
+		external, badge_url = super(OpenAssertionImageView, self).__call__()
+		target = self._get_image(external, badge_url, is_exported(self.request.context))
+		response = self.request.response
+		response.body_file = target
+		response.content_type = b'image/png; charset=UTF-8'
+		response.content_disposition = b'attachment; filename="image.png"'
+		return response
+
+@view_config(route_name='objects.generic.traversal',
+			 request_method='POST',
+			 context=IBadgeAssertion,
+			 permission=nauth.ACT_READ,
+			 name="export")
+class ExportOpenAssertionView(OpenAssertionImageView):
+
+	def __call__(self):
+		external, badge_url = super(ExportOpenAssertionView, self).__call__()
+		context = self.request.context
+		if not is_exported(context):
+			user = IUser(context, None)
+			if user is None:
+				raise hexc.HTTPUnprocessableEntity(_("Cannot find user for assertion."))
+			if self.remoteUser != user:
+				raise hexc.HTTPForbidden()
+			profile = IUserProfile(user, None)
+			email = getattr(profile, 'email', None)
+			email_verified = getattr(profile, 'email_verified', False)
+			if not email or not email_verified:
+				msg = _("Cannot export assertion to an unverified email.")
+				raise hexc.HTTPUnprocessableEntity(msg)
+			update_assertion(context.uid, email=email, exported=True)
+			
+		target = self._get_image(external, badge_url, True)
 		response = self.request.response
 		response.body_file = target
 		response.content_type = b'image/png; charset=UTF-8'

@@ -25,10 +25,10 @@ from nti.badges.interfaces import IEarnableBadge
 from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
 
-from nti.dataserver.datastructures import LastModifiedCopyingUserList
+from nti.common.property import Lazy
+from nti.common.property import alias
 
-from nti.utils.property import Lazy
-from nti.utils.property import alias
+from nti.dataserver.datastructures import LastModifiedCopyingUserList
 
 from . import BADGES
 from . import get_all_badges

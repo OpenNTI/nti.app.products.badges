@@ -25,8 +25,10 @@ from nti.dataserver.interfaces import IUser
 from .. import OPEN_BADGES_VIEW
 from .. import HOSTED_BADGE_IMAGES
 from .. import OPEN_ASSERTIONS_VIEW
-# 
+
 from .. import get_assertion
+
+URL_SCHEMES = ("file", "ftp", "http", "https", "ldap")
 
 def get_user(user=None):
 	result = None
@@ -68,7 +70,7 @@ def get_badge_image_url_and_href(context, request=None, user=None):
 		## image url fixer
 		image = context.image
 		scheme = urlparse(image).scheme if image else None
-		if not scheme:
+		if not scheme or scheme.lower() not in URL_SCHEMES:
 			image = image if image.lower().endswith('.png') else image + '.png'
 			image = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), image)
 	return (image, href)

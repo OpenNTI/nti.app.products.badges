@@ -16,9 +16,6 @@ from zope import interface
 
 from tahrir_api.model import Person
 
-from nti.dataserver.interfaces import IUser
-from nti.dataserver.users.interfaces import IUserProfile
-
 from nti.badges.model import NTIPerson
 from nti.badges.interfaces import INTIPerson
 
@@ -30,6 +27,10 @@ from nti.badges.openbadges.interfaces import IIdentityObject
 
 from nti.badges.tahrir.interfaces import IPerson
 from nti.badges.tahrir.interfaces import IAssertion
+
+from nti.dataserver.users import User
+from nti.dataserver.interfaces import IUser
+from nti.dataserver.users.interfaces import IUserProfile
 
 from . import get_user_id
 from . import get_assertion_by_id
@@ -59,8 +60,6 @@ def user_to_tahrir_person(user):
 	result.nickname = user.username
 	result.created_on = datetime.fromtimestamp(user.createdTime)
 	return result
-
-from nti.dataserver.users import User
 
 @interface.implementer(IUser)
 @component.adapter(IPerson)

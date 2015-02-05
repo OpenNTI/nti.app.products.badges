@@ -61,6 +61,8 @@ class _BadgeAssertionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 		url_links = (('image', 'image.png'),)
 		if is_exported(context):
 			url_links += (('assertion', 'assertion.json'),)
+		else:
+			url_links += (('export', 'export'),)
 
 		href = '/%s/%s/%s' % (ds2, OPEN_ASSERTIONS_VIEW, quote(context.uid))
 		mapping['href'] = href

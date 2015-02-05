@@ -52,7 +52,6 @@
 	<adapter factory=".adapters.open_assertion_to_tahrir_assertion" />
 	
 	<!-- Decorators -->
-
 	<subscriber factory=".decorators._BadgeLinkFixer"
 				provides="nti.externalization.interfaces.IExternalMappingDecorator"
 				for="nti.badges.interfaces.IBadgeClass
@@ -69,7 +68,6 @@
 					 pyramid.interfaces.IRequest" />
 
 	<!-- Subscribers -->
-
 	<subscriber handler=".subscribers._user_deleted" />
 	<subscriber handler=".subscribers._after_database_opened_listener" />
 	<subscriber handler=".subscribers._make_assertions_notable_to_target" />
@@ -93,7 +91,6 @@
 			 provides=".interfaces.IBadgesWorkspace" />
 
 	<!-- Path Adapters -->
-
 	<adapter name="Badges"
 			 factory=".views.BadgesWorkspacePathAdapter" />
 
@@ -107,7 +104,6 @@
 			 provides="zope.traversing.interfaces.IPathAdapter" />
 
 	<!-- Preferences -->
-
 	<include package="zope.security" file="permissions.zcml"/>
 	<include package="zope.preference" file="meta.zcml" />
 	<include package="zope.preference" />

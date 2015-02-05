@@ -169,12 +169,7 @@ def is_exported(context):
 	result = getattr(context, 'exported', None) or False
 	return result
 
-@view_config(route_name='objects.generic.traversal',
-			 request_method='GET',
-			 context=IBadgeAssertion,
-			 permission=nauth.ACT_READ,
-			 name="image.png")
-class OpenAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
+class BaseAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
 
 	def _get_image(self, external, badge_url, exported=False):
 		content = get_badge_image_content(badge_url)
@@ -186,6 +181,13 @@ class OpenAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
 			bake_badge(source, target, url=url)
 			target.seek(0)
 		return target
+
+@view_config(route_name='objects.generic.traversal',
+			 request_method='GET',
+			 context=IBadgeAssertion,
+			 permission=nauth.ACT_READ,
+			 name="image.png")
+class OpenAssertionImageView(BaseAssertionImageView):
 
 	def __call__(self):
 		external, badge_url = super(OpenAssertionImageView, self).__call__()
@@ -201,7 +203,7 @@ class OpenAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
 			 context=IBadgeAssertion,
 			 permission=nauth.ACT_READ,
 			 name="export")
-class ExportOpenAssertionView(OpenAssertionImageView):
+class ExportOpenAssertionView(BaseAssertionImageView):
 
 	def __call__(self):
 		external, badge_url = super(ExportOpenAssertionView, self).__call__()

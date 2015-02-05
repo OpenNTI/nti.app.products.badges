@@ -25,12 +25,14 @@ from nti.badges.interfaces import INTIPerson
 from nti.badges.openbadges.model import IdentityObject
 from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import ID_TYPE_EMAIL
+from nti.badges.openbadges.interfaces import IBadgeAssertion
 from nti.badges.openbadges.interfaces import IIdentityObject
 
 from nti.badges.tahrir.interfaces import IPerson
 from nti.badges.tahrir.interfaces import IAssertion
 
 from . import get_user_id
+from . import get_assertion_by_id
 
 @interface.implementer(IIdentityObject)
 @component.adapter(IUser)
@@ -72,10 +74,24 @@ def tahrir_person_to_user(person):
 def tahrir_assertion_to_user(assertion):
 	return IUser(assertion.person)
 
+@interface.implementer(IAssertion)
+@component.adapter(IBadgeAssertion)
+def open_assertion_to_tahrir_assertion(assertion):
+	result = get_assertion_by_id(assertion.uid)
+	return result
+
+@interface.implementer(IUser)
+@component.adapter(IBadgeAssertion)
+def open_assertion_to_user(assertion):
+	assertion = IAssertion(assertion)
+	result = IUser(assertion.person)
+	return result
+
 @interface.implementer(IBadgeClass)
 @component.adapter(IAssertion)
 def tahrir_assertion_to_badge(assertion):
-	return assertion.badge
+	result = assertion.badge
+	return result
 
 @interface.implementer(INTIPerson)
 @component.adapter(IUser)

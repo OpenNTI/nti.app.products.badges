@@ -13,13 +13,21 @@ from hamcrest import has_key
 from hamcrest import has_entry
 from hamcrest import assert_that
 from hamcrest import has_entries
+from hamcrest import contains_string
 does_not = is_not
 
+import os
+import fudge
 import urllib
+from io import BytesIO
 
 from zope import component
 
 from nti.badges.interfaces import IBadgeManager
+from nti.badges.openbadges.utils.badgebakery import get_baked_data
+
+from nti.dataserver.users import User
+from nti.dataserver.users.utils import force_email_verification
 
 from nti.appserver.tests.test_application import TestApp
 
@@ -36,10 +44,14 @@ class TestViews(ApplicationLayerTest):
 	layer = NTISampleBadgesApplicationTestLayer
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
-	def test_open_badges(self):
+	@fudge.patch('nti.app.products.badges.views.get_badge_image_content')
+	def test_open_badges(self, mock_ic):
 		username = 'ichigo@bleach.com'
 		with mock_dataserver.mock_db_trans(self.ds):
-			self._create_user(username=username)
+			self._create_user(username=username,
+							  external_value={u'email':u'ichigo@bleach.com',
+											  u'realname':u'ichigo kurosaki',
+											  u'alias':u'zangetsu'})
 
 		badge_name = urllib.quote("badge.1")
 		open_badges_path = '/dataserver2/OpenBadges/%s' % badge_name
@@ -95,3 +107,22 @@ class TestViews(ApplicationLayerTest):
 		
 		assert_that(res.json_body, does_not(has_key('evidence')))
 		assert_that(res.json_body, does_not(has_key('expires')))
+		
+		export_json_path = open_assertion_path + "/export"
+		testapp.post(export_json_path,
+					 extra_environ=self._make_extra_environ(user=username),
+					 status=422)
+		
+		with mock_dataserver.mock_db_trans(self.ds):
+			user = User.get_user(username)
+			force_email_verification(user)
+		
+		icon  = os.path.join(os.path.dirname(__file__), 'icon.png')
+		with open(icon, "rb") as fp:
+			icon = fp.read()
+		mock_ic.is_callable().with_args().returns(icon)
+		res = testapp.post(export_json_path,
+						   extra_environ=self._make_extra_environ(user=username),
+						   status=200)
+		data = get_baked_data(BytesIO(res.body))
+		assert_that(data, contains_string('http://localhost/dataserver2/OpenAssertions/'))

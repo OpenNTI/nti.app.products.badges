@@ -126,6 +126,11 @@ def get_assertion(user, badge):
 	result = manager.get_assertion(user, badge)
 	return result
 
+def get_assertion_by_id(assertion_id):
+	manager = component.getUtility(IBadgeManager)
+	result = manager.get_assertion_by_id(assertion_id)
+	return result
+
 def update_assertion(assertion_id, email=None, exported=True):
 	manager = component.getUtility(IBadgeManager)
 	result = manager.update_assertion(assertion_id, email=email, exported=exported)

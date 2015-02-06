@@ -29,6 +29,9 @@ from nti.badges.tahrir.interfaces import ITahrirBadgeManager
 def do_evolve(dscontext):
 	setHooks()
 	manager = component.getUtility(ITahrirBadgeManager)
+	if manager.defaultSQLite:
+		return
+
 	mc = MigrationContext.configure(manager.engine.connect())
 	op = Operations(mc)
 	op.add_column("assertions", sa.Column('exported', sa.Boolean(), 

@@ -85,7 +85,7 @@ class AwardBadgeView(BaseBadgePostView):
 	
 		badge = get_badge(badge_name)
 		if badge is None:
-			raise hexc.HTTPNotFound('Badge not found')
+			raise hexc.HTTPUnprocessableEntity('Badge not found')
 	
 		# add person if required
 		# an adapter must exists to convert the user to a person
@@ -128,7 +128,7 @@ class RevokeBadgeView(BaseBadgePostView):
 		manager = component.getUtility(IBadgeManager)
 		badge = manager.get_badge(badge_name)
 		if badge is None:
-			raise hexc.HTTPNotFound('Badge not found')
+			raise hexc.HTTPUnprocessableEntity('Badge not found')
 	
 		if manager.assertion_exists(user, badge_name):
 			manager.remove_assertion(user, badge_name)

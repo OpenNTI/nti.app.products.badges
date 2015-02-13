@@ -16,8 +16,8 @@ from zope import interface
 from zope import component
 from zope.container.contained import Contained
 
-from nti.appserver.interfaces import IUserService
-from nti.appserver.interfaces import IContainerCollection
+from nti.appserver.workspaces.interfaces import IUserService
+from nti.appserver.workspaces.interfaces import IContainerCollection
 
 from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeManager

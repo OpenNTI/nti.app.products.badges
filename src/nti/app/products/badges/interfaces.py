@@ -11,7 +11,7 @@ from zope import component
 from zope import interface
 from zope.interface.interface import taggedValue
 
-from nti.appserver.interfaces import IWorkspace
+from nti.appserver.workspaces.interfaces import IWorkspace
 
 from nti.app.client_preferences.interfaces import TAG_EXTERNAL_PREFERENCE_GROUP
 

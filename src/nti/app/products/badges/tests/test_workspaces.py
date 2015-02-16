@@ -25,8 +25,8 @@ import os
 import fudge
 from io import BytesIO
 
-from nti.appserver.interfaces import IUserService
-from nti.appserver.interfaces import ICollection
+from nti.appserver.workspaces.interfaces import ICollection
+from nti.appserver.workspaces.interfaces import IUserService
 
 from nti.app.products.badges import add_assertion
 from nti.app.products.badges import interfaces as app_badge_interfaces

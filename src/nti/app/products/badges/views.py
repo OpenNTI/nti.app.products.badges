@@ -30,7 +30,7 @@ from pyramid import httpexceptions as hexc
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
-from nti.appserver.interfaces import IUserService
+from nti.appserver.workspaces.interfaces import IUserService
 
 from nti.badges.interfaces import IBadgeManager
 from nti.badges.openbadges.interfaces import IBadgeClass

@@ -7,20 +7,16 @@
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
-from nti.monkey import relstorage_patch_all_except_gevent_on_import
-relstorage_patch_all_except_gevent_on_import.patch()
-
 logger = __import__('logging').getLogger(__name__)
 
 import os
 import sys
 import argparse
 	
-from zope.configuration import xmlconfig, config
-from zope.dottedname import resolve as dottedname
-	
 from nti.badges.openbadges.utils import scanner
 from nti.badges.openbadges.utils import DEFAULT_SECRET 
+
+from nti.dataserver.utils.base_script import create_context
 
 from .. import add_badge
 from .. import add_issuer
@@ -63,30 +59,6 @@ def sync_db(path, update=False, verify=False, **kwargs):
 
 	return (issuers, badges)
 
-def _create_context(env_dir):
-	env_dir = os.path.expanduser(env_dir)
-
-	# find the ds etc directory
-	etc = os.getenv('DATASERVER_ETC_DIR') or os.path.join(env_dir, 'etc')
-	etc = os.path.expanduser(etc)
-
-	context = config.ConfigurationMachine()
-	xmlconfig.registerCommonDirectives(context)
-
-	slugs = os.path.join(etc, 'package-includes')
-	if os.path.exists(slugs) and os.path.isdir(slugs):
-		package = dottedname.resolve('nti.dataserver')
-		context = xmlconfig.file('configure.zcml', package=package, context=context)
-		xmlconfig.include(context, files=os.path.join(slugs, '*.zcml'),
-						  package='nti.appserver')
-		
-	library_zcml = os.path.join(etc, 'library.zcml')
-	if not os.path.exists(library_zcml):
-		raise Exception("could not locate library zcml file %s", library_zcml)
-	xmlconfig.include(context, file=library_zcml, package='nti.appserver')
-
-	return context
-
 def do_sync(path, update=False, verify=False, verbose=False, **kwargs):
 	issuers, badges = sync_db(path, update, verify, **kwargs)
 	if verbose:
@@ -122,7 +94,7 @@ def process_args(args=None):
 		sys.exit(2)
 
 	env_dir = os.getenv('DATASERVER_DIR')
-	context = _create_context(env_dir)
+	context = create_context(env_dir, with_library=True)
 	conf_packages = ('nti.appserver',)
 
 	from nti.dataserver.utils import run_with_dataserver

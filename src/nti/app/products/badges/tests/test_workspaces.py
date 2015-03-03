@@ -33,7 +33,7 @@ from nti.app.products.badges import interfaces as app_badge_interfaces
 
 from nti.badges.openbadges.utils.badgebakery import get_baked_data
 
-from nti.dataserver import traversal
+from nti.traversal import traversal
 
 from nti.appserver.tests.test_application import TestApp
 

@@ -20,11 +20,12 @@ from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecora
 from nti.badges.interfaces import IBadgeClass
 from nti.badges.interfaces import IBadgeAssertion
 
-from nti.dataserver.links import Link
 from nti.dataserver.interfaces import IUser
 
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalMappingDecorator
+
+from nti.links.links import Link
 
 LINKS = StandardExternalFields.LINKS
 

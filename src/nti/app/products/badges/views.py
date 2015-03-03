@@ -89,7 +89,6 @@ class OpenBadgeView(object):
 
 	def __call__(self):
 		request = self.request
-		
 		badge = request.subpath[0] if request.subpath else ''
 		if not badge:
 			raise hexc.HTTPNotFound()
@@ -121,20 +120,20 @@ class OpenAssertionsPathAdapter(Contained):
 			result. __acl__ = acl_from_aces(
 								ace_allowing(EVERYONE_USER_NAME, nauth.ACT_READ))
 			return result
-
 		raise KeyError(assertion_id)
 
 @view_config(route_name='objects.generic.traversal',
 			 renderer='rest',
 			 request_method='GET',
-			 context=OpenAssertionsPathAdapter)
+			 context=IBadgeAssertion)
 class OpenAssertionView(object):
 
 	def __init__(self, request):
 		self.request = request
 
 	def __call__(self):
-		return self.request.context
+		result = self.request.context
+		return result
 
 def get_badge_image_content(badge_url):
 	__traceback_info__ = badge_url

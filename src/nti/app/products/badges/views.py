@@ -168,6 +168,16 @@ def is_exported(context):
 	result = getattr(context, 'exported', None) or False
 	return result
 
+def is_email_verified(user):
+	profile = IUserProfile(user, None)
+	email_verified = getattr(profile, 'email_verified', False)
+	return email_verified
+
+def get_user_email(user):
+	profile = IUserProfile(user, None)
+	email = getattr(profile, 'email', None)
+	return email
+
 class BaseAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
 
 	def _get_image(self, external, badge_url, exported=False):
@@ -197,6 +207,21 @@ class OpenAssertionImageView(BaseAssertionImageView):
 		response.content_disposition = b'attachment; filename="image.png"'
 		return response
 
+def assert_assertion_exported(context, remoteUser=None):
+	context = context
+	if not is_exported(context):
+		user = IUser(context, None)
+		if user is None:
+			raise hexc.HTTPUnprocessableEntity(_("Cannot find user for assertion."))
+		if remoteUser is not None and remoteUser != user:
+			raise hexc.HTTPForbidden()
+		email = get_user_email(user)
+		email_verified = is_email_verified(user)
+		if not email or not email_verified:
+			msg = _("Cannot export assertion to an unverified email.")
+			raise hexc.HTTPUnprocessableEntity(msg)
+		update_assertion(context.uid, email=email, exported=True)
+
 @view_config(route_name='objects.generic.traversal',
 			 request_method='POST',
 			 context=IBadgeAssertion,
@@ -207,20 +232,7 @@ class ExportOpenAssertionView(BaseAssertionImageView):
 	def __call__(self):
 		external, badge_url = super(ExportOpenAssertionView, self).__call__()
 		context = self.request.context
-		if not is_exported(context):
-			user = IUser(context, None)
-			if user is None:
-				raise hexc.HTTPUnprocessableEntity(_("Cannot find user for assertion."))
-			if self.remoteUser != user:
-				raise hexc.HTTPForbidden()
-			profile = IUserProfile(user, None)
-			email = getattr(profile, 'email', None)
-			email_verified = getattr(profile, 'email_verified', False)
-			if not email or not email_verified:
-				msg = _("Cannot export assertion to an unverified email.")
-				raise hexc.HTTPUnprocessableEntity(msg)
-			update_assertion(context.uid, email=email, exported=True)
-			
+		assert_assertion_exported(context, self.remoteUser)	
 		target = self._get_image(external, badge_url, True)
 		response = self.request.response
 		response.body_file = target
@@ -232,10 +244,7 @@ class ExportOpenAssertionView(BaseAssertionImageView):
 			 request_method='GET',
 			 context=IBadgeAssertion,
 			 name="assertion.json")
-class OpenAssertionJSONView(BaseOpenAssertionView):
-
-	def __init__(self, request):
-		self.request = request
+class OpenAssertionJSONView(AbstractAuthenticatedView, BaseOpenAssertionView):
 
 	def _clean(self, external):
 		external.pop('href', None)
@@ -257,4 +266,6 @@ class OpenAssertionJSONView(BaseOpenAssertionView):
 	def __call__(self):
 		external, _ = super(OpenAssertionJSONView, self).__call__()
 		external = self._clean(external)
+		context = self.request.context
+		assert_assertion_exported(context, self.remoteUser)	
 		return external

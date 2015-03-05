@@ -45,8 +45,6 @@ from nti.dataserver.interfaces import IUser
 from nti.dataserver.interfaces import IDataserverFolder
 from nti.dataserver.interfaces import EVERYONE_USER_NAME
 
-from nti.dataserver.users.interfaces import IUserProfile
-
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.externalization import to_external_object
 
@@ -56,7 +54,10 @@ from . import OPEN_BADGES_VIEW
 from . import HOSTED_BADGE_IMAGES
 from . import OPEN_ASSERTIONS_VIEW
 
+from . import is_exported
+from . import get_user_email
 from . import update_assertion
+from . import is_email_verified
 
 ALL = getattr(StandardExternalFields, 'ALL', ())
 
@@ -163,20 +164,6 @@ class BaseOpenAssertionView(object):
 			badge_url = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), 
 								   badge_url)
 		return external, badge_url
-
-def is_exported(context):
-	result = getattr(context, 'exported', None) or False
-	return result
-
-def is_email_verified(user):
-	profile = IUserProfile(user, None)
-	email_verified = getattr(profile, 'email_verified', False)
-	return email_verified
-
-def get_user_email(user):
-	profile = IUserProfile(user, None)
-	email = getattr(profile, 'email', None)
-	return email
 
 class BaseAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
 

@@ -29,14 +29,14 @@ from nti.links.links import Link
 
 LINKS = StandardExternalFields.LINKS
 
+from .utils import get_badge_image_url_and_href
+
+
 from . import BADGES
 from . import OPEN_ASSERTIONS_VIEW
 
-from .utils import get_badge_image_url_and_href
-
-def is_exported(context):
-	result = getattr(context, 'exported', None) or False
-	return result
+from . import is_exported
+from . import is_email_verified
 
 @component.adapter(IBadgeClass)
 @interface.implementer(IExternalMappingDecorator)
@@ -60,7 +60,7 @@ class _BadgeAssertionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 			return
 		
 		url_links = (('image', 'image.png'),)
-		if is_exported(context):
+		if is_exported(context) and is_email_verified(self.remoteUser):
 			url_links += (('assertion', 'assertion.json'),)
 		else:
 			url_links += (('export', 'export'),)

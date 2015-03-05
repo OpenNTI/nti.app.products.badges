@@ -32,6 +32,16 @@ def get_user_id(user):
 	result = result.lower()
 	return result
 
+def get_user_email(user):
+	profile = IUserProfile(user, None)
+	email = getattr(profile, 'email', None)
+	return email
+
+def is_email_verified(user):
+	profile = IUserProfile(user, None)
+	email_verified = getattr(profile, 'email_verified', False)
+	return email_verified
+
 # issuers
 
 def issuer_exists(issuer):
@@ -134,4 +144,8 @@ def get_assertion_by_id(assertion_id):
 def update_assertion(assertion_id, email=None, exported=True):
 	manager = component.getUtility(IBadgeManager)
 	result = manager.update_assertion(assertion_id, email=email, exported=exported)
+	return result
+
+def is_exported(context):
+	result = getattr(context, 'exported', None) or False
 	return result

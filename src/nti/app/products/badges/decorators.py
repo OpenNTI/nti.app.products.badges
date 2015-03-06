@@ -27,16 +27,15 @@ from nti.externalization.interfaces import IExternalMappingDecorator
 
 from nti.links.links import Link
 
-LINKS = StandardExternalFields.LINKS
-
-from .utils import get_badge_image_url_and_href
-
-
 from . import BADGES
 from . import OPEN_ASSERTIONS_VIEW
 
 from . import is_exported
 from . import is_email_verified
+
+from .utils import get_badge_image_url_and_href
+
+LINKS = StandardExternalFields.LINKS
 
 @component.adapter(IBadgeClass)
 @interface.implementer(IExternalMappingDecorator)

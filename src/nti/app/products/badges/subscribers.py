@@ -30,7 +30,7 @@ from nti.processlifetime import IApplicationTransactionOpenedEvent
 from . import person_exists
 from . import delete_person
 
-from .utils import get_badge_image_url_and_href
+from .utils import get_badge_image_url
 
 @component.adapter(IUser, IObjectRemovedEvent)
 def _user_deleted(user, event):
@@ -131,7 +131,7 @@ def _make_assertions_notable_to_target(assertion, event):
 	
 	# set badge image
 	badge = IBadgeClass(assertion)
-	image, _ = get_badge_image_url_and_href(badge)
+	image = get_badge_image_url(badge)
 	change.image = image if image else None
 	
 	user = IUser(assertion)

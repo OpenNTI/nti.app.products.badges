@@ -10,6 +10,7 @@ __docformat__ = "restructuredtext en"
 from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
+from hamcrest import has_key
 from hamcrest import contains
 from hamcrest import has_item
 from hamcrest import ends_with
@@ -72,19 +73,16 @@ class TestWorkspaces(ApplicationLayerTest):
 
 			assert_that(workspace.collections, contains(verifiably_provides(ICollection),
 														verifiably_provides(ICollection),
-														verifiably_provides(ICollection),
-														verifiably_provides(ICollection)))
+														verifiably_provides(ICollection) ))
 
 			assert_that(workspace.collections, has_items(has_property('name', 'AllBadges'),
 														 has_property('name', 'EarnedBadges'),
-														 has_property('name', 'EarnableBadges'),
-														 has_property('name', 'Assertions')))
+														 has_property('name', 'EarnableBadges') ))
 
 			assert_that( [traversal.resource_path(c) for c in workspace.collections],
 						 has_items(badges_path + '/AllBadges',
 								   badges_path + '/EarnedBadges',
-								   badges_path + '/EarnableBadges',
-								   badges_path + '/Assertions'))
+								   badges_path + '/EarnableBadges'))
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_all_badges(self):
@@ -152,29 +150,33 @@ class TestWorkspaces(ApplicationLayerTest):
 		with mock_dataserver.mock_db_trans(self.ds):
 			add_assertion(username, badge_name)
 
-		earned_badges_path = '/dataserver2/users/person.2%40nti.com/Badges/Assertions'
+		earned_badges_path = '/dataserver2/users/person.2%40nti.com/Badges/EarnedBadges'
 		testapp = TestApp(self.app)
 		res = testapp.get(earned_badges_path,
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
 		
+		assertion_path = None
 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(1))))
 		item = res.json_body['Items'][0]
-		assert_that(item, has_entry('uid', is_not(none())))
-		assert_that(item, has_entry('href', is_not(none())))
-		
-		assertion_path = item['href']
+		assert_that(item, has_key('Links'))
+		for link in item['Links']:
+			if link.get('rel') == 'assertion':
+				assertion_path = link['href']
+			
+		assert_that(assertion_path, is_not(none()))
 		res = testapp.get(assertion_path,
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
 
-		uid = item['uid']
-		assert_that(res.json_body, has_entry('uid', uid))
+		assert_that(res.json_body, has_entry('uid', is_not(none())))
 		assert_that(res.json_body, has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.assertion'))
-		assert_that(res.json_body, has_entry( 'Links', has_length(2)))
-		assert_that(res.json_body, has_entry(u'image', ends_with(uid + '/image.png')))
+		assert_that(res.json_body, has_entry(u'Links', has_length(2)))
+		assert_that(res.json_body, has_entry(u'image', is_not(none())))
 		assert_that(res.json_body, has_entry(u'recipient',
 											 has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.identityobject')))
+		
+		uid = res.json_body['uid'] # save uid
 		
 		icon  = os.path.join(os.path.dirname(__file__), 'icon.png')
 		with open(icon, "rb") as fp:
@@ -187,3 +189,17 @@ class TestWorkspaces(ApplicationLayerTest):
 						  status=200)
 		data = get_baked_data(BytesIO(res.body))
 		assert_that(data, has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
+		
+		assertion_assertion_path = assertion_path + "/assertion.json"
+		res = testapp.get(assertion_assertion_path,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
+		
+		assert_that(res.json_body, has_entry('uid', is_(uid)))
+		assert_that(res.json_body, has_entry('issuedOn', is_not(none())))
+		assert_that(res.json_body, has_entry('badge', has_entry('image', is_not(none()))))
+		assert_that(res.json_body, has_entry('verify', has_entry('url', ends_with(uid))))
+		assert_that(res.json_body, has_entry('recipient', has_entry('type', is_('email'))))
+		assert_that(res.json_body, has_entry('recipient', has_entry('hashed', is_(True))))
+		assert_that(res.json_body, has_entry('recipient', has_entry('salt', is_not(none()))))
+		assert_that(res.json_body, has_entry('recipient', has_entry('identity', is_not(none()))))

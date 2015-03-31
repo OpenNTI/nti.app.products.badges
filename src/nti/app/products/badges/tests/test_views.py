@@ -84,8 +84,8 @@ class TestViews(ApplicationLayerTest):
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=422)
 		
-		export_json_path = open_assertion_path + "/export"
-		testapp.post(export_json_path,
+		export_assertion_path = open_assertion_path + "/lock"
+		testapp.post(export_assertion_path,
 					 extra_environ=self._make_extra_environ(user=username),
 					 status=422)
 		
@@ -97,9 +97,16 @@ class TestViews(ApplicationLayerTest):
 		with open(icon, "rb") as fp:
 			icon = fp.read()
 		mock_ic.is_callable().with_args().returns(icon)
-		res = testapp.post(export_json_path,
+		res = testapp.post(export_assertion_path,
 						   extra_environ=self._make_extra_environ(user=username),
 						   status=200)
+		data = get_baked_data(BytesIO(res.body))
+		assert_that(data, has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
+		
+		baked_image_path = open_assertion_path + "/image.png"
+		res = testapp.get(baked_image_path,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
 		data = get_baked_data(BytesIO(res.body))
 		assert_that(data, has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
 		

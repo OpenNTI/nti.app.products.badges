@@ -9,7 +9,6 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from urllib import quote
 from urlparse import urljoin
 
 from zope import component
@@ -20,6 +19,7 @@ from pyramid.threadlocal import get_current_request
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.badges.interfaces import IBadgeClass
+from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeAssertion
 from nti.badges.openbadges.interfaces import IBadgeAssertion as IOpenAssertion
 
@@ -33,12 +33,16 @@ from nti.externalization.interfaces import IExternalMappingDecorator
 from nti.links.links import Link
 
 from . import BADGES
-from . import OPEN_ASSERTIONS_VIEW
 
 from . import is_locked
+from . import get_assertion
 from . import is_email_verified
 
-from .utils import get_badge_image_url_and_href
+from .utils import get_badge_href
+from .utils import get_assertion_href
+from .utils import get_badge_image_url
+from .utils import get_assertion_json_url
+from .utils import get_assertion_image_url
 
 LINKS = StandardExternalFields.LINKS
 
@@ -48,36 +52,36 @@ class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 
 	def _do_decorate_external(self, context, mapping):
 		request = self.request
-		image, href = get_badge_image_url_and_href(context, request, self.remoteUser)	
-		mapping['href'] = href
-		mapping['image'] = image
-
+		mapping['href'] = get_badge_href(context, request)
+		mapping['image'] = get_badge_image_url(context, request)
+		if IEarnedBadge.providedBy(context):
+			assertion = get_assertion(self.remoteUser, context)
+			if assertion is not None:
+				_links = mapping.setdefault(LINKS, [])
+				href = get_assertion_href(assertion, request) 
+				_links.append(Link(href, rel="assertion"))
+				
 @component.adapter(IBadgeAssertion)
 @interface.implementer(IExternalMappingDecorator)
 class _BadgeAssertionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 
 	def _do_decorate_external(self, context, mapping):
 		request = self.request
-		try:
-			ds2 = request.path_info_peek() # e.g. /dataserver2
-		except AttributeError:
-			return
-
-		url_links = ( ('image', 'image.png'), )
-		if is_locked(context):
-			url_links += ( ('assertion', 'assertion.json'), )
-		elif is_email_verified(self.remoteUser):
-			url_links += ( ('export', 'export'), )
-
-		href = '/%s/%s/%s' % (ds2, OPEN_ASSERTIONS_VIEW, quote(context.uid))
-		mapping['href'] = href
-		
 		_links = mapping.setdefault(LINKS, [])
-		for key, name in url_links:
-			_links.append(Link(href, elements=(name,), rel=key))
-			if key == 'image': # legacy
-				url = "%s/%s" % (urljoin(request.host_url, href), name)
-				mapping[key] = url
+		mapping['href'] = get_assertion_href(context, request)
+		mapping['image'] = get_assertion_image_url(context, request)
+			
+		if is_locked(context):
+			## add linkt baked image
+			href = get_assertion_image_url(context, request)
+			_links.append(Link(href, rel='baked-image'))
+			## add link to assertion json
+			href = get_assertion_json_url(context, request)
+			_links.append(Link(href, rel='mozilla-backpack'))
+		elif is_email_verified(self.remoteUser):
+			## add link to export/lock assertion
+			href = get_assertion_href(context, request)
+			_links.append(Link(href, elements=('lock',), rel='lock'))
 
 @component.adapter(IUser)
 @interface.implementer(IExternalMappingDecorator)
@@ -93,17 +97,10 @@ class _OpenAssertionDecorator(object):
 
 	__metaclass__ = SingletonDecorator
 
-	def decorateExternalObject(self, original, external):
+	def decorateExternalObject(self, context, external):
 		request = get_current_request()
-		if request is None:
-			return
-		try:
-			ds2 = request.path_info_peek() # e.g. /dataserver2
-		except AttributeError:
-			return
-		
-		if is_locked(original):	
-			href = '/%s/%s/%s' % (ds2, OPEN_ASSERTIONS_VIEW, quote(original.uid))
+		href = get_assertion_href(context, request)
+		if href and is_locked(context):
 			verify = external.get('verify')
-			if verify:
+			if verify: # replace verification URL
 				verify['url'] = urljoin(request.host_url, href)

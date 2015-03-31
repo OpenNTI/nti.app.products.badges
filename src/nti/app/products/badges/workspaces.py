@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Implementation of an Atom/OData workspace and collection
-for badges.
+Implementation of an Atom/OData workspace and collection for badges.
 
 .. $Id$
 """
@@ -66,8 +65,7 @@ class _BadgesWorkspace(Contained):
 		if component.queryUtility(IBadgeManager) is not None:
 			return (AllBadgesCollection(self),
 					EarnableBadgeCollection(self),
-					EarnedBadgeCollection(self),
-					AssertionCollection(self))
+					EarnedBadgeCollection(self) )
 		return ()
 
 	def __getitem__(self, key):

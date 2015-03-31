@@ -37,7 +37,6 @@ class TestBadges(NTIBadgesTestCase):
 											   'about':about})
 		return usr
 
-
 	@WithMockDSTrans
 	def test_get_user_id(self):
 		user = self._create_user()

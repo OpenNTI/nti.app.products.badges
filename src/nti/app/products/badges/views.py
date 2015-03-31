@@ -11,12 +11,9 @@ logger = __import__('logging').getLogger(__name__)
 
 from . import MessageFactory as _
 
-import six
 import urllib
 import requests
 from io import BytesIO
-from urlparse import urljoin
-from urlparse import urlparse
 from collections import Mapping
 
 from zope import component
@@ -25,6 +22,7 @@ from zope.container.contained import Contained
 from zope.traversing.interfaces import IPathAdapter
 
 from pyramid.view import view_config
+from pyramid.view import view_defaults
 from pyramid.interfaces import IRequest
 from pyramid import httpexceptions as hexc
 
@@ -48,16 +46,17 @@ from nti.dataserver.interfaces import EVERYONE_USER_NAME
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.externalization import to_external_object
 
+from .utils import get_badge_image_url
 from .interfaces import IBadgesWorkspace
 
 from . import OPEN_BADGES_VIEW
-from . import HOSTED_BADGE_IMAGES
 from . import OPEN_ASSERTIONS_VIEW
 
 from . import is_locked
 from . import get_user_email
 from . import update_assertion
 from . import is_email_verified
+
 
 ALL = getattr(StandardExternalFields, 'ALL', ())
 
@@ -159,7 +158,7 @@ def _copy_external(external):
 	result = _m(external)
 	return result
 	
-def _clean_external(external):
+def _produce_payload(external):
 	external.pop('href', None)
 	def _m(ext):
 		if isinstance(ext, Mapping):
@@ -178,52 +177,40 @@ def _clean_external(external):
 		
 class BaseOpenAssertionView(object):
 
-	def __call__(self):
+	def _do_call(self):
 		request = self.request
+		badge = IBadgeClass(request.context)
 		external = to_external_object(request.context)
-		badge = external.get('badge')
-		if isinstance(badge, six.string_types):
-			badge_url = badge
-		else:
-			badge_url = badge.get('image')
-
-		if not badge_url:
-			raise hexc.HTTPNotFound(_("Badge url not found."))
-
-		p = urlparse(badge_url)
-		if not p.scheme:
-			## CS: Handle the case where the badge url is an image name.
-			## make sure we complete with the correct path
-			badge_url = "%s/%s" % (urljoin(request.host_url, HOSTED_BADGE_IMAGES), 
-								   badge_url)
+		badge_url = get_badge_image_url(badge, request)
 		return external, badge_url
 
 class BaseAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
 
-	def _get_image(self, external, badge_url, payload=None, locked=False):
+	def _get_image(self, badge_url, payload=None, locked=False):
 		content = get_badge_image_content(badge_url)
 		target = source = BytesIO(content)
 		source.seek(0)
 		if locked:
-			url = urljoin(self.request.host_url, external['href'])
 			target = BytesIO()
-			bake_badge(source, target, payload=payload, url=(url if not payload else None))
+			bake_badge(	source, target, 
+						payload=payload, 
+						url=(badge_url if not payload else None))
 			target.seek(0)
 		return target
 
-@view_config(route_name='objects.generic.traversal',
-			 request_method='GET',
-			 context=IBadgeAssertion,
-			 permission=nauth.ACT_READ,
-			 name="image.png")
+@view_config(name="baked-image")
+@view_config(name="image.png")
+@view_defaults(	route_name='objects.generic.traversal',
+			 	request_method='GET',
+				context=IBadgeAssertion,
+			 	permission=nauth.ACT_READ)
 class OpenAssertionImageView(BaseAssertionImageView):
 
 	def __call__(self):
-		external, badge_url = super(OpenAssertionImageView, self).__call__()
-		payload = _clean_external(_copy_external(external))
-		target = self._get_image(external, badge_url,
-								 payload=payload,
-								 locked=is_locked(self.request.context))
+		external, badge_url = self._do_call()
+		locked = is_locked(self.request.context)
+		payload = _produce_payload(external) if is_locked else None
+		target = self._get_image(badge_url, payload=payload, locked=locked)
 		response = self.request.response
 		response.body_file = target
 		response.content_type = b'image/png; charset=UTF-8'
@@ -245,34 +232,36 @@ def assert_assertion_exported(context, remoteUser=None):
 			raise hexc.HTTPUnprocessableEntity(msg)
 		update_assertion(context.uid, email=email, exported=True)
 
-@view_config(route_name='objects.generic.traversal',
-			 request_method='POST',
-			 context=IBadgeAssertion,
-			 permission=nauth.ACT_READ,
-			 name="export")
+@view_config(name="mozillabackpack")
+@view_config(name="assertion.json")
+@view_defaults(	route_name='objects.generic.traversal',
+			 	request_method='GET',
+			 	context=IBadgeAssertion)
+class OpenAssertionJSONView(AbstractAuthenticatedView, BaseOpenAssertionView):
+
+	def __call__(self):
+		external, _ = self._do_call()
+		external = _produce_payload(external)
+		context = self.request.context
+		assert_assertion_exported(context, self.remoteUser)	
+		return external
+
+@view_config(name="lock")
+@view_config(name="export")
+@view_defaults(	route_name='objects.generic.traversal',
+			 	request_method='POST',
+				context=IBadgeAssertion,
+			 	permission=nauth.ACT_READ)
 class ExportOpenAssertionView(BaseAssertionImageView):
 
 	def __call__(self):
-		external, badge_url = super(ExportOpenAssertionView, self).__call__()
+		external, badge_url = self._do_call()
 		context = self.request.context
 		assert_assertion_exported(context, self.remoteUser)	
-		payload = _clean_external(_copy_external(external))
-		target = self._get_image(external, badge_url, payload=payload, locked=True)
+		payload = _produce_payload(external)
+		target = self._get_image(badge_url, payload=payload, locked=True)
 		response = self.request.response
 		response.body_file = target
 		response.content_type = b'image/png; charset=UTF-8'
 		response.content_disposition = b'attachment; filename="image.png"'
 		return response
-
-@view_config(route_name='objects.generic.traversal',
-			 request_method='GET',
-			 context=IBadgeAssertion,
-			 name="assertion.json")
-class OpenAssertionJSONView(AbstractAuthenticatedView, BaseOpenAssertionView):
-
-	def __call__(self):
-		external, _ = super(OpenAssertionJSONView, self).__call__()
-		external = _clean_external(external)
-		context = self.request.context
-		assert_assertion_exported(context, self.remoteUser)	
-		return external

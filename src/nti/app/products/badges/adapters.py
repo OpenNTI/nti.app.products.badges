@@ -87,6 +87,12 @@ def open_assertion_to_user(assertion):
 	return result
 
 @interface.implementer(IBadgeClass)
+@component.adapter(IBadgeAssertion)
+def open_assertion_to_badge(assertion):
+	result = assertion.badge
+	return result
+
+@interface.implementer(IBadgeClass)
 @component.adapter(IAssertion)
 def tahrir_assertion_to_badge(assertion):
 	result = assertion.badge

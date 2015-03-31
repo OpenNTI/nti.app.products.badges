@@ -33,7 +33,6 @@ class TestAdapters(NTIBadgesTestCase):
 											   'about':about})
 		return usr
 
-
 	@WithMockDSTrans
 	def test_user_to_io(self):
 		user = self._create_user()

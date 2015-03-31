@@ -54,7 +54,7 @@ from . import OPEN_BADGES_VIEW
 from . import HOSTED_BADGE_IMAGES
 from . import OPEN_ASSERTIONS_VIEW
 
-from . import is_exported
+from . import is_locked
 from . import get_user_email
 from . import update_assertion
 from . import is_email_verified
@@ -142,6 +142,39 @@ def get_badge_image_content(badge_url):
 	if res.status_code != 200:
 		raise hexc.HTTPNotFound(_("Could not find badge image."))
 	return res.content
+
+def _copy_external(external):
+	def _m(ext):
+		if isinstance(ext, Mapping):
+			result = {}
+			for key, value in ext.items():
+				result[key] = _m(value)
+		elif isinstance(ext, (tuple, list)):
+			result = []
+			for value in ext:
+				result.append(_m(value))
+		else:
+			result = ext
+		return result
+	result = _m(external)
+	return result
+	
+def _clean_external(external):
+	external.pop('href', None)
+	def _m(ext):
+		if isinstance(ext, Mapping):
+			for key in ALL:
+				ext.pop(key, None)
+			for key, value in ext.items():
+				if value is None:
+					ext.pop(key, None)
+				else:
+					_m(value)
+		elif isinstance(ext, (tuple, list)):
+			for value in ext:
+				_m(value)
+	_m(external)
+	return external
 		
 class BaseOpenAssertionView(object):
 
@@ -167,14 +200,14 @@ class BaseOpenAssertionView(object):
 
 class BaseAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
 
-	def _get_image(self, external, badge_url, exported=False):
+	def _get_image(self, external, badge_url, payload=None, locked=False):
 		content = get_badge_image_content(badge_url)
 		target = source = BytesIO(content)
 		source.seek(0)
-		if exported:
+		if locked:
 			url = urljoin(self.request.host_url, external['href'])
 			target = BytesIO()
-			bake_badge(source, target, url=url)
+			bake_badge(source, target, payload=payload, url=(url if not payload else None))
 			target.seek(0)
 		return target
 
@@ -187,7 +220,10 @@ class OpenAssertionImageView(BaseAssertionImageView):
 
 	def __call__(self):
 		external, badge_url = super(OpenAssertionImageView, self).__call__()
-		target = self._get_image(external, badge_url, is_exported(self.request.context))
+		payload = _clean_external(_copy_external(external))
+		target = self._get_image(external, badge_url,
+								 payload=payload,
+								 locked=is_locked(self.request.context))
 		response = self.request.response
 		response.body_file = target
 		response.content_type = b'image/png; charset=UTF-8'
@@ -196,7 +232,7 @@ class OpenAssertionImageView(BaseAssertionImageView):
 
 def assert_assertion_exported(context, remoteUser=None):
 	context = context
-	if not is_exported(context):
+	if not is_locked(context):
 		user = IUser(context, None)
 		if user is None:
 			raise hexc.HTTPUnprocessableEntity(_("Cannot find user for assertion."))
@@ -220,7 +256,8 @@ class ExportOpenAssertionView(BaseAssertionImageView):
 		external, badge_url = super(ExportOpenAssertionView, self).__call__()
 		context = self.request.context
 		assert_assertion_exported(context, self.remoteUser)	
-		target = self._get_image(external, badge_url, True)
+		payload = _clean_external(_copy_external(external))
+		target = self._get_image(external, badge_url, payload=payload, locked=True)
 		response = self.request.response
 		response.body_file = target
 		response.content_type = b'image/png; charset=UTF-8'
@@ -233,26 +270,9 @@ class ExportOpenAssertionView(BaseAssertionImageView):
 			 name="assertion.json")
 class OpenAssertionJSONView(AbstractAuthenticatedView, BaseOpenAssertionView):
 
-	def _clean(self, external):
-		external.pop('href', None)
-		def _m(ext):
-			if isinstance(ext, Mapping):
-				for key in ALL:
-					ext.pop(key, None)
-				for key, value in ext.items():
-					if value is None:
-						ext.pop(key, None)
-					else:
-						_m(value)
-			elif isinstance(ext, (tuple, list)):
-				for value in ext:
-					_m(value)
-		_m(external)
-		return external
-	
 	def __call__(self):
 		external, _ = super(OpenAssertionJSONView, self).__call__()
-		external = self._clean(external)
+		external = _clean_external(external)
 		context = self.request.context
 		assert_assertion_exported(context, self.remoteUser)	
 		return external

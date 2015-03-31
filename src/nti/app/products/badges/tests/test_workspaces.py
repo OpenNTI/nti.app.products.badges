@@ -136,8 +136,8 @@ class TestWorkspaces(ApplicationLayerTest):
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	@fudge.patch('nti.app.products.badges.views.get_badge_image_content',
-				 'nti.app.products.badges.decorators.is_exported',
-				 'nti.app.products.badges.views.is_exported',
+				 'nti.app.products.badges.decorators.is_locked',
+				 'nti.app.products.badges.views.is_locked',
 				 'nti.app.products.badges.decorators.is_email_verified')
 	def test_assertions(self, mock_ic, mock_ie1, mock_ie2, mock_ie3):		
 		mock_ie1.is_callable().with_args().returns(True)
@@ -171,8 +171,8 @@ class TestWorkspaces(ApplicationLayerTest):
 		uid = item['uid']
 		assert_that(res.json_body, has_entry('uid', uid))
 		assert_that(res.json_body, has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.assertion'))
+		assert_that(res.json_body, has_entry( 'Links', has_length(2)))
 		assert_that(res.json_body, has_entry(u'image', ends_with(uid + '/image.png')))
-		assert_that(res.json_body, has_entry(u'assertion', ends_with(uid + '/assertion.json')))
 		assert_that(res.json_body, has_entry(u'recipient',
 											 has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.identityobject')))
 		
@@ -186,4 +186,4 @@ class TestWorkspaces(ApplicationLayerTest):
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
 		data = get_baked_data(BytesIO(res.body))
-		assert_that(data, contains_string('http://localhost/dataserver2/OpenAssertions/'))
+		assert_that(data, has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))

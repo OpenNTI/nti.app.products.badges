@@ -146,6 +146,7 @@ def update_assertion(assertion_id, email=None, exported=True):
 	result = manager.update_assertion(assertion_id, email=email, exported=exported)
 	return result
 
-def is_exported(context):
+def is_locked(context):
 	result = getattr(context, 'exported', None) or False
 	return result
+is_exported = is_locked

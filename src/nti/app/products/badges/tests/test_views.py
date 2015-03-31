@@ -101,7 +101,7 @@ class TestViews(ApplicationLayerTest):
 						   extra_environ=self._make_extra_environ(user=username),
 						   status=200)
 		data = get_baked_data(BytesIO(res.body))
-		assert_that(data, contains_string('http://localhost/dataserver2/OpenAssertions/'))
+		assert_that(data, has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
 		
 		assertion_json_path = open_assertion_path + "/assertion.json"
 		res = testapp.get(assertion_json_path,
@@ -127,8 +127,7 @@ class TestViews(ApplicationLayerTest):
 		
 		assert_that(res.json_body, has_entry('verify', 
 											 has_entries('type', 'hosted',
-														 'url', u'http://nti.com')))
+														 'url', contains_string('http://localhost'))))
 		
 		assert_that(res.json_body, does_not(has_key('evidence')))
 		assert_that(res.json_body, does_not(has_key('expires')))
-

@@ -47,7 +47,8 @@ from .utils import get_assertion_image_url
 LINKS = StandardExternalFields.LINKS
 
 def _assertion_links(links, context, remoteUser, request):
-	if is_locked(context):
+	locked = is_locked(context)
+	if locked:
 		## add linkt baked image
 		href = get_assertion_image_url(context, request)
 		links.append(Link(href, rel='baked-image'))
@@ -58,6 +59,7 @@ def _assertion_links(links, context, remoteUser, request):
 		## add link to export/lock assertion
 		href = get_assertion_href(context, request)
 		links.append(Link(href, elements=('lock',), rel='lock'))
+	return locked
 			
 @component.adapter(IBadgeClass)
 @interface.implementer(IExternalMappingDecorator)
@@ -65,6 +67,7 @@ class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 
 	def _do_decorate_external(self, context, mapping):
 		request = self.request
+		mapping['']
 		mapping['href'] = get_badge_href(context, request)
 		mapping['image'] = get_badge_image_url(context, request)
 		if IEarnedBadge.providedBy(context):
@@ -73,7 +76,8 @@ class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 				_links = mapping.setdefault(LINKS, [])
 				href = get_assertion_href(assertion, request) 
 				_links.append(Link(href, rel="assertion"))
-				_assertion_links(_links, assertion, self.remoteUser, request)
+				locked = _assertion_links(_links, assertion, self.remoteUser, request)
+				mapping['Locked'] = locked
 				
 @component.adapter(IBadgeAssertion)
 @interface.implementer(IExternalMappingDecorator)
@@ -84,7 +88,8 @@ class _BadgeAssertionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 		_links = mapping.setdefault(LINKS, [])
 		mapping['href'] = get_assertion_href(context, request)
 		mapping['image'] = get_assertion_image_url(context, request)
-		_assertion_links(_links, context, self.remoteUser, request)
+		locked = _assertion_links(_links, context, self.remoteUser, request)
+		mapping['Locked'] = locked
 
 @component.adapter(IUser)
 @interface.implementer(IExternalMappingDecorator)

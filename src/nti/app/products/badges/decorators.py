@@ -46,6 +46,19 @@ from .utils import get_assertion_image_url
 
 LINKS = StandardExternalFields.LINKS
 
+def _assertion_links(links, context, remoteUser, request):
+	if is_locked(context):
+		## add linkt baked image
+		href = get_assertion_image_url(context, request)
+		links.append(Link(href, rel='baked-image'))
+		## add link to assertion json
+		href = get_assertion_json_url(context, request)
+		links.append(Link(href, rel='mozilla-backpack'))
+	elif is_email_verified(remoteUser):
+		## add link to export/lock assertion
+		href = get_assertion_href(context, request)
+		links.append(Link(href, elements=('lock',), rel='lock'))
+			
 @component.adapter(IBadgeClass)
 @interface.implementer(IExternalMappingDecorator)
 class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
@@ -60,6 +73,7 @@ class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 				_links = mapping.setdefault(LINKS, [])
 				href = get_assertion_href(assertion, request) 
 				_links.append(Link(href, rel="assertion"))
+				_assertion_links(_links, assertion, self.remoteUser, request)
 				
 @component.adapter(IBadgeAssertion)
 @interface.implementer(IExternalMappingDecorator)
@@ -70,18 +84,7 @@ class _BadgeAssertionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 		_links = mapping.setdefault(LINKS, [])
 		mapping['href'] = get_assertion_href(context, request)
 		mapping['image'] = get_assertion_image_url(context, request)
-			
-		if is_locked(context):
-			## add linkt baked image
-			href = get_assertion_image_url(context, request)
-			_links.append(Link(href, rel='baked-image'))
-			## add link to assertion json
-			href = get_assertion_json_url(context, request)
-			_links.append(Link(href, rel='mozilla-backpack'))
-		elif is_email_verified(self.remoteUser):
-			## add link to export/lock assertion
-			href = get_assertion_href(context, request)
-			_links.append(Link(href, elements=('lock',), rel='lock'))
+		_assertion_links(_links, context, self.remoteUser, request)
 
 @component.adapter(IUser)
 @interface.implementer(IExternalMappingDecorator)

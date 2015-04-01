@@ -14,7 +14,6 @@ import sys
 import argparse
 	
 from nti.badges.openbadges.utils import scanner
-from nti.badges.openbadges.utils import DEFAULT_SECRET 
 
 from nti.dataserver.utils.base_script import create_context
 
@@ -74,7 +73,7 @@ def process_args(args=None):
 							 help="Hosted badge images directory")
 	arg_parser.add_argument('-s', '--secret',
 							 dest='secret',
-							 default=DEFAULT_SECRET,
+							 default=None,
 							 help="JSON web signature secret")
 	arg_parser.add_argument('-u', '--update', help="Update", action='store_true',
 							 dest='update')

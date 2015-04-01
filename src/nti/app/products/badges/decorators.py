@@ -67,7 +67,6 @@ class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 
 	def _do_decorate_external(self, context, mapping):
 		request = self.request
-		mapping['']
 		mapping['href'] = get_badge_href(context, request)
 		mapping['image'] = get_badge_image_url(context, request)
 		if IEarnedBadge.providedBy(context):

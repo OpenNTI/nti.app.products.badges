@@ -198,6 +198,7 @@ class TestWorkspaces(ApplicationLayerTest):
 		
 		assert_that(res.json_body, has_entry('uid', is_(uid)))
 		assert_that(res.json_body, has_entry('issuedOn', is_not(none())))
+		assert_that(res.json_body, has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
 		assert_that(res.json_body, has_entry('badge', is_('http://localhost/dataserver2/OpenBadges/badge.2')))
 		assert_that(res.json_body, has_entry('verify', has_entry('url', contains_string(uid))))
 		assert_that(res.json_body, has_entry('recipient', has_entry('type', is_('email'))))

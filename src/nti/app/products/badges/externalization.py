@@ -33,6 +33,7 @@ from . import is_locked
 
 def _clean_external(external):
 	external.pop('href', None)
+	external.pop('Locked', None)
 	def _m(ext):
 		if isinstance(ext, Mapping):
 			for key in ALL:

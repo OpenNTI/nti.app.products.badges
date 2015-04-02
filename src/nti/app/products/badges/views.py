@@ -157,16 +157,19 @@ def _get_image(badge_url, payload=None, locked=False):
 @view_config(name="image.png")
 @view_defaults(	route_name='objects.generic.traversal',
 			 	request_method='GET',
-				context=IBadgeAssertion,
-			 	permission=nauth.ACT_READ)
-class OpenAssertionImageView(AbstractAuthenticatedView):
+				context=IBadgeAssertion)
+class OpenAssertionImageView(AbstractView):
 
 	def __call__(self):
 		context = self.request.context
+		
+		## baked image if locked
 		locked = is_locked(context)
 		badge_url = _get_badge_image_url(context, self.request)
 		payload = _produce_payload(context) if is_locked else None
 		target = _get_image(badge_url, payload=payload, locked=locked)
+		
+		## return baked image
 		response = self.request.response
 		response.body_file = target
 		response.content_type = b'image/png; charset=UTF-8'
@@ -175,18 +178,23 @@ class OpenAssertionImageView(AbstractAuthenticatedView):
 
 def assert_assertion_exported(context, remoteUser=None):
 	context = context
-	if not is_locked(context):
-		user = IUser(context, None)
-		if user is None:
-			raise hexc.HTTPUnprocessableEntity(_("Cannot find user for assertion."))
-		if remoteUser is not None and remoteUser != user:
-			raise hexc.HTTPForbidden()
-		email = get_user_email(user)
-		email_verified = is_email_verified(user)
-		if not email or not email_verified:
-			msg = _("Cannot export assertion to an unverified email.")
-			raise hexc.HTTPUnprocessableEntity(msg)
-		update_assertion(context.uid, email=email, exported=True)
+	if is_locked(context):
+		return
+
+	## verify user access
+	user = IUser(context, None)
+	if user is None:
+		raise hexc.HTTPUnprocessableEntity(_("Cannot find user for assertion."))
+	if remoteUser is not None and remoteUser != user:
+		raise hexc.HTTPForbidden()
+	
+	## cehck if email has been verified
+	email = get_user_email(user)
+	email_verified = is_email_verified(user)
+	if not email or not email_verified:
+		msg = _("Cannot export assertion to an unverified email.")
+		raise hexc.HTTPUnprocessableEntity(msg)
+	update_assertion(context.uid, email=email, exported=True)
 
 @view_config(name="mozillabackpack")
 @view_config(name="assertion.json")

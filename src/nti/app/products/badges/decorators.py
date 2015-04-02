@@ -9,8 +9,6 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from urlparse import urljoin
-
 from zope import component
 from zope import interface
 
@@ -106,8 +104,8 @@ class _OpenAssertionDecorator(object):
 
 	def decorateExternalObject(self, context, external):
 		request = get_current_request()
-		href = get_assertion_href(context, request)
-		if href and is_locked(context):
+		url = get_assertion_json_url(context, request)
+		if url and is_locked(context):
 			verify = external.get('verify')
 			if verify: # replace verification URL
-				verify['url'] = urljoin(request.host_url, href)
+				verify['url'] = url

@@ -13,7 +13,6 @@ from hamcrest import is_not
 from hamcrest import has_key
 from hamcrest import contains
 from hamcrest import has_item
-from hamcrest import ends_with
 from hamcrest import has_items
 from hamcrest import has_entry
 from hamcrest import has_length
@@ -198,7 +197,7 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry('uid', is_(uid)))
 		assert_that(res.json_body, has_entry('issuedOn', is_not(none())))
 		assert_that(res.json_body, has_entry('badge', has_entry('image', is_not(none()))))
-		assert_that(res.json_body, has_entry('verify', has_entry('url', ends_with(uid))))
+		assert_that(res.json_body, has_entry('verify', has_entry('url', contains_string(uid))))
 		assert_that(res.json_body, has_entry('recipient', has_entry('type', is_('email'))))
 		assert_that(res.json_body, has_entry('recipient', has_entry('hashed', is_(True))))
 		assert_that(res.json_body, has_entry('recipient', has_entry('salt', is_not(none()))))

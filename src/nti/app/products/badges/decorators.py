@@ -12,20 +12,15 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
-from pyramid.threadlocal import get_current_request
-
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.badges.interfaces import IBadgeClass
 from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeAssertion
-from nti.badges.openbadges.interfaces import IBadgeAssertion as IOpenAssertion
 
 from nti.dataserver.interfaces import IUser
 
-from nti.externalization.singleton import SingletonDecorator
 from nti.externalization.interfaces import StandardExternalFields
-from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
 from nti.links.links import Link
@@ -95,17 +90,3 @@ class _UserBadgesLinkDecorator(AbstractAuthenticatedRequestAwareDecorator):
 	def _do_decorate_external(self, context, mapping):
 		_links = mapping.setdefault(LINKS, [])
 		_links.append(Link(context, elements=(BADGES,), rel=BADGES))
-
-@component.adapter(IOpenAssertion)
-@interface.implementer(IExternalObjectDecorator)
-class _OpenAssertionDecorator(object):
-
-	__metaclass__ = SingletonDecorator
-
-	def decorateExternalObject(self, context, external):
-		request = get_current_request()
-		url = get_assertion_json_url(context, request)
-		if url and is_locked(context):
-			verify = external.get('verify')
-			if verify: # replace verification URL
-				verify['url'] = url

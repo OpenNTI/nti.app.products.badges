@@ -67,16 +67,12 @@
 				provides="nti.externalization.interfaces.IExternalMappingDecorator"
 				for="nti.dataserver.interfaces.IUser
 					 pyramid.interfaces.IRequest" />
-
-	<subscriber factory=".decorators._OpenAssertionDecorator"
-				for="nti.badges.openbadges.interfaces.IBadgeAssertion"
-				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
 	
 	<!-- Externalization -->
 	<adapter factory=".externalization._MozillaOpenAssertionExternalizer"
 			 for="nti.badges.openbadges.interfaces.IBadgeAssertion"
 			 provides="nti.externalization.interfaces.IInternalObjectExternalizer"
-			 name="mozilla" />
+			 name="mozillabackpack" />
 
 	<!-- Subscribers -->
 	<subscriber handler=".subscribers._user_deleted" />

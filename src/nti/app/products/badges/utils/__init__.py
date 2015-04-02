@@ -37,12 +37,17 @@ def get_user(user=None):
 
 def get_badge_href(context, request=None):
 	ds2 = get_ds2(request)
-	if not ds2:
-		return None
+	if ds2:
+		## href is the open badge URL
+		href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, quote(context.name))
+		return href
+	return None
 
-	## href is the open badge URL
-	href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, quote(context.name))
-	return href
+def get_badge_url(context, request=None):
+	request = request if request else get_current_request()
+	href = get_badge_href(context, request=request)
+	result = urljoin(request.host_url, href) if href else href
+	return result
 
 def get_badge_image_url(context, request=None):
 	image = context.image

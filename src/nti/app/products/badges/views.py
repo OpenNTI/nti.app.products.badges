@@ -14,7 +14,6 @@ from . import MessageFactory as _
 import urllib
 import requests
 from io import BytesIO
-from collections import Mapping
 
 from zope import component
 from zope import interface
@@ -26,6 +25,7 @@ from pyramid.view import view_defaults
 from pyramid.interfaces import IRequest
 from pyramid import httpexceptions as hexc
 
+from nti.app.base.abstract_views import AbstractView
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
 from nti.appserver.workspaces.interfaces import IUserService
@@ -43,7 +43,6 @@ from nti.dataserver.interfaces import IUser
 from nti.dataserver.interfaces import IDataserverFolder
 from nti.dataserver.interfaces import EVERYONE_USER_NAME
 
-from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.externalization import to_external_object
 
 from .utils import get_badge_image_url
@@ -56,9 +55,6 @@ from . import is_locked
 from . import get_user_email
 from . import update_assertion
 from . import is_email_verified
-
-
-ALL = getattr(StandardExternalFields, 'ALL', ())
 
 @interface.implementer(IPathAdapter)
 @component.adapter(IUser, IRequest)
@@ -82,10 +78,7 @@ class BadgeAdminPathAdapter(Contained):
 			 renderer='rest',
 			 request_method='GET',
 			 context=IDataserverFolder)
-class OpenBadgeView(object):
-
-	def __init__(self, request):
-		self.request = request
+class OpenBadgeView(AbstractView):
 
 	def __call__(self):
 		request = self.request
@@ -122,14 +115,15 @@ class OpenAssertionsPathAdapter(Contained):
 			return result
 		raise KeyError(assertion_id)
 
+def _produce_payload(assertion):
+	result = to_external_object(assertion, name="mozillabackpack")
+	return result
+
 @view_config(route_name='objects.generic.traversal',
 			 renderer='rest',
 			 request_method='GET',
 			 context=IBadgeAssertion)
-class OpenAssertionView(object):
-
-	def __init__(self, request):
-		self.request = request
+class OpenAssertionView(AbstractView):
 
 	def __call__(self):
 		result = self.request.context
@@ -142,61 +136,22 @@ def get_badge_image_content(badge_url):
 		raise hexc.HTTPNotFound(_("Could not find badge image."))
 	return res.content
 
-def _copy_external(external):
-	def _m(ext):
-		if isinstance(ext, Mapping):
-			result = {}
-			for key, value in ext.items():
-				result[key] = _m(value)
-		elif isinstance(ext, (tuple, list)):
-			result = []
-			for value in ext:
-				result.append(_m(value))
-		else:
-			result = ext
-		return result
-	result = _m(external)
-	return result
-	
-def _produce_payload(external):
-	external.pop('href', None)
-	def _m(ext):
-		if isinstance(ext, Mapping):
-			for key in ALL:
-				ext.pop(key, None)
-			for key, value in ext.items():
-				if value is None:
-					ext.pop(key, None)
-				else:
-					_m(value)
-		elif isinstance(ext, (tuple, list)):
-			for value in ext:
-				_m(value)
-	_m(external)
-	return external
-		
-class BaseOpenAssertionView(object):
+def _get_badge_image_url(context, request=None):
+	badge = IBadgeClass(context)
+	badge_url = get_badge_image_url(badge, request)
+	return badge_url
 
-	def _do_call(self):
-		request = self.request
-		badge = IBadgeClass(request.context)
-		external = to_external_object(request.context)
-		badge_url = get_badge_image_url(badge, request)
-		return external, badge_url
-
-class BaseAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
-
-	def _get_image(self, badge_url, payload=None, locked=False):
-		content = get_badge_image_content(badge_url)
-		target = source = BytesIO(content)
-		source.seek(0)
-		if locked:
-			target = BytesIO()
-			bake_badge(	source, target, 
-						payload=payload, 
-						url=(badge_url if not payload else None))
-			target.seek(0)
-		return target
+def _get_image(badge_url, payload=None, locked=False):
+	content = get_badge_image_content(badge_url)
+	target = source = BytesIO(content)
+	source.seek(0)
+	if locked:
+		target = BytesIO()
+		bake_badge(	source, target, 
+					payload=payload, 
+					url=(badge_url if not payload else None))
+		target.seek(0)
+	return target
 
 @view_config(name="baked-image")
 @view_config(name="image.png")
@@ -204,13 +159,14 @@ class BaseAssertionImageView(AbstractAuthenticatedView, BaseOpenAssertionView):
 			 	request_method='GET',
 				context=IBadgeAssertion,
 			 	permission=nauth.ACT_READ)
-class OpenAssertionImageView(BaseAssertionImageView):
+class OpenAssertionImageView(AbstractAuthenticatedView):
 
 	def __call__(self):
-		external, badge_url = self._do_call()
-		locked = is_locked(self.request.context)
-		payload = _produce_payload(external) if is_locked else None
-		target = self._get_image(badge_url, payload=payload, locked=locked)
+		context = self.request.context
+		locked = is_locked(context)
+		badge_url = _get_badge_image_url(context, self.request)
+		payload = _produce_payload(context) if is_locked else None
+		target = _get_image(badge_url, payload=payload, locked=locked)
 		response = self.request.response
 		response.body_file = target
 		response.content_type = b'image/png; charset=UTF-8'
@@ -237,13 +193,13 @@ def assert_assertion_exported(context, remoteUser=None):
 @view_defaults(	route_name='objects.generic.traversal',
 			 	request_method='GET',
 			 	context=IBadgeAssertion)
-class OpenAssertionJSONView(AbstractAuthenticatedView, BaseOpenAssertionView):
+class OpenAssertionJSONView(AbstractView):
 
 	def __call__(self):
-		external, _ = self._do_call()
-		external = _produce_payload(external)
 		context = self.request.context
-		assert_assertion_exported(context, self.remoteUser)	
+		if not is_locked(context):
+			raise hexc.HTTPUnprocessableEntity(_("Assertion is not locked"))
+		external = _produce_payload(context)
 		return external
 
 @view_config(name="lock")
@@ -252,14 +208,18 @@ class OpenAssertionJSONView(AbstractAuthenticatedView, BaseOpenAssertionView):
 			 	request_method='POST',
 				context=IBadgeAssertion,
 			 	permission=nauth.ACT_READ)
-class ExportOpenAssertionView(BaseAssertionImageView):
+class ExportOpenAssertionView(AbstractAuthenticatedView):
 
 	def __call__(self):
-		external, badge_url = self._do_call()
 		context = self.request.context
+		
+		## verify the assertion can be exported
 		assert_assertion_exported(context, self.remoteUser)	
-		payload = _produce_payload(external)
-		target = self._get_image(badge_url, payload=payload, locked=True)
+		payload = _produce_payload(context)
+		badge_url = _get_badge_image_url(context, self.request)
+		target = _get_image(badge_url, payload=payload, locked=True)
+		
+		## return baked image
 		response = self.request.response
 		response.body_file = target
 		response.content_type = b'image/png; charset=UTF-8'

@@ -14,6 +14,9 @@ from collections import Mapping
 from zope import interface
 from zope import component
 
+from pyramid.threadlocal import get_current_request
+
+from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
 
 from nti.externalization.datastructures import InterfaceObjectIO
@@ -22,6 +25,11 @@ from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IInternalObjectExternalizer
 
 ALL = getattr(StandardExternalFields, 'ALL', ())
+
+from .utils import get_badge_url
+from .utils import get_assertion_json_url
+
+from . import is_locked
 
 def _clean_external(external):
 	external.pop('href', None)
@@ -44,10 +52,24 @@ def _clean_external(external):
 @interface.implementer(IInternalObjectExternalizer)
 class _MozillaOpenAssertionExternalizer(object):
 
-	def __init__(self, obj):
-		self.obj = obj
+	def __init__(self, context):
+		self.context = context
 
 	def toExternalObject(self, **kwargs):
-		result = InterfaceObjectIO(self.obj, IBadgeAssertion).toExternalObject(**kwargs)
+		result = InterfaceObjectIO(self.context, IBadgeAssertion).toExternalObject(**kwargs)
 		result = _clean_external(result)
+		
+		## change badge to an URL
+		badge = self.context.badge
+		if IBadgeClass.providedBy(badge):
+			result['badge'] = get_badge_url(badge)
+		
+		## change verification URL
+		request = get_current_request()
+		url = get_assertion_json_url(self.context, request)
+		if url and is_locked(self.context):
+			verify = result.get('verify')
+			if verify: # replace verification URL
+				verify['url'] = url
+
 		return result

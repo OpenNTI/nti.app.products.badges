@@ -115,11 +115,7 @@ class TestViews(ApplicationLayerTest):
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
 		
-		assert_that(res.json_body, has_entry('badge', 
-											 has_entries('criteria', 'http://nti.com/criteria/1.html',
-														 'description', u'Badge 1',
-														 'issuer', u'http://nti.com',
-														 'name', u'badge.1')))
+		assert_that(res.json_body, has_entry('badge', 'http://localhost/dataserver2/OpenBadges/badge.1'))
 		
 		assert_that(res.json_body, has_entries(
 										'image', 'http://localhost/dataserver2/OpenAssertions/YmFkZ2UuMSAtPiA2/image.png',

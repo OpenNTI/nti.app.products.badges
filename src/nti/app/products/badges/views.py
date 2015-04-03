@@ -260,7 +260,6 @@ class OpenAssertionImageView(AbstractView):
 		target = _get_image(badge_url, payload=payload, locked=locked)
 		
 		## return baked image
-		from IPython.core.debugger import Tracer; Tracer()()
 		response = self.request.response
 		response.body_file = target
 		response.content_type = b'image/png;'

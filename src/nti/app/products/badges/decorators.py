@@ -17,10 +17,13 @@ from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecora
 from nti.badges.interfaces import IBadgeClass
 from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeAssertion
+from nti.badges.openbadges.interfaces import IBadgeAssertion as IOpenAssertion
 
 from nti.dataserver.interfaces import IUser
 
+from nti.externalization.singleton import SingletonDecorator
 from nti.externalization.interfaces import StandardExternalFields
+from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
 from nti.links.links import Link
@@ -82,6 +85,16 @@ class _BadgeAssertionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 		mapping['image'] = get_assertion_image_url(context, request)
 		locked = _assertion_links(_links, context, self.remoteUser, request)
 		mapping['Locked'] = locked
+
+@component.adapter(IOpenAssertion)
+@interface.implementer(IExternalObjectDecorator)
+class _OpenAssertionDecorator(object):
+
+	__metaclass__ = SingletonDecorator
+
+	def decorateExternalObject(self, context, external):
+		if not is_locked(context):
+			external.pop('verify', None)
 
 @component.adapter(IUser)
 @interface.implementer(IExternalMappingDecorator)

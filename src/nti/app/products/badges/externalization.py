@@ -72,11 +72,13 @@ class _MozillaOpenAssertionExternalizer(object):
 			result['badge'] = get_openbadge_url(badge, request)
 		
 		## change verification URL
-		url = get_assertion_json_url(self.context, request)
-		if url and is_locked(self.context):
+		if is_locked(self.context):
 			verify = result.get('verify')
-			if verify: # replace verification URL
+			url = get_assertion_json_url(self.context, request)
+			if url and verify:  # replace verification URL
 				verify['url'] = url
+		else:
+			result.pop('verify', None)
 
 		return result
 

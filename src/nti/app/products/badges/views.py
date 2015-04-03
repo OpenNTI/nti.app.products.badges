@@ -24,6 +24,7 @@ from pyramid.view import view_config
 from pyramid.view import view_defaults
 from pyramid.interfaces import IRequest
 from pyramid import httpexceptions as hexc
+from pyramid.response import Response as PyramidResponse
 
 from nti.app.base.abstract_views import AbstractView
 from nti.app.base.abstract_views import AbstractAuthenticatedView
@@ -84,13 +85,16 @@ def _to__mozilla_backpack(context):
 	result = to_external_object(context, name="mozillabackpack",
 								decorate=False)
 	return result
-
+	
 class OpenJSONView(AbstractView):
 	
 	def _set_environ(self):
 		environ = self.request.environ
 		environ['HTTP_X_REQUESTED_WITH'] = b'xmlhttprequest'
-		
+
+class Response(PyramidResponse):
+	default_charset = None
+
 ### Issuers
 
 @interface.implementer(IPathAdapter)
@@ -260,9 +264,9 @@ class OpenAssertionImageView(AbstractView):
 		target = _get_image(badge_url, payload=payload, locked=locked)
 		
 		## return baked image
-		response = self.request.response
+		response = Response()
 		response.body_file = target
-		response.content_type = b'image/png;'
+		response.content_type = b'image/png'
 		response.content_disposition = b'attachment; filename="image.png"'
 		return response
 
@@ -323,8 +327,8 @@ class ExportOpenAssertionView(AbstractAuthenticatedView):
 		target = _get_image(badge_url, payload=payload, locked=True)
 		
 		## return baked image
-		response = self.request.response
+		response = Response()
 		response.body_file = target
-		response.content_type = b'image/png;'
+		response.content_type = b'image/png'
 		response.content_disposition = b'attachment; filename="image.png"'
 		return response

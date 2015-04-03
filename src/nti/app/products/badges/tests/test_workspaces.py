@@ -204,6 +204,8 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry('recipient', has_entry('salt', is_not(none()))))
 		assert_that(res.json_body, has_entry('recipient', has_entry('identity', is_not(none()))))
 		
+		image_url = res.json_body['image']
+		
 		badge_json_url = 'http://localhost/dataserver2/OpenBadges/badge.2/badge.json'
 		res = testapp.get(badge_json_url,
 						  extra_environ=self._make_extra_environ(user=username),
@@ -216,3 +218,10 @@ class TestWorkspaces(ApplicationLayerTest):
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
 		assert_that(res.json_body, has_entry('url', is_('http://nti.com')))
+		
+		res = testapp.get(image_url,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
+		
+		assert_that(res.headers, has_entry('Content-Type', is_('image/png')))
+		assert_that(res.body, has_length(greater_than_or_equal_to(20000)) )

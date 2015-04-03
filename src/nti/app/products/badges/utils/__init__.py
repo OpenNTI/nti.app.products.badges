@@ -87,3 +87,9 @@ def get_assertion_json_url(assertion, request=None, full=True):
 	if result:
 		result += '/assertion.json'
 	return result
+
+def get_openbadge_url(context, request=None):
+	result = get_badge_url(context, request)
+	if result:
+		result += "/badge.json"
+	return result

@@ -73,26 +73,53 @@ class BadgeAdminPathAdapter(Contained):
 		self.request = request
 		self.__parent__ = context
 
-@view_config(route_name='objects.generic.traversal',
-			 name=OPEN_BADGES_VIEW,
-			 renderer='rest',
-			 request_method='GET',
-			 context=IDataserverFolder)
-class OpenBadgeView(AbstractView):
+def _to__mozilla_backpack(context):
+	result = to_external_object(context, name="mozillabackpack")
+	return result
 
-	def __call__(self):
-		request = self.request
-		badge = request.subpath[0] if request.subpath else ''
-		if not badge:
+@interface.implementer(IPathAdapter)
+@component.adapter(IDataserverFolder, IRequest)
+class OpenBadgesPathAdapter(Contained):
+
+	def __init__(self, dataserver, request):
+		self.__parent__ = dataserver
+		self.__name__ = OPEN_BADGES_VIEW
+
+	def __getitem__(self, badge_id):
+		if not badge_id:
 			raise hexc.HTTPNotFound()
 
 		manager = component.getUtility(IBadgeManager)
-		result = manager.get_badge(badge)
+		result = manager.get_badge(badge_id)
 		if result is not None:
-			return IBadgeClass(result)
+			result = IBadgeClass(result)
+			result. __acl__ = acl_from_aces(
+								ace_allowing(EVERYONE_USER_NAME, nauth.ACT_READ))
+			return result
+		raise KeyError(badge_id)
 
-		raise hexc.HTTPNotFound(_('Badge not found.'))
+@view_config(route_name='objects.generic.traversal',
+			 renderer='rest',
+			 request_method='GET',
+			 context=IBadgeClass)
+class OpenBadgeView(AbstractView):
 
+	def __call__(self):
+		result = self.request.context
+		return result
+
+@view_config(name="mozillabackpack")
+@view_config(name="badge.json")
+@view_defaults(	route_name='objects.generic.traversal',
+				renderer='rest',
+				request_method='GET',
+				context=IBadgeClass)
+class OpenBadgeJSONView(OpenBadgeView):
+
+	def __call__(self):
+		result = _to__mozilla_backpack(self.request.context)
+		return result
+	
 @interface.implementer(IPathAdapter)
 @component.adapter(IDataserverFolder, IRequest)
 class OpenAssertionsPathAdapter(Contained):
@@ -114,10 +141,6 @@ class OpenAssertionsPathAdapter(Contained):
 								ace_allowing(EVERYONE_USER_NAME, nauth.ACT_READ))
 			return result
 		raise KeyError(assertion_id)
-
-def _produce_payload(assertion):
-	result = to_external_object(assertion, name="mozillabackpack")
-	return result
 
 @view_config(route_name='objects.generic.traversal',
 			 renderer='rest',
@@ -166,7 +189,7 @@ class OpenAssertionImageView(AbstractView):
 		## baked image if locked
 		locked = is_locked(context)
 		badge_url = _get_badge_image_url(context, self.request)
-		payload = _produce_payload(context) if is_locked else None
+		payload = _to__mozilla_backpack(context) if is_locked else None
 		target = _get_image(badge_url, payload=payload, locked=locked)
 		
 		## return baked image
@@ -207,7 +230,7 @@ class OpenAssertionJSONView(AbstractView):
 		context = self.request.context
 		if not is_locked(context):
 			raise hexc.HTTPUnprocessableEntity(_("Assertion is not locked"))
-		external = _produce_payload(context)
+		external = _to__mozilla_backpack(context)
 		return external
 
 @view_config(name="lock")
@@ -223,7 +246,7 @@ class ExportOpenAssertionView(AbstractAuthenticatedView):
 		
 		## verify the assertion can be exported
 		assert_assertion_exported(context, self.remoteUser)	
-		payload = _produce_payload(context)
+		payload = _to__mozilla_backpack(context)
 		badge_url = _get_badge_image_url(context, self.request)
 		target = _get_image(badge_url, payload=payload, locked=True)
 		

@@ -73,6 +73,11 @@
 			 for="nti.badges.openbadges.interfaces.IBadgeAssertion"
 			 provides="nti.externalization.interfaces.IInternalObjectExternalizer"
 			 name="mozillabackpack" />
+			 
+	<adapter factory=".externalization._MozillaOpenBadgeExternalizer"
+			 for="nti.badges.openbadges.interfaces.IBadgeClass"
+			 provides="nti.externalization.interfaces.IInternalObjectExternalizer"
+			 name="mozillabackpack" />
 
 	<!-- Subscribers -->
 	<subscriber handler=".subscribers._user_deleted" />
@@ -110,6 +115,10 @@
 			 factory=".views.OpenAssertionsPathAdapter"
 			 provides="zope.traversing.interfaces.IPathAdapter" />
 
+	<adapter name="OpenBadges"
+			 factory=".views.OpenBadgesPathAdapter"
+			 provides="zope.traversing.interfaces.IPathAdapter" />
+			 
 	<!-- Preferences -->
 	<include package="zope.security" file="permissions.zcml"/>
 	<include package="zope.preference" file="meta.zcml" />

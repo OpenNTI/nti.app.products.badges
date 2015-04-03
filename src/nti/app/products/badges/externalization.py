@@ -26,7 +26,7 @@ from nti.externalization.interfaces import IInternalObjectExternalizer
 
 ALL = getattr(StandardExternalFields, 'ALL', ())
 
-from .utils import get_badge_url
+from .utils import get_openbadge_url
 from .utils import get_assertion_json_url
 from .utils import get_assertion_image_url
 
@@ -69,7 +69,7 @@ class _MozillaOpenAssertionExternalizer(object):
 		## change badge to an URL
 		badge = self.context.badge
 		if IBadgeClass.providedBy(badge):
-			result['badge'] = get_badge_url(badge)
+			result['badge'] = get_openbadge_url(badge, request)
 		
 		## change verification URL
 		url = get_assertion_json_url(self.context, request)
@@ -78,4 +78,16 @@ class _MozillaOpenAssertionExternalizer(object):
 			if verify: # replace verification URL
 				verify['url'] = url
 
+		return result
+
+@component.adapter(IBadgeClass)
+@interface.implementer(IInternalObjectExternalizer)
+class _MozillaOpenBadgeExternalizer(object):
+
+	def __init__(self, context):
+		self.context = context
+
+	def toExternalObject(self, **kwargs):
+		result = InterfaceObjectIO(self.context, IBadgeClass).toExternalObject(**kwargs)
+		result = _clean_external(result)
 		return result

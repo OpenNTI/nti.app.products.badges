@@ -199,9 +199,15 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry('uid', is_(uid)))
 		assert_that(res.json_body, has_entry('issuedOn', is_not(none())))
 		assert_that(res.json_body, has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
-		assert_that(res.json_body, has_entry('badge', is_('http://localhost/dataserver2/OpenBadges/badge.2')))
+		assert_that(res.json_body, has_entry('badge', is_('http://localhost/dataserver2/OpenBadges/badge.2/badge.json')))
 		assert_that(res.json_body, has_entry('verify', has_entry('url', contains_string(uid))))
 		assert_that(res.json_body, has_entry('recipient', has_entry('type', is_('email'))))
 		assert_that(res.json_body, has_entry('recipient', has_entry('hashed', is_(True))))
 		assert_that(res.json_body, has_entry('recipient', has_entry('salt', is_not(none()))))
 		assert_that(res.json_body, has_entry('recipient', has_entry('identity', is_not(none()))))
+		
+		badge_json_url = 'http://localhost/dataserver2/OpenBadges/badge.2/badge.json'
+		res = testapp.get(badge_json_url,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
+		assert_that(res.json_body, has_entry('image', is_('http://nti.com/files/badge_2.png')))

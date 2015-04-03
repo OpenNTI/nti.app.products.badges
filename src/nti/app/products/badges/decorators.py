@@ -32,7 +32,6 @@ from . import BADGES
 
 from . import is_locked
 from . import get_assertion
-from . import is_email_verified
 
 from .utils import get_badge_href
 from .utils import get_assertion_href
@@ -43,6 +42,9 @@ from .utils import get_assertion_image_url
 LINKS = StandardExternalFields.LINKS
 
 def _assertion_links(links, context, remoteUser, request):
+	owner = IUser(context, None)
+	if owner != remoteUser:
+		return
 	locked = is_locked(context)
 	if locked:
 		## add linkt baked image
@@ -51,7 +53,7 @@ def _assertion_links(links, context, remoteUser, request):
 		## add link to assertion json
 		href = get_assertion_json_url(context, request)
 		links.append(Link(href, rel='mozilla-backpack'))
-	elif is_email_verified(remoteUser):
+	else:
 		## add link to export/lock assertion
 		href = get_assertion_href(context, request)
 		links.append(Link(href, elements=('lock',), rel='lock'))

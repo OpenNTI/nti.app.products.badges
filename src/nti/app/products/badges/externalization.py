@@ -92,4 +92,5 @@ class _MozillaOpenBadgeExternalizer(object):
 	def toExternalObject(self, **kwargs):
 		result = InterfaceObjectIO(self.context, IBadgeClass).toExternalObject(**kwargs)
 		result = _clean_external(result)
+		result.pop('Type', None)
 		return result

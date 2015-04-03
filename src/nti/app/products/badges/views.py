@@ -247,7 +247,10 @@ class ExportOpenAssertionView(AbstractAuthenticatedView):
 
 	def __call__(self):
 		context = self.request.context
-		
+		owner = IUser(context, None)
+		if owner != self.remoteUser:
+			raise hexc.HTTPForbidden()
+	
 		## verify the assertion can be exported
 		assert_assertion_exported(context, self.remoteUser)	
 		payload = _to__mozilla_backpack(context)

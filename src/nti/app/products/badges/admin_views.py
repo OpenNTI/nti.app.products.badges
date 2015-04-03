@@ -36,6 +36,10 @@ from nti.dataserver.users.interfaces import IUserProfile
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
 
+from .utils.sync import sync_db
+
+from .views import BadgeAdminPathAdapter
+
 from . import get_badge
 from . import add_person
 from . import add_assertion
@@ -43,9 +47,6 @@ from . import person_exists
 from . import get_all_badges
 from . import assertion_exists
 from . import remove_assertion
-
-from .utils.sync import sync_db
-from .views import BadgeAdminPathAdapter
 
 class BaseBadgePostView(AbstractAuthenticatedView, 
 						ModeledContentUploadRequestUtilsMixin):
@@ -66,8 +67,13 @@ class BaseBadgePostView(AbstractAuthenticatedView,
 class AwardBadgeView(BaseBadgePostView):
 	
 	def __call__(self):
-		vls = self.readInput()
-		username = vls.get('username') or vls.get('email') or self.remoteUser.username
+		values = self.readInput()
+
+		# validate user
+		username = values.get('user') or values.get('username') or values.get('email')
+		if not username:
+			raise hexc.HTTPUnprocessableEntity('Username was not specified')
+
 		user = User.get_user(username)
 		if user is None:
 			ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
@@ -76,8 +82,9 @@ class AwardBadgeView(BaseBadgePostView):
 		if user is None:
 			raise hexc.HTTPUnprocessableEntity('User not found')
 		
+		# validate badge
 		for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
-			badge_name = vls.get(name)
+			badge_name = values.get(name)
 			if badge_name:
 				break
 		if not badge_name:
@@ -108,8 +115,12 @@ class AwardBadgeView(BaseBadgePostView):
 class RevokeBadgeView(BaseBadgePostView):
 	
 	def __call__(self):
-		vls = self.readInput()
-		username = vls.get('username') or vls.get('email') or self.remoteUser.username
+		values = self.readInput()
+		
+		# validate user
+		username = values.get('user') or values.get('username') or values.get('email')
+		if not username:
+			raise hexc.HTTPUnprocessableEntity('Username was not specified')
 		user = User.get_user(username)
 		if user is None:
 			ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
@@ -118,8 +129,9 @@ class RevokeBadgeView(BaseBadgePostView):
 		if user is None:
 			raise hexc.HTTPNotFound('User not found')
 	
+		# validate badge
 		for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
-			badge_name = vls.get(name)
+			badge_name = values.get(name)
 			if badge_name:
 				break
 		if not badge_name:

@@ -28,6 +28,7 @@ ALL = getattr(StandardExternalFields, 'ALL', ())
 
 from .utils import get_badge_url
 from .utils import get_assertion_json_url
+from .utils import get_assertion_image_url
 
 from . import is_locked
 
@@ -60,13 +61,17 @@ class _MozillaOpenAssertionExternalizer(object):
 		result = InterfaceObjectIO(self.context, IBadgeAssertion).toExternalObject(**kwargs)
 		result = _clean_external(result)
 		
+		## get assertion_image
+		request = get_current_request()
+		if request:
+			result['image'] = get_assertion_image_url(self.context, request)
+		
 		## change badge to an URL
 		badge = self.context.badge
 		if IBadgeClass.providedBy(badge):
 			result['badge'] = get_badge_url(badge)
 		
 		## change verification URL
-		request = get_current_request()
 		url = get_assertion_json_url(self.context, request)
 		if url and is_locked(self.context):
 			verify = result.get('verify')

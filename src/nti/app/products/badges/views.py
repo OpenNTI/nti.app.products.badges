@@ -28,6 +28,8 @@ from pyramid import httpexceptions as hexc
 from nti.app.base.abstract_views import AbstractView
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
+from nti.app.renderers.interfaces import INoHrefInResponse
+
 from nti.appserver.workspaces.interfaces import IUserService
 
 from nti.badges.interfaces import IBadgeManager
@@ -118,6 +120,7 @@ class OpenBadgeJSONView(OpenBadgeView):
 
 	def __call__(self):
 		result = _to__mozilla_backpack(self.request.context)
+		interface.alsoProvides(result, INoHrefInResponse)
 		return result
 	
 @interface.implementer(IPathAdapter)
@@ -231,6 +234,7 @@ class OpenAssertionJSONView(AbstractView):
 		if not is_locked(context):
 			raise hexc.HTTPUnprocessableEntity(_("Assertion is not locked"))
 		external = _to__mozilla_backpack(context)
+		interface.alsoProvides(external, INoHrefInResponse)
 		return external
 
 @view_config(name="lock")

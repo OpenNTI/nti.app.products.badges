@@ -75,7 +75,7 @@ class TestAdminViews(ApplicationLayerTest):
 		msgs = send_notable_email(self.testapp)
 		msg = msgs[0]
 		assert_that( msg, contains_string( 'You earned a badge' ) )
-		assert_that( msg, contains_string( 'src="http://nti.com/files/badge_1.png"'))
+		assert_that( msg, contains_string( 'src="http://localhost/hosted_badge_images/badge_1.png"'))
 
 		# an in our activity
 		path = '/dataserver2/users/%s/Activity' % username

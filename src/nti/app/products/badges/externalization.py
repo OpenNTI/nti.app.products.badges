@@ -25,14 +25,15 @@ from nti.externalization.datastructures import InterfaceObjectIO
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IInternalObjectExternalizer
 
-ALL = getattr(StandardExternalFields, 'ALL', ())
-
 from .utils import get_openbadge_url
 from .utils import get_openissuer_url
+from .utils import get_badge_image_url
 from .utils import get_assertion_json_url
 from .utils import get_assertion_image_url
 
 from . import is_locked
+
+ALL = getattr(StandardExternalFields, 'ALL', ())
 
 def _clean_external(external):
 	external.pop('href', None)
@@ -94,7 +95,11 @@ class _MozillaOpenBadgeExternalizer(object):
 	def toExternalObject(self, **kwargs):
 		result = InterfaceObjectIO(self.context, IBadgeClass).toExternalObject(**kwargs)
 		result = _clean_external(result)
-
+		
+		request = get_current_request()
+		if request:
+			result['image'] = get_badge_image_url(self.context, request)
+			
 		# change issuer url
 		request = get_current_request()
 		issuer = self.context.issuer

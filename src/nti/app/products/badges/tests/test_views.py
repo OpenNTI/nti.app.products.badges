@@ -61,7 +61,7 @@ class TestViews(ApplicationLayerTest):
 						  status=200)
 		assert_that(res.json_body, has_entry(u'name', 'badge.1'))
 		assert_that(res.json_body, has_entry(u'href', '/dataserver2/OpenBadges/badge.1'))
-		assert_that(res.json_body, has_entry(u'image', 'http://nti.com/files/badge_1.png'))
+		assert_that(res.json_body, has_entry(u'image', 'http://localhost/hosted_badge_images/badge_1.png'))
 		assert_that(res.json_body, has_entry(u'criteria', 'http://nti.com/criteria/1.html'))
 
 		award_badge_path = '/dataserver2/BadgeAdmin/@@award'

@@ -81,7 +81,8 @@ class BadgeAdminPathAdapter(Contained):
 		self.__parent__ = context
 
 def _to__mozilla_backpack(context):
-	result = to_external_object(context, name="mozillabackpack")
+	result = to_external_object(context, name="mozillabackpack",
+								decorate=False)
 	return result
 
 class OpenJSONView(AbstractView):

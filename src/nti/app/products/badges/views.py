@@ -262,7 +262,7 @@ class OpenAssertionImageView(AbstractView):
 		## return baked image
 		response = self.request.response
 		response.body_file = target
-		response.content_type = b'image/png; charset=UTF-8'
+		response.content_type = b'image/png'
 		response.content_disposition = b'attachment; filename="image.png"'
 		return response
 
@@ -325,6 +325,6 @@ class ExportOpenAssertionView(AbstractAuthenticatedView):
 		## return baked image
 		response = self.request.response
 		response.body_file = target
-		response.content_type = b'image/png; charset=UTF-8'
+		response.content_type = b'image/png'
 		response.content_disposition = b'attachment; filename="image.png"'
 		return response

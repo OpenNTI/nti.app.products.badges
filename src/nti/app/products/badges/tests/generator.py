@@ -26,7 +26,7 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
 	for code in xrange(issuers):
 		code += 1
 		issuer_id = database.add_issuer(origin=u'http://nti.com',
-									    name=u'issuer.%s@Rnti' % code,
+									    name=u'issuer_%s' % code,
 									    org=u'http://nti.com',
 									    contact=u'issuer.%s@nti.com' % code)
 		issuer_ids.append(issuer_id)

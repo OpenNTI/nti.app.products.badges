@@ -19,6 +19,7 @@ from nti.dataserver.users import User
 from nti.dataserver.interfaces import IUser
 
 from .. import OPEN_BADGES_VIEW
+from .. import OPEN_ISSUERS_VIEW
 from .. import HOSTED_BADGE_IMAGES
 from .. import OPEN_ASSERTIONS_VIEW
 
@@ -92,4 +93,24 @@ def get_openbadge_url(context, request=None):
 	result = get_badge_url(context, request)
 	if result:
 		result += "/badge.json"
+	return result
+
+def get_issuer_href(context, request=None):
+	ds2 = get_ds2(request)
+	if ds2:
+		## href is the open badge URL
+		href = '/%s/%s/%s' % (ds2, OPEN_ISSUERS_VIEW, quote(context.name))
+		return href
+	return None
+
+def get_issuer_url(context, request=None):
+	request = request if request else get_current_request()
+	href = get_issuer_href(context, request)
+	result = urljoin(request.host_url, href) if href else href
+	return result
+
+def get_openissuer_url(context, request=None):
+	result = get_issuer_url(context, request)
+	if result:
+		result += "/issuer.json"
 	return result

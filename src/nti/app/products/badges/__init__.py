@@ -19,8 +19,12 @@ from nti.badges.interfaces import IBadgeManager
 from nti.dataserver.users.interfaces import IUserProfile
 
 BADGES = 'Badges'
+ISSUERS = 'Issuers'
+
 OPEN_BADGES_VIEW = 'OpenBadges'
+OPEN_ISSUERS_VIEW = 'OpenIssuers'
 OPEN_ASSERTIONS_VIEW = 'OpenAssertions'
+
 HOSTED_BADGE_IMAGES = 'hosted_badge_images'
 
 def get_user_id(user):
@@ -43,6 +47,16 @@ def is_email_verified(user):
 	return email_verified
 
 # issuers
+
+def get_all_issuers():
+	manager = component.getUtility(IBadgeManager)
+	result = manager.get_all_issuers()
+	return result
+
+def get_issuer(issuer):
+	manager = component.getUtility(IBadgeManager)
+	result = manager.get_issuer(issuer)
+	return result
 
 def issuer_exists(issuer):
 	manager = component.getUtility(IBadgeManager)

@@ -209,3 +209,11 @@ class TestWorkspaces(ApplicationLayerTest):
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
 		assert_that(res.json_body, has_entry('image', is_('http://nti.com/files/badge_2.png')))
+		assert_that(res.json_body, has_entry('issuer', contains_string('http://localhost/dataserver2/OpenIssuers/issuer')))
+
+		issuer_json_url = res.json_body['issuer']
+		
+		res = testapp.get(issuer_json_url,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
+		assert_that(res.json_body, has_entry('url', is_('http://nti.com')))

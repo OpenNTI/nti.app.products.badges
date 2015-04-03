@@ -8,7 +8,6 @@
 			xmlns:z3c="http://namespaces.zope.org/z3c"
 			i18n_domain="zope" >
 
-
 	<include package="zope.component" file="meta.zcml" />
 	<include package="zope.security" file="meta.zcml" />
 	<include package="zope.component" />
@@ -83,6 +82,11 @@
 			 provides="nti.externalization.interfaces.IInternalObjectExternalizer"
 			 name="mozillabackpack" />
 
+	<adapter factory=".externalization._MozillaOpenIssuerExternalizer"
+			 for="nti.badges.openbadges.interfaces.IIssuerOrganization"
+			 provides="nti.externalization.interfaces.IInternalObjectExternalizer"
+			 name="mozillabackpack" />
+
 	<!-- Subscribers -->
 	<subscriber handler=".subscribers._user_deleted" />
 	<subscriber handler=".subscribers._after_database_opened_listener" />
@@ -115,6 +119,10 @@
 			 factory=".views.BadgeAdminPathAdapter"
 			 provides="zope.traversing.interfaces.IPathAdapter" />
 
+	<adapter name="OpenIssuers"
+			 factory=".views.OpenIssuersPathAdapter"
+			 provides="zope.traversing.interfaces.IPathAdapter" />
+			 
 	<adapter name="OpenAssertions"
 			 factory=".views.OpenAssertionsPathAdapter"
 			 provides="zope.traversing.interfaces.IPathAdapter" />

@@ -18,6 +18,7 @@ from pyramid.threadlocal import get_current_request
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
+from nti.badges.openbadges.interfaces import IIssuerOrganization
 
 from nti.externalization.datastructures import InterfaceObjectIO
 
@@ -27,6 +28,7 @@ from nti.externalization.interfaces import IInternalObjectExternalizer
 ALL = getattr(StandardExternalFields, 'ALL', ())
 
 from .utils import get_openbadge_url
+from .utils import get_openissuer_url
 from .utils import get_assertion_json_url
 from .utils import get_assertion_image_url
 
@@ -68,7 +70,7 @@ class _MozillaOpenAssertionExternalizer(object):
 		
 		## change badge to an URL
 		badge = self.context.badge
-		if IBadgeClass.providedBy(badge):
+		if IBadgeClass.providedBy(badge) and request:
 			result['badge'] = get_openbadge_url(badge, request)
 		
 		## change verification URL
@@ -92,5 +94,24 @@ class _MozillaOpenBadgeExternalizer(object):
 	def toExternalObject(self, **kwargs):
 		result = InterfaceObjectIO(self.context, IBadgeClass).toExternalObject(**kwargs)
 		result = _clean_external(result)
+
+		# change issuer url
+		request = get_current_request()
+		issuer = self.context.issuer
+		if IIssuerOrganization.providedBy(issuer) and request:
+			result['issuer'] = get_openissuer_url(issuer, request)
+			
 		result.pop('Type', None)
+		return result
+
+@component.adapter(IIssuerOrganization)
+@interface.implementer(IInternalObjectExternalizer)
+class _MozillaOpenIssuerExternalizer(object):
+
+	def __init__(self, context):
+		self.context = context
+
+	def toExternalObject(self, **kwargs):
+		result = InterfaceObjectIO(self.context, IIssuerOrganization).toExternalObject(**kwargs)
+		result = _clean_external(result)
 		return result

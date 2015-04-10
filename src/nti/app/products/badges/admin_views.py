@@ -17,6 +17,7 @@ from zope import component
 from zope.catalog.interfaces import ICatalog
 
 from pyramid.view import view_config
+from pyramid.view import view_defaults
 from pyramid import httpexceptions as hexc
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
@@ -57,13 +58,14 @@ class BaseBadgePostView(AbstractAuthenticatedView,
 			values = super(BaseBadgePostView, self).readInput(value=value)
 			result.update(values)
 		return result
-	
-@view_config(route_name='objects.generic.traversal',
-			 name='award',
-			 renderer='rest',
-			 request_method='POST',
-			 context=BadgeAdminPathAdapter,
-			 permission=nauth.ACT_NTI_ADMIN)
+
+@view_config(name='award')	
+@view_config(name='award_badge')	
+@view_defaults(	route_name='objects.generic.traversal',
+			 	renderer='rest',
+			 	request_method='POST',
+			 	context=BadgeAdminPathAdapter,
+			 	permission=nauth.ACT_NTI_ADMIN)
 class AwardBadgeView(BaseBadgePostView):
 	
 	def __call__(self):
@@ -106,12 +108,13 @@ class AwardBadgeView(BaseBadgePostView):
 	
 		return hexc.HTTPNoContent()
 
-@view_config(route_name='objects.generic.traversal',
-			 name='revoke',
-			 renderer='rest',
-			 request_method='POST',
-			 context=BadgeAdminPathAdapter,
-			 permission=nauth.ACT_NTI_ADMIN)
+@view_config(name='revoke')	
+@view_config(name='revoke_badge')	
+@view_defaults(	route_name='objects.generic.traversal',
+				renderer='rest',
+				request_method='POST',
+				context=BadgeAdminPathAdapter,
+				permission=nauth.ACT_NTI_ADMIN)
 class RevokeBadgeView(BaseBadgePostView):
 	
 	def __call__(self):
@@ -150,12 +153,14 @@ class RevokeBadgeView(BaseBadgePostView):
 	
 		return hexc.HTTPNoContent()
 
-@view_config(route_name='objects.generic.traversal',
-			 name='sync_db',
-			 renderer='rest',
-			 request_method='POST',
-			 context=BadgeAdminPathAdapter,
-			 permission=nauth.ACT_NTI_ADMIN)
+
+@view_config(name='sync_db')
+@view_config(name='sync_badges')
+@view_defaults(	route_name='objects.generic.traversal',
+			 	renderer='rest',
+			 	request_method='POST',
+				context=BadgeAdminPathAdapter,
+			 	permission=nauth.ACT_NTI_ADMIN)
 class SyncDbView(BaseBadgePostView):
 
 	def __call__(self):
@@ -239,12 +244,12 @@ def bulk_import(input_source, errors=[]):
 
 	return (awards, revokations)
 
-@view_config(route_name='objects.generic.traversal',
-			 name='bulk_import',
-			 renderer='rest',
-			 request_method='POST',
-			 context=BadgeAdminPathAdapter,
-			 permission=nauth.ACT_NTI_ADMIN)
+@view_config(name='bulk_import')
+@view_defaults(	route_name='objects.generic.traversal',
+			 	renderer='rest',
+				request_method='POST',
+				context=BadgeAdminPathAdapter,
+				permission=nauth.ACT_NTI_ADMIN)
 class BulkImportView(AbstractAuthenticatedView):
 	
 	def __call__(self):
@@ -268,12 +273,12 @@ class BulkImportView(AbstractAuthenticatedView):
 		result['Elapsed'] = time.time() - now
 		return result
 
-@view_config(route_name='objects.generic.traversal',
-			 name='update_persons',
-			 renderer='rest',
-			 request_method='POST',
-			 context=BadgeAdminPathAdapter,
-			 permission=nauth.ACT_NTI_ADMIN)
+@view_config(name='update_persons')
+@view_defaults(	route_name='objects.generic.traversal',
+				renderer='rest',
+				request_method='POST',
+				context=BadgeAdminPathAdapter,
+				permission=nauth.ACT_NTI_ADMIN)
 class UpdatePersonsView(AbstractAuthenticatedView):
 	
 	def check(self, s):
@@ -328,13 +333,14 @@ class UpdatePersonsView(AbstractAuthenticatedView):
 		result['Elapsed'] = time.time() - now
 		result['Total'] = result['Count'] = count
 		return result
-
-@view_config(route_name='objects.generic.traversal',
-			 name='AllBadges',
-			 renderer='rest',
-			 request_method='GET',
-			 context=BadgeAdminPathAdapter,
-			 permission=nauth.ACT_NTI_ADMIN)
+	
+@view_config(name='AllBadges')
+@view_config(name='all_badges')
+@view_defaults(	route_name='objects.generic.traversal',
+				renderer='rest',
+				request_method='GET',
+				context=BadgeAdminPathAdapter,
+				permission=nauth.ACT_NTI_ADMIN)
 class AllBadgesView(object):
 
 	def __init__(self, request):

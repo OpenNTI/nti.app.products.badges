@@ -60,6 +60,7 @@ from . import OPEN_ASSERTIONS_VIEW
 from . import is_locked
 from . import get_badge
 from . import get_issuer
+from . import get_assertion
 from . import get_user_email
 from . import update_assertion
 from . import is_email_verified
@@ -300,7 +301,7 @@ class OpenAssertionJSONView(OpenJSONView):
 	def __call__(self):
 		context = self.request.context
 		if not is_locked(context):
-			raise hexc.HTTPUnprocessableEntity(_("Assertion is not locked"))
+			raise hexc.HTTPUnprocessableEntity(_("Assertion is not locked."))
 		self._set_environ()
 		external = _to__mozilla_backpack(context)
 		interface.alsoProvides(external, INoHrefInResponse)
@@ -332,3 +333,21 @@ class ExportOpenAssertionView(AbstractAuthenticatedView):
 		response.content_type = b'image/png'
 		response.content_disposition = b'attachment; filename="image.png"'
 		return response
+
+@view_config(name="lock")
+@view_config(name="export")
+@view_defaults(	route_name='objects.generic.traversal',
+			 	request_method='POST',
+				context=IBadgeClass,
+			 	permission=nauth.ACT_READ)
+class LockBadgeView(AbstractAuthenticatedView):
+
+	def __call__(self):
+		context = self.request.context	
+		assertion  = get_assertion(self.remoteUser, context.name)
+		if assertion is None:
+			raise hexc.HTTPUnprocessableEntity(_("Cannot find user assertion."))
+		
+		## verify the assertion can be exported and export
+		assert_assertion_exported(assertion, self.remoteUser)	
+		return context

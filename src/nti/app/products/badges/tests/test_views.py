@@ -10,6 +10,7 @@ __docformat__ = "restructuredtext en"
 from hamcrest import none
 from hamcrest import is_not
 from hamcrest import has_key
+from hamcrest import has_item
 from hamcrest import has_entry
 from hamcrest import assert_that
 from hamcrest import has_entries
@@ -134,3 +135,41 @@ class TestViews(ApplicationLayerTest):
 		
 		assert_that(res.json_body, does_not(has_key('evidence')))
 		assert_that(res.json_body, does_not(has_key('expires')))
+
+	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
+	@fudge.patch('nti.app.products.badges.views.is_email_verified')
+	@fudge.patch('nti.app.products.badges.decorators.is_earned_badge')
+	def test_lock_badge(self, mock_ic, mock_ieb):
+		username = 'ichigo@bleach.com'
+		with mock_dataserver.mock_db_trans(self.ds):
+			self._create_user(username=username,
+							  external_value={u'email':u'ichigo@bleach.com',
+											  u'realname':u'ichigo kurosaki',
+											  u'alias':u'zangetsu'})
+
+		award_badge_path = '/dataserver2/BadgeAdmin/@@award'
+		self.testapp.post_json(award_badge_path,
+							   {"username":username,
+								"badge":"badge.1"},
+							   status=204)
+		
+		mock_ieb.is_callable().with_args().returns(True)
+		badge_name = urllib.quote("badge.1")
+		open_badges_path = '/dataserver2/OpenBadges/%s' % badge_name
+		testapp = TestApp(self.app)
+		res = testapp.get(open_badges_path,
+						  extra_environ=self._make_extra_environ(user=username),
+						  status=200)
+
+		assert_that(res.json_body, has_entry('Links', has_item(has_entry('rel', 'lock'))))
+		assert_that(res.json_body, has_entry('Links', has_item(has_entry('rel', 'assertion'))))
+
+		mock_ic.is_callable().with_args().returns(True)
+	
+		export_badge_path = open_badges_path + '/lock'
+		res = testapp.post(export_badge_path,
+						   extra_environ=self._make_extra_environ(user=username),
+						   status=200)
+		assert_that(res.json_body, has_entry('Links', does_not(has_item(has_entry('rel', 'lock')))))
+		assert_that(res.json_body, has_entry('Links', has_item(has_entry('rel', 'baked-image'))))
+		assert_that(res.json_body, has_entry('Links', has_item(has_entry('rel', 'mozilla-backpack'))))

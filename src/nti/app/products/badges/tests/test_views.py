@@ -7,6 +7,7 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
+from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
 from hamcrest import has_key
@@ -161,6 +162,7 @@ class TestViews(ApplicationLayerTest):
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
 
+		assert_that(res.json_body, has_entry('Locked', is_(False)))
 		assert_that(res.json_body, has_entry('Links', has_item(has_entry('rel', 'lock'))))
 		assert_that(res.json_body, has_entry('Links', has_item(has_entry('rel', 'assertion'))))
 
@@ -170,6 +172,8 @@ class TestViews(ApplicationLayerTest):
 		res = testapp.post(export_badge_path,
 						   extra_environ=self._make_extra_environ(user=username),
 						   status=200)
+		
+		assert_that(res.json_body, has_entry('Locked', is_(True)))
 		assert_that(res.json_body, has_entry('Links', does_not(has_item(has_entry('rel', 'lock')))))
 		assert_that(res.json_body, has_entry('Links', has_item(has_entry('rel', 'baked-image'))))
 		assert_that(res.json_body, has_entry('Links', has_item(has_entry('rel', 'mozilla-backpack'))))

@@ -33,6 +33,7 @@ from nti.app.renderers.interfaces import INoHrefInResponse
 
 from nti.appserver.workspaces.interfaces import IUserService
 
+from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeManager
 from nti.badges.openbadges.utils.badgebakery import bake_badge
 
@@ -349,5 +350,6 @@ class LockBadgeView(AbstractAuthenticatedView):
 			raise hexc.HTTPUnprocessableEntity(_("Cannot find user assertion."))
 		
 		## verify the assertion can be exported and export
-		assert_assertion_exported(assertion, self.remoteUser)	
+		assert_assertion_exported(assertion, self.remoteUser)
+		interface.alsoProvides(context, IEarnedBadge) ## see decorators
 		return context

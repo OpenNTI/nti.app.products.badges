@@ -7,7 +7,7 @@
 			 alt="Badge"
 			 title="Badge"
 			 width="45" height="45"
-			 style="display: inline;vertical-align:top;float:left;margin-right:2px;"
+			 style="display: inline;vertical-align:top;float:left;margin-right:2px;overflow:hidden;"
 			 tal:attributes="src notable/badge_href|default; alt notable/badge_description|default"/>
 	</span>
 

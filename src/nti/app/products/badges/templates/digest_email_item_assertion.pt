@@ -1,5 +1,5 @@
 <!--! -*- mode: nxml -*- -->
-<div style="margin-bottom: 18px;font: 15px/1.25em 'Helvetica Neue', Arial, Helvetica;"
+<div style="margin-bottom: 18px;font: 15px/1.25em 'Helvetica Neue', Arial, Helvetica;overflow:hidden;"
 	 tal:define="notable view/notable">
 
 	<span style="margin: 0 2px 0 0;">
@@ -7,7 +7,7 @@
 			 alt="Badge"
 			 title="Badge"
 			 width="45" height="45"
-			 style="display: inline;vertical-align:top;float:left;margin-right:2px;overflow:hidden;"
+			 style="display: inline;vertical-align:top;float:left;margin-right:2px;"
 			 tal:attributes="src notable/badge_href|default; alt notable/badge_description|default"/>
 	</span>
 

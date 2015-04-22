@@ -24,7 +24,7 @@ from nti.app.base.abstract_views import AbstractAuthenticatedView
 from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
 
 from nti.badges.interfaces import IBadgeManager
-from nti.badges.openbadges.interfaces import IBadgeClass
+from nti.badges.openbadges.interfaces import IBadgeClass, IBadgeAssertion
 
 from nti.common.maps import CaseInsensitiveDict
 
@@ -44,6 +44,7 @@ from .views import BadgeAdminPathAdapter
 from . import get_badge
 from . import add_person
 from . import add_assertion
+from . import get_assertion
 from . import person_exists
 from . import get_all_badges
 from . import assertion_exists
@@ -102,11 +103,14 @@ class AwardBadgeView(BaseBadgePostView):
 			add_person(user)
 	
 		# add assertion
-		if not assertion_exists(user, badge_name):
+		result = get_assertion(user, badge_name)
+		if result is None:
 			add_assertion(user, badge_name)
+			result = get_assertion(user, badge_name)
 			logger.info("Badge '%s' added to user %s", badge_name, username)
-	
-		return hexc.HTTPNoContent()
+			
+		result = IBadgeAssertion(result)
+		return result
 
 @view_config(name='revoke')	
 @view_config(name='revoke_badge')	
@@ -133,7 +137,7 @@ class RevokeBadgeView(BaseBadgePostView):
 			raise hexc.HTTPNotFound('User not found')
 	
 		# validate badge
-		for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
+		for name in ('badge', 'name'):
 			badge_name = values.get(name)
 			if badge_name:
 				break
@@ -150,9 +154,9 @@ class RevokeBadgeView(BaseBadgePostView):
 			logger.info("Badge '%s' revoked from user %s", badge_name, username)
 		else:
 			logger.warn('Assertion (%s,%s) not found', user, badge_name)
+			raise hexc.HTTPNotFound()
 	
 		return hexc.HTTPNoContent()
-
 
 @view_config(name='sync_db')
 @view_config(name='sync_badges')

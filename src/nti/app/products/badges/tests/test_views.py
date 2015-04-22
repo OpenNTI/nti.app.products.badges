@@ -70,7 +70,7 @@ class TestViews(ApplicationLayerTest):
 		self.testapp.post_json(award_badge_path,
 							   {"username":username,
 								"badge":"badge.1"},
-							   status=204)
+							   status=200)
 		manager = component.getUtility(IBadgeManager)
 		assertion = manager.get_assertion('ichigo@bleach.com', 'badge.1')
 		assert_that(assertion, is_not(none()))
@@ -141,6 +141,7 @@ class TestViews(ApplicationLayerTest):
 	@fudge.patch('nti.app.products.badges.views.is_email_verified')
 	@fudge.patch('nti.app.products.badges.decorators.is_earned_badge')
 	def test_lock_badge(self, mock_ic, mock_ieb):
+		mock_ieb.is_callable().with_args().returns(True)
 		username = 'ichigo@bleach.com'
 		with mock_dataserver.mock_db_trans(self.ds):
 			self._create_user(username=username,
@@ -152,9 +153,8 @@ class TestViews(ApplicationLayerTest):
 		self.testapp.post_json(award_badge_path,
 							   {"username":username,
 								"badge":"badge.1"},
-							   status=204)
-		
-		mock_ieb.is_callable().with_args().returns(True)
+							   status=200)
+
 		badge_name = urllib.quote("badge.1")
 		open_badges_path = '/dataserver2/OpenBadges/%s' % badge_name
 		testapp = TestApp(self.app)

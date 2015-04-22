@@ -10,6 +10,7 @@ __docformat__ = "restructuredtext en"
 from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
+from hamcrest import has_key
 from hamcrest import has_entry
 from hamcrest import has_length
 from hamcrest import has_entries
@@ -55,7 +56,7 @@ class TestAdminViews(ApplicationLayerTest):
 		self.testapp.post_json(award_badge_path,
 							   {"username":"ichigo@bleach.com",
 								"badge":"badge.1"},
-							   status=204)
+							   status=200)
 		manager = component.getUtility(IBadgeManager)
 		assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'), is_(True))
 
@@ -95,10 +96,13 @@ class TestAdminViews(ApplicationLayerTest):
 			self._create_user(username=username, external_value={'email':username})
 
 		award_badge_path = '/dataserver2/BadgeAdmin/@@award'
-		self.testapp.post_json(award_badge_path,
-							   {"username":"ichigo@bleach.com",
-								"badge":"badge.1"},
-							   status=204)
+		res = self.testapp.post_json(award_badge_path,
+							   		{"username":"ichigo@bleach.com",
+									"badge":"badge.1"},
+							   		status=200)
+		assert_that(res.json_body, has_key('href'))
+		href = res.json_body['href']		
+		self.testapp.get(href, status=200)
 
 		revoke_badge_path = '/dataserver2/BadgeAdmin/@@revoke'
 		self.testapp.post_json(revoke_badge_path,
@@ -107,6 +111,13 @@ class TestAdminViews(ApplicationLayerTest):
 							   status=204)
 		manager = component.getUtility(IBadgeManager)
 		assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'), is_(False))
+		
+		self.testapp.post_json(revoke_badge_path,
+							   {"username":"ichigo@bleach.com",
+								"badge":"badge.1"},
+							   status=404)
+		
+		self.testapp.get(href, status=404)
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_bulk_import(self):
@@ -115,11 +126,11 @@ class TestAdminViews(ApplicationLayerTest):
 				self._create_user(username=username,
 								  external_value={'email':username+'@bleach.com'})
 
-		award_badge_path = '/dataserver2/BadgeAdmin/award'
+		award_badge_path = '/dataserver2/BadgeAdmin/@@award'
 		self.testapp.post_json(award_badge_path,
 							   {"username":"rukia",
 								"badge":"badge.2"},
-							   status=204)
+							   status=200)
 
 		with mock_dataserver.mock_db_trans(self.ds):
 			source = "ichigo\tbadge.1\n"

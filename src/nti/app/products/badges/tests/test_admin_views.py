@@ -101,8 +101,8 @@ class TestAdminViews(ApplicationLayerTest):
 									"badge":"badge.1"},
 							   		status=200)
 		assert_that(res.json_body, has_key('href'))
-		href = res.json_body['href']		
-		self.testapp.get(href, status=200)
+		open_assertion_path = res.json_body['href']		
+		self.testapp.get(open_assertion_path, status=200)
 
 		revoke_badge_path = '/dataserver2/BadgeAdmin/@@revoke'
 		self.testapp.post_json(revoke_badge_path,
@@ -117,7 +117,8 @@ class TestAdminViews(ApplicationLayerTest):
 								"badge":"badge.1"},
 							   status=404)
 		
-		self.testapp.get(href, status=404)
+		self.testapp.get(open_assertion_path, status=404)
+		self.testapp.get(open_assertion_path+'/image.png', status=404)
 
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_bulk_import(self):

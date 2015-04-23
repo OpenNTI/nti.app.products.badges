@@ -115,7 +115,7 @@ class OpenIssuersPathAdapter(Contained):
 		result = get_issuer(issuer_id)
 		if result is not None:
 			result = IIssuerOrganization(result)
-			result. __acl__ = acl_from_aces(
+			result.__acl__ = acl_from_aces(
 								ace_allowing(EVERYONE_USER_NAME, nauth.ACT_READ))
 			return result
 		raise KeyError(issuer_id)
@@ -162,7 +162,7 @@ class OpenBadgesPathAdapter(Contained):
 		result = get_badge(badge_id)
 		if result is not None:
 			result = IBadgeClass(result)
-			result. __acl__ = acl_from_aces(
+			result.__acl__ = acl_from_aces(
 								ace_allowing(EVERYONE_USER_NAME, nauth.ACT_READ))
 			return result
 		raise KeyError(badge_id)
@@ -210,7 +210,7 @@ class OpenAssertionsPathAdapter(Contained):
 		result = manager.get_assertion_by_id(assertion_id)
 		if result is not None:
 			result = IBadgeAssertion(result)
-			result. __acl__ = acl_from_aces(
+			result.__acl__ = acl_from_aces(
 								ace_allowing(EVERYONE_USER_NAME, nauth.ACT_READ))
 			return result
 		raise KeyError(assertion_id)
@@ -284,7 +284,7 @@ def assert_assertion_exported(context, remoteUser=None):
 	if remoteUser is not None and remoteUser != user:
 		raise hexc.HTTPForbidden()
 	
-	## cehck if email has been verified
+	## check if email has been verified
 	email = get_user_email(user)
 	email_verified = is_email_verified(user)
 	if not email or not email_verified:

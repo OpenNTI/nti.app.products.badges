@@ -120,9 +120,9 @@ class TestViews(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry('badge', 'http://localhost/dataserver2/OpenBadges/badge.1/badge.json'))
 		
 		assert_that(res.json_body, has_entries(
-										'image', 'http://localhost/dataserver2/OpenAssertions/YmFkZ2UuMSAtPiA2/image.png',
+										'image', 'http://localhost/dataserver2/OpenAssertions/f35d4fc8b4f1294aeac14ef865bef15c/image.png',
 										'issuedOn', is_not(none()),
-										'uid', 'YmFkZ2UuMSAtPiA2'))
+										'uid', 'f35d4fc8b4f1294aeac14ef865bef15c'))
 		
 		assert_that(res.json_body, has_entry('recipient', 
 											 has_entries('hashed', True,

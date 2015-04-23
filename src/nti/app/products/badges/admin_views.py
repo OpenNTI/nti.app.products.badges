@@ -108,7 +108,7 @@ class AwardBadgeView(BaseBadgePostView):
 			add_assertion(user, badge_name)
 			result = get_assertion(user, badge_name)
 			logger.info("Badge '%s' added to user %s", badge_name, username)
-			
+
 		result = IBadgeAssertion(result)
 		return result
 

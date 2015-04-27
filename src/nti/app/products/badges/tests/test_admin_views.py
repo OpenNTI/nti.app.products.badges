@@ -135,7 +135,7 @@ class TestAdminViews(ApplicationLayerTest):
 
 		with mock_dataserver.mock_db_trans(self.ds):
 			source = "ichigo\tbadge.1\n"
-			source += "rukia@bleach.com\tbadge.2\trevoke\n"
+			source += "rukia\tbadge.2\trevoke\n"
 			source += "aizen@bleach.com\tbadge.1\taward\n"
 			source += "ichigo@bleach.com\tnotfound-badge\taward\n"
 			source += "ichigo@bleach.com\tbadge.1\tinvalid\n"

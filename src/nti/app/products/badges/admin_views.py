@@ -14,7 +14,6 @@ import time
 import simplejson
 
 from zope import component
-from zope.catalog.interfaces import ICatalog
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
@@ -31,7 +30,6 @@ from nti.common.maps import CaseInsensitiveDict
 from nti.dataserver import authorization as nauth
 
 from nti.dataserver.users import User
-from nti.dataserver.users import index as user_index
 from nti.dataserver.users.interfaces import IUserProfile
 
 from nti.externalization.interfaces import LocatedExternalDict
@@ -79,10 +77,6 @@ class AwardBadgeView(BaseBadgePostView):
 
 		user = User.get_user(username)
 		if user is None:
-			ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
-			results = list(ent_catalog.searchResults(email=(username, username)))
-			user = results[0] if results else None
-		if user is None:
 			raise hexc.HTTPUnprocessableEntity('User not found')
 		
 		# validate badge
@@ -129,10 +123,6 @@ class RevokeBadgeView(BaseBadgePostView):
 		if not username:
 			raise hexc.HTTPUnprocessableEntity('Username was not specified')
 		user = User.get_user(username)
-		if user is None:
-			ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
-			results = list(ent_catalog.searchResults(email=(username, username)))
-			user = results[0] if results else None
 		if user is None:
 			raise hexc.HTTPNotFound('User not found')
 	
@@ -204,8 +194,6 @@ class SyncDbView(BaseBadgePostView):
 		return result
 
 def bulk_import(input_source, errors=[]):
-	ent_catalog = component.getUtility(ICatalog, name=user_index.CATALOG_NAME)
-
 	awards = 0
 	revokations = 0
 	for line, source in enumerate(input_source):
@@ -225,9 +213,6 @@ def bulk_import(input_source, errors=[]):
 			continue
 
 		user = User.get_user(username)
-		if user is None:
-			results = list(ent_catalog.searchResults(email=(username, username)))
-			user = results[0] if results else None
 		if user is None:
 			errors.append("Invalid user '%s' in line %s" % (username, line))
 			continue

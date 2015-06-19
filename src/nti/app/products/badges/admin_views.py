@@ -48,9 +48,9 @@ from . import get_all_badges
 from . import assertion_exists
 from . import remove_assertion
 
-class BaseBadgePostView(AbstractAuthenticatedView, 
+class BaseBadgePostView(AbstractAuthenticatedView,
 						ModeledContentUploadRequestUtilsMixin):
-	
+
 	def readInput(self, value=None):
 		result = CaseInsensitiveDict()
 		if self.request.body:
@@ -58,15 +58,15 @@ class BaseBadgePostView(AbstractAuthenticatedView,
 			result.update(values)
 		return result
 
-@view_config(name='award')	
-@view_config(name='award_badge')	
-@view_defaults(	route_name='objects.generic.traversal',
-			 	renderer='rest',
-			 	request_method='POST',
-			 	context=BadgeAdminPathAdapter,
-			 	permission=nauth.ACT_NTI_ADMIN)
+@view_config(name='award')
+@view_config(name='award_badge')
+@view_defaults(route_name='objects.generic.traversal',
+			   renderer='rest',
+			   request_method='POST',
+			   context=BadgeAdminPathAdapter,
+			   permission=nauth.ACT_NTI_ADMIN)
 class AwardBadgeView(BaseBadgePostView):
-	
+
 	def __call__(self):
 		values = self.readInput()
 
@@ -78,7 +78,7 @@ class AwardBadgeView(BaseBadgePostView):
 		user = User.get_user(username)
 		if user is None:
 			raise hexc.HTTPUnprocessableEntity('User not found')
-		
+
 		# validate badge
 		for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
 			badge_name = values.get(name)
@@ -86,16 +86,16 @@ class AwardBadgeView(BaseBadgePostView):
 				break
 		if not badge_name:
 			raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
-	
+
 		badge = get_badge(badge_name)
 		if badge is None:
 			raise hexc.HTTPUnprocessableEntity('Badge not found')
-	
+
 		# add person if required
 		# an adapter must exists to convert the user to a person
 		if not person_exists(user):
 			add_person(user)
-	
+
 		# add assertion
 		result = get_assertion(user, badge_name)
 		if result is None:
@@ -106,18 +106,18 @@ class AwardBadgeView(BaseBadgePostView):
 		result = IBadgeAssertion(result)
 		return result
 
-@view_config(name='revoke')	
-@view_config(name='revoke_badge')	
-@view_defaults(	route_name='objects.generic.traversal',
-				renderer='rest',
-				request_method='POST',
-				context=BadgeAdminPathAdapter,
-				permission=nauth.ACT_NTI_ADMIN)
+@view_config(name='revoke')
+@view_config(name='revoke_badge')
+@view_defaults(route_name='objects.generic.traversal',
+			   renderer='rest',
+			   request_method='POST',
+			   context=BadgeAdminPathAdapter,
+			   permission=nauth.ACT_NTI_ADMIN)
 class RevokeBadgeView(BaseBadgePostView):
-	
+
 	def __call__(self):
 		values = self.readInput()
-		
+
 		# validate user
 		username = values.get('user') or values.get('username') or values.get('email')
 		if not username:
@@ -125,7 +125,7 @@ class RevokeBadgeView(BaseBadgePostView):
 		user = User.get_user(username)
 		if user is None:
 			raise hexc.HTTPNotFound('User not found')
-	
+
 		# validate badge
 		for name in ('badge', 'name'):
 			badge_name = values.get(name)
@@ -133,59 +133,59 @@ class RevokeBadgeView(BaseBadgePostView):
 				break
 		if not badge_name:
 			raise hexc.HTTPUnprocessableEntity('Badge name was not specified')
-	
+
 		manager = component.getUtility(IBadgeManager)
 		badge = manager.get_badge(badge_name)
 		if badge is None:
 			raise hexc.HTTPUnprocessableEntity('Badge not found')
-	
+
 		if manager.assertion_exists(user, badge_name):
 			manager.remove_assertion(user, badge_name)
 			logger.info("Badge '%s' revoked from user %s", badge_name, username)
 		else:
 			logger.warn('Assertion (%s,%s) not found', user, badge_name)
 			raise hexc.HTTPNotFound()
-	
+
 		return hexc.HTTPNoContent()
 
 @view_config(name='sync_db')
 @view_config(name='sync_badges')
-@view_defaults(	route_name='objects.generic.traversal',
-			 	renderer='rest',
-			 	request_method='POST',
-				context=BadgeAdminPathAdapter,
-			 	permission=nauth.ACT_NTI_ADMIN)
+@view_defaults(route_name='objects.generic.traversal',
+			   renderer='rest',
+			   request_method='POST',
+			   context=BadgeAdminPathAdapter,
+			   permission=nauth.ACT_NTI_ADMIN)
 class SyncDbView(BaseBadgePostView):
 
 	def __call__(self):
 		values = self.readInput()
-	
+
 		# get badge directory
 		for name in ('directory', 'dir', 'path', 'hosted_badge_images'):
 			directory = values.get(name)
 			if directory:
 				break
-	
+
 		if not directory:
 			directory = os.getenv('HOSTED_BADGE_IMAGES_DIR')
-	
+
 		if not directory or not os.path.exists(directory) or not os.path.isdir(directory):
 			raise hexc.HTTPNotFound('Directory not found')
-	
+
 		# update badges
 		update = values.get('update') or u''
 		update = str(update).lower() in ('1', 'true', 't', 'yes', 'y', 'on')
-	
+
 		# verify object
 		verify = values.get('verify') or u''
 		verify = str(verify).lower() in ('1', 'true', 't', 'yes', 'y', 'on')
-	
+
 		secret = values.get('secret')
 		now = time.time()
-	
+
 		# sync database
 		issuers, badges = sync_db(directory, update=update, verify=verify, secret=secret)
-	
+
 		# return
 		result = LocatedExternalDict()
 		result['Badges'] = badges
@@ -234,13 +234,13 @@ def bulk_import(input_source, errors=[]):
 	return (awards, revokations)
 
 @view_config(name='bulk_import')
-@view_defaults(	route_name='objects.generic.traversal',
-			 	renderer='rest',
-				request_method='POST',
-				context=BadgeAdminPathAdapter,
-				permission=nauth.ACT_NTI_ADMIN)
+@view_defaults(route_name='objects.generic.traversal',
+			   renderer='rest',
+			   request_method='POST',
+			   context=BadgeAdminPathAdapter,
+			   permission=nauth.ACT_NTI_ADMIN)
 class BulkImportView(AbstractAuthenticatedView):
-	
+
 	def __call__(self):
 		now = time.time()
 		request = self.request
@@ -248,14 +248,14 @@ class BulkImportView(AbstractAuthenticatedView):
 		result['Errors'] = errors = []
 		if request.POST:
 			values = CaseInsensitiveDict(request.POST)
-			source=values['source'].file
+			source = values['source'].file
 			source.seek(0)
 		else:
 			values = simplejson.loads(unicode(request.body, request.charset))
 			values = CaseInsensitiveDict(values)
 			source = os.path.expanduser(values['source'])
 			source = open(source, "r")
-	
+
 		awards, revokations = bulk_import(source, errors)
 		result['Awards'] = awards
 		result['Revokations'] = revokations
@@ -263,16 +263,16 @@ class BulkImportView(AbstractAuthenticatedView):
 		return result
 
 @view_config(name='update_persons')
-@view_defaults(	route_name='objects.generic.traversal',
-				renderer='rest',
-				request_method='POST',
-				context=BadgeAdminPathAdapter,
-				permission=nauth.ACT_NTI_ADMIN)
+@view_defaults(route_name='objects.generic.traversal',
+			   renderer='rest',
+			   request_method='POST',
+			   context=BadgeAdminPathAdapter,
+			   permission=nauth.ACT_NTI_ADMIN)
 class UpdatePersonsView(AbstractAuthenticatedView):
-	
+
 	def check(self, s):
 		return u'' if not s else s.lower()
-	
+
 	def get_user(self, person):
 		username = person.nickname
 		result = User.get_user(username)
@@ -287,7 +287,7 @@ class UpdatePersonsView(AbstractAuthenticatedView):
 		result = False
 		profile = IUserProfile(user, None)
 		username = self.check(user.username)
-		
+
 		# check email
 		email = self.check(getattr(profile, "email", u'')) or username
 		email_verified = getattr(profile, "email_verified", False)
@@ -298,12 +298,12 @@ class UpdatePersonsView(AbstractAuthenticatedView):
 		# check other fields
 		bio = getattr(profile, 'about', None) or u''
 		website = getattr(profile, 'home_page', None) or u''
-		
+
 		result = result or (bio != person.bio)
 		result = result or (website != person.website)
 		if result:
-			manager.update_person(person, 
-								  email=email, 
+			manager.update_person(person,
+								  email=email,
 							  	  name=username,
 							  	  website=website,
 							  	  bio=bio)
@@ -322,14 +322,14 @@ class UpdatePersonsView(AbstractAuthenticatedView):
 		result['Elapsed'] = time.time() - now
 		result['Total'] = result['Count'] = count
 		return result
-	
+
 @view_config(name='AllBadges')
 @view_config(name='all_badges')
-@view_defaults(	route_name='objects.generic.traversal',
-				renderer='rest',
-				request_method='GET',
-				context=BadgeAdminPathAdapter,
-				permission=nauth.ACT_NTI_ADMIN)
+@view_defaults(route_name='objects.generic.traversal',
+			   renderer='rest',
+			   request_method='GET',
+			   context=BadgeAdminPathAdapter,
+			   permission=nauth.ACT_NTI_ADMIN)
 class AllBadgesView(object):
 
 	def __init__(self, request):

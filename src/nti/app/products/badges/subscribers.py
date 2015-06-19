@@ -27,10 +27,10 @@ from nti.dataserver.interfaces import IUser
 
 from nti.processlifetime import IApplicationTransactionOpenedEvent
 
+from .utils import get_badge_image_url
+
 from . import person_exists
 from . import delete_person
-
-from .utils import get_badge_image_url
 
 @component.adapter(IUser, IObjectRemovedEvent)
 def _user_deleted(user, event):
@@ -85,7 +85,7 @@ class AssertionChange(Change):
 	for assertions/badges.
 	"""
 	image = None
-	
+
 	# When we write this out, turn the assertion into the actual
 	# badge
 	def externalObjectTransformationHook(self, assertion):
@@ -118,7 +118,7 @@ class AssertionChange(Change):
 	def __acl__(self):
 		creator = self.creator
 		if creator is not None:
-			return acl_from_aces( ace_allowing( creator, ACT_READ ) )
+			return acl_from_aces(ace_allowing(creator, ACT_READ))
 		return (ACE_DENY_ALL,)
 
 @component.adapter(IBadgeAssertion, IObjectAddedEvent)
@@ -128,12 +128,12 @@ def _make_assertions_notable_to_target(assertion, event):
 	for the target user.
 	"""
 	change = AssertionChange(SC_BADGE_EARNED, assertion)
-	
+
 	# set badge image
 	badge = IBadgeClass(assertion)
 	image = get_badge_image_url(badge)
 	change.image = image if image else None
-	
+
 	user = IUser(assertion)
 	# Set a creator...this may not be the best we can do in some cases
 	change.creator = user

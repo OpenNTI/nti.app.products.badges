@@ -17,7 +17,9 @@ from io import BytesIO
 
 from zope import component
 from zope import interface
+
 from zope.container.contained import Contained
+
 from zope.traversing.interfaces import IPathAdapter
 
 from pyramid.view import view_config
@@ -87,9 +89,9 @@ def _to__mozilla_backpack(context):
 	result = to_external_object(context, name="mozillabackpack",
 								decorate=False)
 	return result
-	
+
 class OpenJSONView(AbstractView):
-	
+
 	def _set_environ(self):
 		environ = self.request.environ
 		environ['HTTP_X_REQUESTED_WITH'] = b'xmlhttprequest'
@@ -97,7 +99,7 @@ class OpenJSONView(AbstractView):
 class Response(PyramidResponse):
 	default_charset = None
 
-### Issuers
+# Issuers
 
 @interface.implementer(IPathAdapter)
 @component.adapter(IDataserverFolder, IRequest)
@@ -129,13 +131,13 @@ class OpenIssuerView(AbstractView):
 	def __call__(self):
 		result = self.request.context
 		return result
-	
+
 @view_config(name="mozillabackpack")
 @view_config(name="issuer.json")
-@view_defaults(	route_name='objects.generic.traversal',
-				renderer='rest',
-				request_method='GET',
-				context=IIssuerOrganization)
+@view_defaults(route_name='objects.generic.traversal',
+			   renderer='rest',
+			   request_method='GET',
+			   context=IIssuerOrganization)
 class OpenIssuerJSONView(OpenJSONView):
 
 	def __call__(self):
@@ -144,7 +146,7 @@ class OpenIssuerJSONView(OpenJSONView):
 		interface.alsoProvides(result, INoHrefInResponse)
 		return result
 
-### Badges
+# Badges
 
 @interface.implementer(IPathAdapter)
 @component.adapter(IDataserverFolder, IRequest)
@@ -179,10 +181,10 @@ class OpenBadgeView(AbstractView):
 
 @view_config(name="mozillabackpack")
 @view_config(name="badge.json")
-@view_defaults(	route_name='objects.generic.traversal',
-				renderer='rest',
-				request_method='GET',
-				context=IBadgeClass)
+@view_defaults(route_name='objects.generic.traversal',
+			   renderer='rest',
+			   request_method='GET',
+			   context=IBadgeClass)
 class OpenBadgeJSONView(OpenJSONView):
 
 	def __call__(self):
@@ -190,8 +192,8 @@ class OpenBadgeJSONView(OpenJSONView):
 		result = _to__mozilla_backpack(self.request.context)
 		interface.alsoProvides(result, INoHrefInResponse)
 		return result
-	
-### Assertions
+
+# Assertions
 
 @interface.implementer(IPathAdapter)
 @component.adapter(IDataserverFolder, IRequest)
@@ -243,29 +245,29 @@ def _get_image(badge_url, payload=None, locked=False):
 	source.seek(0)
 	if locked:
 		target = BytesIO()
-		bake_badge(	source, target, 
-					payload=payload, 
+		bake_badge(source, target,
+					payload=payload,
 					url=(badge_url if not payload else None))
 		target.seek(0)
 	return target
 
 @view_config(name="baked-image")
 @view_config(name="image.png")
-@view_defaults(	route_name='objects.generic.traversal',
-			 	request_method='GET',
-				context=IBadgeAssertion)
+@view_defaults(route_name='objects.generic.traversal',
+			   request_method='GET',
+			   context=IBadgeAssertion)
 class OpenAssertionImageView(AbstractView):
 
 	def __call__(self):
 		context = self.request.context
-		
-		## baked image if locked
+
+		# baked image if locked
 		locked = is_locked(context)
 		badge_url = _get_badge_image_url(context, self.request)
 		payload = _to__mozilla_backpack(context) if is_locked else None
 		target = _get_image(badge_url, payload=payload, locked=locked)
-		
-		## return baked image
+
+		# return baked image
 		response = Response()
 		response.body_file = target
 		response.content_type = b'image/png'
@@ -277,14 +279,14 @@ def assert_assertion_exported(context, remoteUser=None):
 	if is_locked(context):
 		return
 
-	## verify user access
+	# verify user access
 	user = IUser(context, None)
 	if user is None:
 		raise hexc.HTTPUnprocessableEntity(_("Cannot find user for assertion."))
 	if remoteUser is not None and remoteUser != user:
 		raise hexc.HTTPForbidden()
-	
-	## check if email has been verified
+
+	# check if email has been verified
 	email = get_user_email(user)
 	email_verified = is_email_verified(user)
 	if not email or not email_verified:
@@ -294,9 +296,9 @@ def assert_assertion_exported(context, remoteUser=None):
 
 @view_config(name="mozillabackpack")
 @view_config(name="assertion.json")
-@view_defaults(	route_name='objects.generic.traversal',
-			 	request_method='GET',
-			 	context=IBadgeAssertion)
+@view_defaults(route_name='objects.generic.traversal',
+			   request_method='GET',
+			   context=IBadgeAssertion)
 class OpenAssertionJSONView(OpenJSONView):
 
 	def __call__(self):
@@ -310,10 +312,10 @@ class OpenAssertionJSONView(OpenJSONView):
 
 @view_config(name="lock")
 @view_config(name="export")
-@view_defaults(	route_name='objects.generic.traversal',
-			 	request_method='POST',
-				context=IBadgeAssertion,
-			 	permission=nauth.ACT_READ)
+@view_defaults(route_name='objects.generic.traversal',
+			   request_method='POST',
+			   context=IBadgeAssertion,
+			   permission=nauth.ACT_READ)
 class ExportOpenAssertionView(AbstractAuthenticatedView):
 
 	def __call__(self):
@@ -321,14 +323,14 @@ class ExportOpenAssertionView(AbstractAuthenticatedView):
 		owner = IUser(context, None)
 		if owner != self.remoteUser:
 			raise hexc.HTTPForbidden()
-	
-		## verify the assertion can be exported
-		assert_assertion_exported(context, self.remoteUser)	
+
+		# verify the assertion can be exported
+		assert_assertion_exported(context, self.remoteUser)
 		payload = _to__mozilla_backpack(context)
 		badge_url = _get_badge_image_url(context, self.request)
 		target = _get_image(badge_url, payload=payload, locked=True)
-		
-		## return baked image
+
+		# return baked image
 		response = Response()
 		response.body_file = target
 		response.content_type = b'image/png'
@@ -337,19 +339,19 @@ class ExportOpenAssertionView(AbstractAuthenticatedView):
 
 @view_config(name="lock")
 @view_config(name="export")
-@view_defaults(	route_name='objects.generic.traversal',
-			 	request_method='POST',
-				context=IBadgeClass,
-			 	permission=nauth.ACT_READ)
+@view_defaults(route_name='objects.generic.traversal',
+			   request_method='POST',
+			   context=IBadgeClass,
+			   permission=nauth.ACT_READ)
 class LockBadgeView(AbstractAuthenticatedView):
 
 	def __call__(self):
-		context = self.request.context	
-		assertion  = get_assertion(self.remoteUser, context.name)
+		context = self.request.context
+		assertion = get_assertion(self.remoteUser, context.name)
 		if assertion is None:
 			raise hexc.HTTPUnprocessableEntity(_("Cannot find user assertion."))
-		
-		## verify the assertion can be exported and export
+
+		# verify the assertion can be exported and export
 		assert_assertion_exported(assertion, self.remoteUser)
-		interface.alsoProvides(context, IEarnedBadge) ## see decorators
+		interface.alsoProvides(context, IEarnedBadge)  # # see decorators
 		return context

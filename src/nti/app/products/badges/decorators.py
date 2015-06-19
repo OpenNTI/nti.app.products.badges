@@ -47,21 +47,21 @@ def _assertion_links(links, context, remoteUser, request, badge=None):
 		return
 	locked = is_locked(context)
 	if locked:
-		## add link to baked image
+		# add link to baked image
 		href = get_assertion_image_url(context, request)
 		links.append(Link(href, rel='baked-image'))
-		## add link to assertion json
+		# add link to assertion json
 		href = get_assertion_json_url(context, request)
 		links.append(Link(href, rel='mozilla-backpack'))
 	else:
-		## add link to export/lock assertion
+		# add link to export/lock assertion
 		if badge is None:
 			href = get_assertion_href(context, request)
 		else:
 			href = get_badge_href(badge, request)
 		links.append(Link(href, elements=('lock',), rel='lock'))
 	return locked
-		
+
 def is_earned_badge(context, user=None):
 	return IEarnedBadge.providedBy(context)
 
@@ -73,16 +73,16 @@ class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 		request = self.request
 		mapping['href'] = get_badge_href(context, request)
 		mapping['image'] = get_badge_image_url(context, request)
-		if is_earned_badge(context): # test to avoid a lot of db ops
+		if is_earned_badge(context):  # test to avoid a lot of db ops
 			assertion = get_assertion(self.remoteUser, context)
 			if assertion is not None:
 				_links = mapping.setdefault(LINKS, [])
-				href = get_assertion_href(assertion, request) 
+				href = get_assertion_href(assertion, request)
 				_links.append(Link(href, rel="assertion"))
 				locked = _assertion_links(_links, assertion, self.remoteUser,
 										  request, badge=context)
 				mapping['Locked'] = locked
-				
+
 @component.adapter(IBadgeAssertion)
 @interface.implementer(IExternalMappingDecorator)
 class _BadgeAssertionDecorator(AbstractAuthenticatedRequestAwareDecorator):

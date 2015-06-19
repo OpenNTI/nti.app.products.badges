@@ -133,7 +133,7 @@ def add_assertion(person, badge, exported=False):
 	manager = component.getUtility(IBadgeManager)
 	result = manager.add_assertion(person, badge, exported=exported)
 	return result
-	
+
 def remove_assertion(person, badge):
 	manager = component.getUtility(IBadgeManager)
 	result = manager.remove_assertion(person, badge)

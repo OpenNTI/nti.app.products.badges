@@ -11,8 +11,9 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from zope import interface
 from zope import component
+from zope import interface
+
 from zope.container.contained import Contained
 
 from nti.appserver.workspaces.interfaces import IUserService
@@ -28,19 +29,18 @@ from nti.common.property import Lazy
 from nti.common.property import alias
 
 from nti.dataserver.datastructures import LastModifiedCopyingUserList
-
-from . import BADGES
-from . import get_all_badges
-from . import assertion_exists
-from . import get_person_badges
-from . import get_person_assertions
-
 from .interfaces import IBadgesWorkspace
 from .interfaces import IOpenBadgeAdapter
 from .interfaces import IPrincipalErnableBadges
 from .interfaces import get_principal_badge_filter
 from .interfaces import get_principal_earned_badge_filter
 from .interfaces import get_principal_earnable_badge_filter
+
+from . import BADGES
+from . import get_all_badges
+from . import assertion_exists
+from . import get_person_badges
+from . import get_person_assertions
 
 def get_openbadge(context):
 	adapter = component.queryUtility(IOpenBadgeAdapter)
@@ -52,6 +52,7 @@ def get_openbadge(context):
 class _BadgesWorkspace(Contained):
 
 	__name__ = BADGES
+
 	name = alias('__name__', __name__)
 
 	def __init__(self, user_service):
@@ -65,7 +66,7 @@ class _BadgesWorkspace(Contained):
 		if component.queryUtility(IBadgeManager) is not None:
 			return (AllBadgesCollection(self),
 					EarnableBadgeCollection(self),
-					EarnedBadgeCollection(self) )
+					EarnedBadgeCollection(self))
 		return ()
 
 	def __getitem__(self, key):
@@ -91,8 +92,9 @@ def BadgesWorkspace(user_service):
 @interface.implementer(IContainerCollection)
 class AllBadgesCollection(Contained):
 
-	#: Our name, part of our URL.
+	# Our name, part of our URL.
 	__name__ = 'AllBadges'
+
 	name = alias('__name__', __name__)
 
 	accepts = ()
@@ -122,8 +124,9 @@ class AllBadgesCollection(Contained):
 @interface.implementer(IContainerCollection)
 class EarnableBadgeCollection(Contained):
 
-	# : Our name, part of our URL.
+	# Our name, part of our URL.
 	__name__ = 'EarnableBadges'
+
 	name = alias('__name__', __name__)
 
 	accepts = ()
@@ -153,8 +156,9 @@ class EarnableBadgeCollection(Contained):
 @interface.implementer(IContainerCollection)
 class EarnedBadgeCollection(Contained):
 
-	# : Our name, part of our URL.
+	# Our name, part of our URL.
 	__name__ = 'EarnedBadges'
+
 	name = alias('__name__', __name__)
 
 	accepts = ()

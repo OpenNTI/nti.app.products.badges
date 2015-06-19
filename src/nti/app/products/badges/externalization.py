@@ -64,17 +64,17 @@ class _MozillaOpenAssertionExternalizer(object):
 		result = InterfaceObjectIO(self.context, IBadgeAssertion).toExternalObject(**kwargs)
 		result = _clean_external(result)
 		
-		## get assertion_image
+		# get assertion_image
 		request = get_current_request()
 		if request:
 			result['image'] = get_assertion_image_url(self.context, request)
 		
-		## change badge to an URL
+		# change badge to an URL
 		badge = self.context.badge
 		if IBadgeClass.providedBy(badge) and request:
 			result['badge'] = get_openbadge_url(badge, request)
 		
-		## change verification URL
+		# change verification URL
 		if is_locked(self.context):
 			verify = result.get('verify')
 			url = get_assertion_json_url(self.context, request)

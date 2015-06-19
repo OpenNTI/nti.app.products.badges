@@ -28,10 +28,10 @@ URL_SCHEMES = ("file", "ftp", "http", "https", "ldap")
 def get_ds2(request=None):
 	request = request if request else get_current_request()
 	try:
-		return request.path_info_peek() if request else None # e.g. /dataserver2
-	except AttributeError: # in unit test we may see this
+		return request.path_info_peek() if request else None  # e.g. /dataserver2
+	except AttributeError:  # in unit test we may see this
 		return None
-	
+
 def get_user(user=None):
 	user = User.get_user(str(user)) if user and not IUser.providedBy(user) else user
 	return user
@@ -39,7 +39,7 @@ def get_user(user=None):
 def get_badge_href(context, request=None):
 	ds2 = get_ds2(request)
 	if ds2:
-		## href is the open badge URL
+		# href is the open badge URL
 		href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, quote(context.name))
 		return href
 	return None
@@ -55,7 +55,7 @@ def get_badge_image_url(context, request=None):
 	request = request if request else get_current_request()
 	if not request:
 		return image
-	
+
 	scheme = urlparse(image).scheme if image else None
 	if not scheme or scheme.lower() not in URL_SCHEMES:
 		image = image if image.lower().endswith('.png') else image + '.png'
@@ -67,7 +67,7 @@ def get_assertion_url(assertion, request=None, full=False):
 	ds2 = get_ds2(request)
 	if not ds2:
 		return None
-	
+
 	uid = quote(assertion.uid)
 	href = '/%s/%s/%s' % (ds2, OPEN_ASSERTIONS_VIEW, uid)
 	result = urljoin(request.host_url, href) if full else href
@@ -98,7 +98,7 @@ def get_openbadge_url(context, request=None):
 def get_issuer_href(context, request=None):
 	ds2 = get_ds2(request)
 	if ds2:
-		## href is the open badge URL
+		# href is the open badge URL
 		href = '/%s/%s/%s' % (ds2, OPEN_ISSUERS_VIEW, quote(context.name))
 		return href
 	return None

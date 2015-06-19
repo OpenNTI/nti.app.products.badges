@@ -12,7 +12,7 @@ logger = __import__('logging').getLogger(__name__)
 import os
 import sys
 import argparse
-	
+
 from nti.badges.openbadges.utils import scanner
 
 from nti.dataserver.utils.base_script import create_context
@@ -29,9 +29,9 @@ def sync_db(path, update=False, verify=False, **kwargs):
 
 	path = os.path.expanduser(path)
 	logger.info("Scanning %s", path)
-	
+
 	# pairs mozilla badge/issuer
-	results = scanner.flat_scan(path, verify=verify, **kwargs) 
+	results = scanner.flat_scan(path, verify=verify, **kwargs)
 	if not results:
 		logger.warn("No badges found")
 		return (issuers, badges)
@@ -77,7 +77,7 @@ def process_args(args=None):
 							 help="JSON web signature secret")
 	arg_parser.add_argument('-u', '--update', help="Update", action='store_true',
 							 dest='update')
-	arg_parser.add_argument('-y', '--verify', help="Verify badge data", 
+	arg_parser.add_argument('-y', '--verify', help="Verify badge data",
 							 action='store_true',
 							 dest='verify')
 

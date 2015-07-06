@@ -28,6 +28,8 @@ from nti.badges.openbadges.interfaces import IIdentityObject
 from nti.badges.tahrir.interfaces import IPerson
 from nti.badges.tahrir.interfaces import IAssertion
 
+from nti.contentfragments.interfaces import IPlainTextContentFragment
+
 from nti.dataserver.users import User
 from nti.dataserver.interfaces import IUser
 from nti.dataserver.users.interfaces import IUserProfile
@@ -45,12 +47,18 @@ def user_to_identity_object(user):
 							salt=None)
 	return result
 
+def to_plain_text(content):
+	text = component.getAdapter(content,
+								IPlainTextContentFragment,
+								name='text')
+	return text
+	
 def set_common_person(user, person):
 	uid = get_user_id(user)
 	person.email = uid
 	profile = IUserProfile(user, None)
 	person.website = getattr(profile, 'home_page', None) or u''
-	person.bio = ' '.join(getattr(profile, 'about', None) or u'')
+	person.bio = to_plain_text(' '.join(getattr(profile, 'about', None) or u''))
 
 @interface.implementer(IPerson)
 @component.adapter(IUser)

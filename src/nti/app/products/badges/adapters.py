@@ -49,8 +49,8 @@ def set_common_person(user, person):
 	uid = get_user_id(user)
 	person.email = uid
 	profile = IUserProfile(user, None)
-	person.bio = getattr(profile, 'about', None) or u''
 	person.website = getattr(profile, 'home_page', None) or u''
+	person.bio = ' '.join(getattr(profile, 'about', None) or u'')
 
 @interface.implementer(IPerson)
 @component.adapter(IUser)

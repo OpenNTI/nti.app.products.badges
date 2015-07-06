@@ -72,11 +72,11 @@ class IPrincipalEarnableBadgeFilter(interface.Interface):
 		"""
 
 class IOpenBadgeAdapter(interface.Interface):
-	
+
 	"""
-	Utility to adapt an object to a :class:`nti.badges.openbadges.interfaces.IBadgeClass` 
+	Utility to adapt an object to a :class:`nti.badges.openbadges.interfaces.IBadgeClass`
 	"""
-	
+
 	def adapt(context):
 		"""
 		adpapt the specified context to a IBadgeClass
@@ -106,4 +106,4 @@ def get_principal_earnable_badge_filter(user):
 from nti.dataserver.interfaces import make_stream_change_event_interface
 
 SC_BADGE_EARNED = 'BadgeEarned'
-IStreamChangeBadgeEarnedEvent = make_stream_change_event_interface( SC_BADGE_EARNED )[0]
+IStreamChangeBadgeEarnedEvent = make_stream_change_event_interface(SC_BADGE_EARNED)[0]

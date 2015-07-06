@@ -63,17 +63,17 @@ class _MozillaOpenAssertionExternalizer(object):
 	def toExternalObject(self, **kwargs):
 		result = InterfaceObjectIO(self.context, IBadgeAssertion).toExternalObject(**kwargs)
 		result = _clean_external(result)
-		
+
 		# get assertion_image
 		request = get_current_request()
 		if request:
 			result['image'] = get_assertion_image_url(self.context, request)
-		
+
 		# change badge to an URL
 		badge = self.context.badge
 		if IBadgeClass.providedBy(badge) and request:
 			result['badge'] = get_openbadge_url(badge, request)
-		
+
 		# change verification URL
 		if is_locked(self.context):
 			verify = result.get('verify')
@@ -95,17 +95,17 @@ class _MozillaOpenBadgeExternalizer(object):
 	def toExternalObject(self, **kwargs):
 		result = InterfaceObjectIO(self.context, IBadgeClass).toExternalObject(**kwargs)
 		result = _clean_external(result)
-		
+
 		request = get_current_request()
 		if request:
 			result['image'] = get_badge_image_url(self.context, request)
-			
+
 		# change issuer url
 		request = get_current_request()
 		issuer = self.context.issuer
 		if IIssuerOrganization.providedBy(issuer) and request:
 			result['issuer'] = get_openissuer_url(issuer, request)
-			
+
 		result.pop('Type', None)
 		return result
 

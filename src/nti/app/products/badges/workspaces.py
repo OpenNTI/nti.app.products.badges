@@ -187,7 +187,7 @@ class EarnedBadgeCollection(Contained):
 @interface.implementer(IContainerCollection)
 class AssertionCollection(Contained):
 
-	# : Our name, part of our URL.
+	# Our name, part of our URL.
 	__name__ = 'Assertions'
 	name = alias('__name__', __name__)
 

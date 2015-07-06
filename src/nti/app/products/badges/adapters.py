@@ -52,7 +52,7 @@ def to_plain_text(content):
 								IPlainTextContentFragment,
 								name='text')
 	return text
-	
+
 def set_common_person(user, person):
 	uid = get_user_id(user)
 	person.email = uid

@@ -12,6 +12,8 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from nti.appserver.interfaces import ICreatableObjectFilter
+
 from nti.dataserver.interfaces import IUser
 
 from .interfaces import IPrincipalBadgeFilter
@@ -53,3 +55,17 @@ class _DefaultPrincipalEarnableBadgeFilter(object):
 
 	def allow_badge(self, user, badge):
 		return True
+
+@interface.implementer(ICreatableObjectFilter)
+class _BadgesContentObjectFilter(object):
+
+	PREFIX = u'application/vnd.nextthought.openbadges'
+
+	def __init__(self, context=None):
+		pass
+
+	def filter_creatable_objects(self, terms):
+		for name in list(terms):  # mutating
+			if name.startswith(self.PREFIX):
+				terms.pop(name, None)
+		return terms

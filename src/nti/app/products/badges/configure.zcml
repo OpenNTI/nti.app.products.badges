@@ -101,6 +101,10 @@
 	<subscriber	factory=".filters._DefaultPrincipalEarnableBadgeFilter"
 				provides=".interfaces.IPrincipalEarnableBadgeFilter"/>
 
+	<subscriber	factory=".filters._BadgesContentObjectFilter"
+				provides="nti.appserver.interfaces.ICreatableObjectFilter"
+				for="nti.dataserver.interfaces.IUser" />
+
 	<!-- Workspaces -->
 	<!-- A subscriber for enumeration -->
 	<subscriber factory=".workspaces.BadgesWorkspace"

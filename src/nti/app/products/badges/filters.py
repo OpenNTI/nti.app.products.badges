@@ -59,13 +59,14 @@ class _DefaultPrincipalEarnableBadgeFilter(object):
 @interface.implementer(ICreatableObjectFilter)
 class _BadgesContentObjectFilter(object):
 
-	PREFIX = u'application/vnd.nextthought.openbadges'
+	PREFIX_1 = u'application/vnd.nextthought.badges'
+	PREFIX_2 = u'application/vnd.nextthought.openbadges'
 
 	def __init__(self, context=None):
 		pass
 
 	def filter_creatable_objects(self, terms):
 		for name in list(terms):  # mutating
-			if name.startswith(self.PREFIX):
+			if name.startswith(self.PREFIX_1) or name.startswith(self.PREFIX_2):
 				terms.pop(name, None)
 		return terms

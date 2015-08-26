@@ -28,7 +28,13 @@ from nti.badges.openbadges.interfaces import IBadgeAssertion
 from nti.common.property import Lazy
 from nti.common.property import alias
 
+from nti.dataserver.interfaces import IDataserverFolder
 from nti.dataserver.datastructures import LastModifiedCopyingUserList
+
+from nti.links.links import Link
+
+from nti.traversal.traversal import find_interface
+
 from .interfaces import IBadgesWorkspace
 from .interfaces import IOpenBadgeAdapter
 from .interfaces import IPrincipalErnableBadges
@@ -37,6 +43,10 @@ from .interfaces import get_principal_earned_badge_filter
 from .interfaces import get_principal_earnable_badge_filter
 
 from . import BADGES
+from . import OPEN_BADGES_VIEW
+from . import OPEN_ISSUERS_VIEW
+from . import OPEN_ASSERTIONS_VIEW
+
 from . import get_all_badges
 from . import assertion_exists
 from . import get_person_badges
@@ -68,6 +78,16 @@ class _BadgesWorkspace(Contained):
 					EarnableBadgeCollection(self),
 					EarnedBadgeCollection(self))
 		return ()
+
+	@property
+	def links(self):
+		result = []
+		link_names = [OPEN_BADGES_VIEW, OPEN_ISSUERS_VIEW, OPEN_ASSERTIONS_VIEW]
+		ds_folder = find_interface(self, IDataserverFolder, strict=True)
+		for name in link_names:
+			link = Link(ds_folder, rel=name, elements=(name,))
+			result.append(link)
+		return result
 
 	def __getitem__(self, key):
 		"Make us traversable to collections."

@@ -25,6 +25,7 @@ from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtils
 from nti.badges.interfaces import IBadgeManager
 from nti.badges.openbadges.interfaces import IBadgeClass, IBadgeAssertion
 
+from nti.common.string import TRUE_VALUES
 from nti.common.maps import CaseInsensitiveDict
 
 from nti.dataserver import authorization as nauth
@@ -48,6 +49,8 @@ from . import get_all_badges
 from . import assertion_exists
 from . import remove_assertion
 
+ITEMS = StandardExternalFields.ITEMS
+
 class BaseBadgePostView(AbstractAuthenticatedView,
 						ModeledContentUploadRequestUtilsMixin):
 
@@ -59,6 +62,7 @@ class BaseBadgePostView(AbstractAuthenticatedView,
 		return result
 
 @view_config(name='award')
+@view_config(name='Award')
 @view_config(name='award_badge')
 @view_defaults(route_name='objects.generic.traversal',
 			   renderer='rest',
@@ -107,6 +111,7 @@ class AwardBadgeView(BaseBadgePostView):
 		return result
 
 @view_config(name='revoke')
+@view_config(name='Revoke')
 @view_config(name='revoke_badge')
 @view_defaults(route_name='objects.generic.traversal',
 			   renderer='rest',
@@ -148,6 +153,7 @@ class RevokeBadgeView(BaseBadgePostView):
 
 		return hexc.HTTPNoContent()
 
+@view_config(name='SyncDb')
 @view_config(name='sync_db')
 @view_config(name='sync_badges')
 @view_defaults(route_name='objects.generic.traversal',
@@ -174,11 +180,11 @@ class SyncDbView(BaseBadgePostView):
 
 		# update badges
 		update = values.get('update') or u''
-		update = str(update).lower() in ('1', 'true', 't', 'yes', 'y', 'on')
+		update = str(update).lower() in TRUE_VALUES
 
 		# verify object
 		verify = values.get('verify') or u''
-		verify = str(verify).lower() in ('1', 'true', 't', 'yes', 'y', 'on')
+		verify = str(verify).lower() in TRUE_VALUES
 
 		secret = values.get('secret')
 		now = time.time()
@@ -233,6 +239,7 @@ def bulk_import(input_source, errors=[]):
 
 	return (awards, revokations)
 
+@view_config(name='BulkImport')
 @view_config(name='bulk_import')
 @view_defaults(route_name='objects.generic.traversal',
 			   renderer='rest',
@@ -262,6 +269,7 @@ class BulkImportView(AbstractAuthenticatedView):
 		result['Elapsed'] = time.time() - now
 		return result
 
+@view_config(name='UpdatePersons')
 @view_config(name='update_persons')
 @view_defaults(route_name='objects.generic.traversal',
 			   renderer='rest',
@@ -337,7 +345,6 @@ class AllBadgesView(object):
 
 	def __call__(self):
 		result = LocatedExternalDict()
-		result[StandardExternalFields.ITEMS] = items = []
-		items.extend(IBadgeClass(x) for x in get_all_badges())
-		result['Total'] = len(items)
+		result[ITEMS] = items = [IBadgeClass(x) for x in get_all_badges()]
+		result['ItemCount'] = result['Total'] = len(items)
 		return result

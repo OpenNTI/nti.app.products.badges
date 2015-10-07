@@ -90,7 +90,9 @@ class _BadgesWorkspace(Contained):
 		return result
 
 	def __getitem__(self, key):
-		"Make us traversable to collections."
+		"""
+		Make us traversable to collections.
+		"""
 		for i in self.collections:
 			if i.__name__ == key:
 				return i

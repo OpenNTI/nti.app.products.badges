@@ -28,16 +28,16 @@ from nti.externalization.interfaces import IExternalMappingDecorator
 
 from nti.links.links import Link
 
-from . import BADGES
-
-from . import is_locked
-from . import get_assertion
-
 from .utils import get_badge_href
 from .utils import get_assertion_href
 from .utils import get_badge_image_url
 from .utils import get_assertion_json_url
 from .utils import get_assertion_image_url
+
+from . import BADGES
+
+from . import is_locked
+from . import get_assertion
 
 LINKS = StandardExternalFields.LINKS
 

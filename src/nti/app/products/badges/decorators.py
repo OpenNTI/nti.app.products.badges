@@ -12,6 +12,16 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from nti.app.products.badges import BADGES
+from nti.app.products.badges import is_locked
+from nti.app.products.badges import get_assertion
+
+from nti.app.products.badges.utils import get_badge_href
+from nti.app.products.badges.utils import get_assertion_href
+from nti.app.products.badges.utils import get_badge_image_url
+from nti.app.products.badges.utils import get_assertion_json_url
+from nti.app.products.badges.utils import get_assertion_image_url
+
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.badges.interfaces import IBadgeClass
@@ -27,17 +37,6 @@ from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
 from nti.links.links import Link
-
-from .utils import get_badge_href
-from .utils import get_assertion_href
-from .utils import get_badge_image_url
-from .utils import get_assertion_json_url
-from .utils import get_assertion_image_url
-
-from . import BADGES
-
-from . import is_locked
-from . import get_assertion
 
 LINKS = StandardExternalFields.LINKS
 
@@ -59,7 +58,7 @@ def _assertion_links(links, context, remoteUser, request, badge=None):
 			href = get_assertion_href(context, request)
 		else:
 			href = get_badge_href(badge, request)
-		links.append(Link(href, elements=('lock',), rel='lock'))
+		links.append(Link(href, elements=('@@lock',), rel='lock'))
 	return locked
 
 def is_earned_badge(context, user=None):

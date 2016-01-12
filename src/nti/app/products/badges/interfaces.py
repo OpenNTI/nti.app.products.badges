@@ -9,6 +9,7 @@ __docformat__ = "restructuredtext en"
 
 from zope import component
 from zope import interface
+
 from zope.interface.interface import taggedValue
 
 from nti.appserver.workspaces.interfaces import IWorkspace
@@ -17,6 +18,7 @@ from nti.app.client_preferences.interfaces import TAG_EXTERNAL_PREFERENCE_GROUP
 
 from nti.dataserver.interfaces import IZContained
 from nti.dataserver.interfaces import IStreamChangeEvent
+from nti.dataserver.interfaces import make_stream_change_event_interface
 
 class IAssertionChange(IStreamChangeEvent, IZContained):
 	"""
@@ -103,7 +105,6 @@ def get_principal_earnable_badge_filter(user):
 		return all((f.allow_badge(user, badge) for f in filters))
 	return uber_filter
 
-from nti.dataserver.interfaces import make_stream_change_event_interface
-
+#: Badge Earned Stream Change
 SC_BADGE_EARNED = 'BadgeEarned'
 IStreamChangeBadgeEarnedEvent = make_stream_change_event_interface(SC_BADGE_EARNED)[0]

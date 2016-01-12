@@ -16,6 +16,13 @@ from zope import interface
 
 from tahrir_api.model import Person
 
+from nti.app.products.badges import get_user_id
+from nti.app.products.badges import get_assertion_by_id
+
+from nti.app.products.badges.interfaces import IStreamChangeBadgeEarnedEvent
+
+from nti.app.pushnotifications.digest_email import AbstractClassifier
+
 from nti.badges.model import NTIPerson
 from nti.badges.interfaces import INTIPerson
 
@@ -33,9 +40,6 @@ from nti.contentfragments.interfaces import IPlainTextContentFragment
 from nti.dataserver.users import User
 from nti.dataserver.interfaces import IUser
 from nti.dataserver.users.interfaces import IUserProfile
-
-from . import get_user_id
-from . import get_assertion_by_id
 
 @interface.implementer(IIdentityObject)
 @component.adapter(IUser)
@@ -114,10 +118,6 @@ def user_to_ntiperson(user):
 	set_common_person(user, result)
 	result.createdTime = user.createdTime
 	return result
-
-from nti.app.pushnotifications.digest_email import AbstractClassifier
-
-from .interfaces import IStreamChangeBadgeEarnedEvent
 
 @component.adapter(IStreamChangeBadgeEarnedEvent)
 class _AssertionChangeEventClassifier(AbstractClassifier):

@@ -11,10 +11,18 @@ logger = __import__('logging').getLogger(__name__)
 
 from collections import Mapping
 
-from zope import interface
 from zope import component
+from zope import interface
 
 from pyramid.threadlocal import get_current_request
+
+from nti.app.products.badges import is_locked
+
+from nti.app.products.badges.utils import get_openbadge_url
+from nti.app.products.badges.utils import get_openissuer_url
+from nti.app.products.badges.utils import get_badge_image_url
+from nti.app.products.badges.utils import get_assertion_json_url
+from nti.app.products.badges.utils import get_assertion_image_url
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
@@ -25,22 +33,14 @@ from nti.externalization.datastructures import InterfaceObjectIO
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IInternalObjectExternalizer
 
-from .utils import get_openbadge_url
-from .utils import get_openissuer_url
-from .utils import get_badge_image_url
-from .utils import get_assertion_json_url
-from .utils import get_assertion_image_url
-
-from . import is_locked
-
-ALL = getattr(StandardExternalFields, 'ALL', ())
+ALL_EXTERNAL_FIELDS = getattr(StandardExternalFields, 'ALL', ())
 
 def _clean_external(external):
 	external.pop('href', None)
 	external.pop('Locked', None)
 	def _m(ext):
 		if isinstance(ext, Mapping):
-			for key in ALL:
+			for key in ALL_EXTERNAL_FIELDS:
 				ext.pop(key, None)
 			for key, value in ext.items():
 				if value is None:

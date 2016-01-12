@@ -22,6 +22,19 @@ from pyramid import httpexceptions as hexc
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
 
+from nti.app.products.badges import get_badge
+from nti.app.products.badges import add_person
+from nti.app.products.badges import add_assertion
+from nti.app.products.badges import get_assertion
+from nti.app.products.badges import person_exists
+from nti.app.products.badges import get_all_badges
+from nti.app.products.badges import assertion_exists
+from nti.app.products.badges import remove_assertion
+
+from nti.app.products.badges.utils.sync import sync_db
+
+from nti.app.products.badges.views import BadgeAdminPathAdapter
+
 from nti.badges.interfaces import IBadgeManager
 from nti.badges.openbadges.interfaces import IBadgeClass, IBadgeAssertion
 
@@ -35,19 +48,6 @@ from nti.dataserver.users.interfaces import IUserProfile
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
-
-from .utils.sync import sync_db
-
-from .views import BadgeAdminPathAdapter
-
-from . import get_badge
-from . import add_person
-from . import add_assertion
-from . import get_assertion
-from . import person_exists
-from . import get_all_badges
-from . import assertion_exists
-from . import remove_assertion
 
 ITEMS = StandardExternalFields.ITEMS
 

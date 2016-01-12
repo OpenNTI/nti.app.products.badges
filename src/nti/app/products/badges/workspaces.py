@@ -19,6 +19,23 @@ from zope.container.contained import Contained
 from nti.appserver.workspaces.interfaces import IUserService
 from nti.appserver.workspaces.interfaces import IContainerCollection
 
+from nti.app.products.badges import BADGES
+from nti.app.products.badges import OPEN_BADGES_VIEW
+from nti.app.products.badges import OPEN_ISSUERS_VIEW
+from nti.app.products.badges import OPEN_ASSERTIONS_VIEW
+
+from nti.app.products.badges import get_all_badges
+from nti.app.products.badges import assertion_exists
+from nti.app.products.badges import get_person_badges
+from nti.app.products.badges import get_person_assertions
+
+from nti.app.products.badges.interfaces import IBadgesWorkspace
+from nti.app.products.badges.interfaces import IOpenBadgeAdapter
+from nti.app.products.badges.interfaces import IPrincipalErnableBadges
+from nti.app.products.badges.interfaces import get_principal_badge_filter
+from nti.app.products.badges.interfaces import get_principal_earned_badge_filter
+from nti.app.products.badges.interfaces import get_principal_earnable_badge_filter
+
 from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeManager
 from nti.badges.interfaces import IEarnableBadge
@@ -34,23 +51,6 @@ from nti.dataserver.datastructures import LastModifiedCopyingUserList
 from nti.links.links import Link
 
 from nti.traversal.traversal import find_interface
-
-from .interfaces import IBadgesWorkspace
-from .interfaces import IOpenBadgeAdapter
-from .interfaces import IPrincipalErnableBadges
-from .interfaces import get_principal_badge_filter
-from .interfaces import get_principal_earned_badge_filter
-from .interfaces import get_principal_earnable_badge_filter
-
-from . import BADGES
-from . import OPEN_BADGES_VIEW
-from . import OPEN_ISSUERS_VIEW
-from . import OPEN_ASSERTIONS_VIEW
-
-from . import get_all_badges
-from . import assertion_exists
-from . import get_person_badges
-from . import get_person_assertions
 
 def get_openbadge(context):
 	adapter = component.queryUtility(IOpenBadgeAdapter)

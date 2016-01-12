@@ -31,6 +31,22 @@ from pyramid.response import Response as PyramidResponse
 from nti.app.base.abstract_views import AbstractView
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
+from nti.app.products.badges import OPEN_BADGES_VIEW
+from nti.app.products.badges import OPEN_ISSUERS_VIEW
+from nti.app.products.badges import OPEN_ASSERTIONS_VIEW
+
+from nti.app.products.badges import is_locked
+from nti.app.products.badges import get_badge
+from nti.app.products.badges import get_issuer
+from nti.app.products.badges import get_assertion
+from nti.app.products.badges import get_user_email
+from nti.app.products.badges import update_assertion
+from nti.app.products.badges import is_email_verified
+
+from nti.app.products.badges.utils import get_badge_image_url
+
+from nti.app.products.badges.interfaces import IBadgesWorkspace
+
 from nti.app.renderers.interfaces import INoHrefInResponse
 
 from nti.appserver.workspaces.interfaces import IUserService
@@ -44,29 +60,11 @@ from nti.badges.openbadges.interfaces import IBadgeAssertion
 from nti.badges.openbadges.interfaces import IIssuerOrganization
 
 from nti.dataserver import authorization as nauth
-from nti.dataserver.authorization_acl import ace_allowing
-from nti.dataserver.authorization_acl import acl_from_aces
 
 from nti.dataserver.interfaces import IUser
 from nti.dataserver.interfaces import IDataserverFolder
-from nti.dataserver.interfaces import EVERYONE_USER_NAME
 
 from nti.externalization.externalization import to_external_object
-
-from .utils import get_badge_image_url
-from .interfaces import IBadgesWorkspace
-
-from . import OPEN_BADGES_VIEW
-from . import OPEN_ISSUERS_VIEW
-from . import OPEN_ASSERTIONS_VIEW
-
-from . import is_locked
-from . import get_badge
-from . import get_issuer
-from . import get_assertion
-from . import get_user_email
-from . import update_assertion
-from . import is_email_verified
 
 @interface.implementer(IPathAdapter)
 @component.adapter(IUser, IRequest)
@@ -117,8 +115,6 @@ class OpenIssuersPathAdapter(Contained):
 		result = get_issuer(issuer_id)
 		if result is not None:
 			result = IIssuerOrganization(result)
-			result.__acl__ = acl_from_aces(
-								ace_allowing(EVERYONE_USER_NAME, nauth.ACT_READ))
 			return result
 		raise KeyError(issuer_id)
 
@@ -164,8 +160,6 @@ class OpenBadgesPathAdapter(Contained):
 		result = get_badge(badge_id)
 		if result is not None:
 			result = IBadgeClass(result)
-			result.__acl__ = acl_from_aces(
-								ace_allowing(EVERYONE_USER_NAME, nauth.ACT_READ))
 			return result
 		raise KeyError(badge_id)
 
@@ -212,8 +206,6 @@ class OpenAssertionsPathAdapter(Contained):
 		result = manager.get_assertion_by_id(assertion_id)
 		if result is not None:
 			result = IBadgeAssertion(result)
-			result.__acl__ = acl_from_aces(
-								ace_allowing(EVERYONE_USER_NAME, nauth.ACT_READ))
 			return result
 		raise KeyError(assertion_id)
 

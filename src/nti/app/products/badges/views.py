@@ -345,5 +345,21 @@ class LockBadgeView(AbstractAuthenticatedView):
 
 		# verify the assertion can be exported and export
 		assert_assertion_exported(assertion, self.remoteUser)
-		interface.alsoProvides(context, IEarnedBadge)  # # see decorators
+		# XXX: Mark as earned badge (see decorators). We can do this because
+		# badges are not persistent objects in ZODB
+		interface.alsoProvides(context, IEarnedBadge)  
 		return context
+
+@view_config(name="assertion")
+@view_defaults(route_name='objects.generic.traversal',
+			   request_method='GET',
+			   context=IBadgeClass,
+			   permission=nauth.ACT_READ)
+class BadgeAssertionView(AbstractAuthenticatedView):
+
+	def __call__(self):
+		context = self.request.context
+		assertion = get_assertion(self.remoteUser, context.name)
+		if assertion is None:
+			raise hexc.HTTPNotFound(_("Cannot find user assertion."))
+		return assertion

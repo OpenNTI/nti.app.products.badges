@@ -23,22 +23,25 @@ from nti.app.products.badges.interfaces import IStreamChangeBadgeEarnedEvent
 
 from nti.app.pushnotifications.digest_email import AbstractClassifier
 
-from nti.badges.model import NTIPerson
 from nti.badges.interfaces import INTIPerson
 
-from nti.badges.openbadges.model import IdentityObject
+from nti.badges.model import NTIPerson
+
 from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import ID_TYPE_EMAIL
 from nti.badges.openbadges.interfaces import IBadgeAssertion
 from nti.badges.openbadges.interfaces import IIdentityObject
+
+from nti.badges.openbadges.model import IdentityObject
 
 from nti.badges.tahrir.interfaces import IPerson
 from nti.badges.tahrir.interfaces import IAssertion
 
 from nti.contentfragments.interfaces import IPlainTextContentFragment
 
-from nti.dataserver.users import User
 from nti.dataserver.interfaces import IUser
+
+from nti.dataserver.users import User
 from nti.dataserver.users.interfaces import IUserProfile
 
 @interface.implementer(IIdentityObject)

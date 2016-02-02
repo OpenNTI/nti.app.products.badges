@@ -18,13 +18,22 @@ from nti.badges.interfaces import IBadgeManager
 
 from nti.dataserver.users.interfaces import IUserProfile
 
+#: Badges workspace
 BADGES = 'Badges'
+
+#: Issuers workspace
 ISSUERS = 'Issuers'
 
+#: Open badges views
 OPEN_BADGES_VIEW = 'OpenBadges'
+
+#: Open issuers views
 OPEN_ISSUERS_VIEW = 'OpenIssuers'
+
+#: Open assertions view
 OPEN_ASSERTIONS_VIEW = 'OpenAssertions'
 
+#: Hosted badges images directory name
 HOSTED_BADGE_IMAGES = 'hosted_badge_images'
 
 def get_user_id(user):
@@ -49,13 +58,13 @@ def is_email_verified(user):
 # issuers
 
 def get_all_issuers():
-	manager = component.getUtility(IBadgeManager)
-	result = manager.get_all_issuers()
+	manager = component.queryUtility(IBadgeManager)
+	result = manager.get_all_issuers() if manager is not None else ()
 	return result
 
 def get_issuer(issuer):
-	manager = component.getUtility(IBadgeManager)
-	result = manager.get_issuer(issuer)
+	manager = component.queryUtility(IBadgeManager)
+	result = manager.get_issuer(issuer) if manager is not None else None
 	return result
 
 def issuer_exists(issuer):
@@ -86,13 +95,13 @@ def update_badge(badge):
 	return result
 
 def get_badge(badge):
-	manager = component.getUtility(IBadgeManager)
-	result = manager.get_badge(badge)
+	manager = component.queryUtility(IBadgeManager)
+	result = manager.get_badge(badge) if manager is not None else None
 	return result
 
 def get_all_badges():
-	manager = component.getUtility(IBadgeManager)
-	result = manager.get_all_badges()
+	manager = component.queryUtility(IBadgeManager)
+	result = manager.get_all_badges() if manager is not None else ()
 	return result
 
 # persons
@@ -113,18 +122,18 @@ def person_exists(person):
 	return result
 
 def get_person_badges(person):
-	manager = component.getUtility(IBadgeManager)
-	result = manager.get_person_badges(person)
+	manager = component.queryUtility(IBadgeManager)
+	result = manager.get_person_badges(person) if manager is not None else ()
 	return result
 
 def get_person_assertions(person):
-	manager = component.getUtility(IBadgeManager)
-	result = manager.get_person_assertions(person)
+	manager = component.queryUtility(IBadgeManager)
+	result = manager.get_person_assertions(person) if manager is not None else ()
 	return result
 
 def get_all_persons(person):
-	manager = component.getUtility(IBadgeManager)
-	result = manager.get_all_persons()
+	manager = component.queryUtility(IBadgeManager)
+	result = manager.get_all_persons() if manager is not None else ()
 	return result
 
 # assertions

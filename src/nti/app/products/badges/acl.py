@@ -18,12 +18,12 @@ from nti.badges.openbadges.interfaces import IIssuerOrganization
 
 from nti.common.property import Lazy
 
-from nti.dataserver.interfaces import IACLProvider
-from nti.dataserver.interfaces import EVERYONE_USER_NAME
-
 from nti.dataserver.authorization import ACT_READ
 from nti.dataserver.authorization_acl import ace_allowing
 from nti.dataserver.authorization_acl import acl_from_aces
+
+from nti.dataserver.interfaces import IACLProvider
+from nti.dataserver.interfaces import EVERYONE_USER_NAME
 
 @interface.implementer(IACLProvider)
 class OpenMixinACLProvider(object):

@@ -16,6 +16,11 @@ from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 
 import sqlalchemy.exc
 
+from nti.app.products.badges import person_exists
+from nti.app.products.badges import delete_person
+
+from nti.app.products.badges.utils import get_badge_image_url
+
 from nti.badges.interfaces import IBadgeManager
 from nti.badges.interfaces import IBadgeAssertion
 
@@ -26,11 +31,6 @@ from nti.badges.tahrir.interfaces import IIssuer
 from nti.dataserver.interfaces import IUser
 
 from nti.processlifetime import IApplicationTransactionOpenedEvent
-
-from .utils import get_badge_image_url
-
-from . import person_exists
-from . import delete_person
 
 @component.adapter(IUser, IObjectRemovedEvent)
 def _user_deleted(user, event):
@@ -65,9 +65,12 @@ def _after_database_opened_listener(event):
 
 from zope.lifecycleevent import IObjectAddedEvent
 
-from nti.appserver.interfaces import IUserActivityStorage
-
 from nti.app.notabledata.interfaces import IUserNotableDataStorage
+
+from nti.app.products.badges.interfaces import SC_BADGE_EARNED
+from nti.app.products.badges.interfaces import IAssertionChange
+
+from nti.appserver.interfaces import IUserActivityStorage
 
 from nti.dataserver.interfaces import ACE_DENY_ALL
 from nti.dataserver.activitystream_change import Change
@@ -75,8 +78,6 @@ from nti.dataserver.activitystream_change import Change
 from nti.dataserver.authorization import ACT_READ
 from nti.dataserver.authorization_acl import ace_allowing
 from nti.dataserver.authorization_acl import acl_from_aces
-
-from .interfaces import SC_BADGE_EARNED, IAssertionChange
 
 @interface.implementer(IAssertionChange)
 class AssertionChange(Change):

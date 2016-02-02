@@ -12,13 +12,13 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from nti.app.products.badges.interfaces import IPrincipalBadgeFilter
+from nti.app.products.badges.interfaces import IPrincipalEarnedBadgeFilter
+from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
+
 from nti.appserver.interfaces import ICreatableObjectFilter
 
 from nti.dataserver.interfaces import IUser
-
-from .interfaces import IPrincipalBadgeFilter
-from .interfaces import IPrincipalEarnedBadgeFilter
-from .interfaces import IPrincipalEarnableBadgeFilter
 
 @component.adapter(IUser)
 @interface.implementer(IPrincipalBadgeFilter)

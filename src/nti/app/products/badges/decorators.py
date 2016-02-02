@@ -27,6 +27,7 @@ from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecora
 from nti.badges.interfaces import IBadgeClass
 from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeAssertion
+
 from nti.badges.openbadges.interfaces import IBadgeAssertion as IOpenAssertion
 
 from nti.dataserver.interfaces import IUser

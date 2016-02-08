@@ -22,11 +22,14 @@ from zope.container.contained import Contained
 
 from zope.traversing.interfaces import IPathAdapter
 
+from pyramid import httpexceptions as hexc
+
+from pyramid.interfaces import IRequest
+
+from pyramid.response import Response as PyramidResponse
+
 from pyramid.view import view_config
 from pyramid.view import view_defaults
-from pyramid.interfaces import IRequest
-from pyramid import httpexceptions as hexc
-from pyramid.response import Response as PyramidResponse
 
 from nti.app.base.abstract_views import AbstractView
 from nti.app.base.abstract_views import AbstractAuthenticatedView
@@ -43,9 +46,9 @@ from nti.app.products.badges import get_user_email
 from nti.app.products.badges import update_assertion
 from nti.app.products.badges import is_email_verified
 
-from nti.app.products.badges.utils import get_badge_image_url
-
 from nti.app.products.badges.interfaces import IBadgesWorkspace
+
+from nti.app.products.badges.utils import get_badge_image_url
 
 from nti.app.renderers.interfaces import INoHrefInResponse
 
@@ -53,11 +56,12 @@ from nti.appserver.workspaces.interfaces import IUserService
 
 from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeManager
-from nti.badges.openbadges.utils.badgebakery import bake_badge
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
 from nti.badges.openbadges.interfaces import IIssuerOrganization
+
+from nti.badges.openbadges.utils.badgebakery import bake_badge
 
 from nti.dataserver import authorization as nauth
 

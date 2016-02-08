@@ -72,12 +72,13 @@ from nti.app.products.badges.interfaces import IAssertionChange
 
 from nti.appserver.interfaces import IUserActivityStorage
 
-from nti.dataserver.interfaces import ACE_DENY_ALL
 from nti.dataserver.activitystream_change import Change
 
 from nti.dataserver.authorization import ACT_READ
 from nti.dataserver.authorization_acl import ace_allowing
 from nti.dataserver.authorization_acl import acl_from_aces
+
+from nti.dataserver.interfaces import ACE_DENY_ALL
 
 @interface.implementer(IAssertionChange)
 class AssertionChange(Change):

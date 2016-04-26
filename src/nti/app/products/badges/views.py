@@ -9,8 +9,6 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from . import MessageFactory as _
-
 import urllib
 import requests
 from io import BytesIO
@@ -33,6 +31,8 @@ from pyramid.view import view_defaults
 
 from nti.app.base.abstract_views import AbstractView
 from nti.app.base.abstract_views import AbstractAuthenticatedView
+
+from nti.app.products.badges import MessageFactory as _
 
 from nti.app.products.badges import OPEN_BADGES_VIEW
 from nti.app.products.badges import OPEN_ISSUERS_VIEW

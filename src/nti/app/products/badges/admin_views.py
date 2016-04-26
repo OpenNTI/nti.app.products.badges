@@ -15,11 +15,13 @@ import simplejson
 
 from zope import component
 
-from pyramid.view import view_config
-from pyramid.view import view_defaults
 from pyramid import httpexceptions as hexc
 
+from pyramid.view import view_config
+from pyramid.view import view_defaults
+
 from nti.app.base.abstract_views import AbstractAuthenticatedView
+
 from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
 
 from nti.app.products.badges import get_badge
@@ -36,10 +38,12 @@ from nti.app.products.badges.utils.sync import sync_db
 from nti.app.products.badges.views import BadgeAdminPathAdapter
 
 from nti.badges.interfaces import IBadgeManager
+
 from nti.badges.openbadges.interfaces import IBadgeClass, IBadgeAssertion
 
-from nti.common.string import TRUE_VALUES
 from nti.common.maps import CaseInsensitiveDict
+
+from nti.common.string import TRUE_VALUES
 
 from nti.dataserver import authorization as nauth
 

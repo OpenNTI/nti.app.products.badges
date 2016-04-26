@@ -15,13 +15,14 @@ from urlparse import urlparse
 
 from pyramid.threadlocal import get_current_request
 
-from nti.dataserver.users import User
+from nti.app.products.badges import OPEN_BADGES_VIEW
+from nti.app.products.badges import OPEN_ISSUERS_VIEW
+from nti.app.products.badges import HOSTED_BADGE_IMAGES
+from nti.app.products.badges import OPEN_ASSERTIONS_VIEW
+
 from nti.dataserver.interfaces import IUser
 
-from .. import OPEN_BADGES_VIEW
-from .. import OPEN_ISSUERS_VIEW
-from .. import HOSTED_BADGE_IMAGES
-from .. import OPEN_ASSERTIONS_VIEW
+from nti.dataserver.users import User
 
 URL_SCHEMES = ("file", "ftp", "http", "https", "ldap")
 

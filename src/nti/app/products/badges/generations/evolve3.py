@@ -16,10 +16,12 @@ generation = 3
 import sqlalchemy as sa
 
 from zope import component
+
 from zope.component.hooks import setHooks
 
-from alembic.operations import Operations
 from alembic.migration import MigrationContext
+
+from alembic.operations import Operations
 
 from tahrir_api import model
 target_metadata = getattr(model.DeclarativeBase, 'metadata')

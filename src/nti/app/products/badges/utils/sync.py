@@ -13,15 +13,15 @@ import os
 import sys
 import argparse
 
+from nti.app.products.badges import add_badge
+from nti.app.products.badges import add_issuer
+from nti.app.products.badges import badge_exists
+from nti.app.products.badges import update_badge
+from nti.app.products.badges import issuer_exists
+
 from nti.badges.openbadges.utils import scanner
 
 from nti.dataserver.utils.base_script import create_context
-
-from .. import add_badge
-from .. import add_issuer
-from .. import badge_exists
-from .. import update_badge
-from .. import issuer_exists
 
 def sync_db(path, update=False, verify=False, **kwargs):
 	badges = 0

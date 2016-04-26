@@ -39,7 +39,8 @@ from nti.app.products.badges.views import BadgeAdminPathAdapter
 
 from nti.badges.interfaces import IBadgeManager
 
-from nti.badges.openbadges.interfaces import IBadgeClass, IBadgeAssertion
+from nti.badges.openbadges.interfaces import IBadgeClass
+from nti.badges.openbadges.interfaces import IBadgeAssertion
 
 from nti.common.maps import CaseInsensitiveDict
 

@@ -39,6 +39,7 @@ from nti.app.products.badges.interfaces import get_principal_earnable_badge_filt
 from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeManager
 from nti.badges.interfaces import IEarnableBadge
+
 from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
 
@@ -46,7 +47,8 @@ from nti.common.property import Lazy
 from nti.common.property import alias
 
 from nti.dataserver.interfaces import IDataserverFolder
-from nti.dataserver.datastructures import LastModifiedCopyingUserList
+
+from nti.datastructures.datastructures import LastModifiedCopyingUserList
 
 from nti.links.links import Link
 

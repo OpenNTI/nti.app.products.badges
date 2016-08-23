@@ -43,14 +43,14 @@ from nti.badges.interfaces import IEarnableBadge
 from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
 
-from nti.common.property import Lazy
-from nti.common.property import alias
-
 from nti.dataserver.interfaces import IDataserverFolder
 
 from nti.datastructures.datastructures import LastModifiedCopyingUserList
 
 from nti.links.links import Link
+
+from nti.property.property import Lazy
+from nti.property.property import alias
 
 from nti.traversal.traversal import find_interface
 

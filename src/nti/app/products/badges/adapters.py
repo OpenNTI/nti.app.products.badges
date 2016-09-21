@@ -27,8 +27,9 @@ from nti.badges.interfaces import INTIPerson
 
 from nti.badges.model import NTIPerson
 
-from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import ID_TYPE_EMAIL
+
+from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
 from nti.badges.openbadges.interfaces import IIdentityObject
 

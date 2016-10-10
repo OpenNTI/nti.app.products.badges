@@ -87,7 +87,7 @@ class BadgeAdminPathAdapter(Contained):
 		self.request = request
 		self.__parent__ = context
 
-def _to__mozilla_backpack(context):
+def _to_mozilla_backpack(context):
 	result = to_external_object(context, name="mozillabackpack",
 								decorate=False)
 	return result
@@ -142,7 +142,7 @@ class OpenIssuerJSONView(OpenJSONView):
 
 	def __call__(self):
 		self._set_environ()
-		result = _to__mozilla_backpack(self.request.context)
+		result = _to_mozilla_backpack(self.request.context)
 		interface.alsoProvides(result, INoHrefInResponse)
 		return result
 
@@ -187,7 +187,7 @@ class OpenBadgeJSONView(OpenJSONView):
 
 	def __call__(self):
 		self._set_environ()
-		result = _to__mozilla_backpack(self.request.context)
+		result = _to_mozilla_backpack(self.request.context)
 		interface.alsoProvides(result, INoHrefInResponse)
 		return result
 
@@ -260,7 +260,7 @@ class OpenAssertionImageView(AbstractView):
 		# baked image if locked
 		locked = is_locked(context)
 		badge_url = _get_badge_image_url(context, self.request)
-		payload = _to__mozilla_backpack(context) if is_locked else None
+		payload = _to_mozilla_backpack(context) if is_locked else None
 		target = _get_image(badge_url, payload=payload, locked=locked)
 
 		# return baked image
@@ -302,7 +302,7 @@ class OpenAssertionJSONView(OpenJSONView):
 		if not is_locked(context):
 			raise hexc.HTTPUnprocessableEntity(_("Assertion is not locked."))
 		self._set_environ()
-		external = _to__mozilla_backpack(context)
+		external = _to_mozilla_backpack(context)
 		interface.alsoProvides(external, INoHrefInResponse)
 		return external
 
@@ -322,7 +322,7 @@ class ExportOpenAssertionView(AbstractAuthenticatedView):
 
 		# verify the assertion can be exported
 		assert_assertion_exported(context, self.remoteUser)
-		payload = _to__mozilla_backpack(context)
+		payload = _to_mozilla_backpack(context)
 		badge_url = _get_badge_image_url(context, self.request)
 		target = _get_image(badge_url, payload=payload, locked=True)
 

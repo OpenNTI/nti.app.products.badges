@@ -116,7 +116,7 @@ def BadgesWorkspace(user_service):
 @interface.implementer(IContainerCollection)
 class AllBadgesCollection(Contained):
 
-	# Our name, part of our URL.
+	#: Our name, part of our URL.
 	__name__ = 'AllBadges'
 
 	name = alias('__name__', __name__)
@@ -148,7 +148,7 @@ class AllBadgesCollection(Contained):
 @interface.implementer(IContainerCollection)
 class EarnableBadgeCollection(Contained):
 
-	# Our name, part of our URL.
+	#: Our name, part of our URL.
 	__name__ = 'EarnableBadges'
 
 	name = alias('__name__', __name__)
@@ -180,7 +180,7 @@ class EarnableBadgeCollection(Contained):
 @interface.implementer(IContainerCollection)
 class EarnedBadgeCollection(Contained):
 
-	# Our name, part of our URL.
+	#: Our name, part of our URL.
 	__name__ = 'EarnedBadges'
 
 	name = alias('__name__', __name__)

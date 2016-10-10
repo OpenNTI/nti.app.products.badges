@@ -47,106 +47,93 @@ def get_user_id(user):
 
 def get_user_email(user):
 	profile = IUserProfile(user, None)
-	email = getattr(profile, 'email', None)
-	return email
+	try:
+		return profile.email
+	except AttributeError:
+		return None
 
 def is_email_verified(user):
 	profile = IUserProfile(user, None)
-	email_verified = getattr(profile, 'email_verified', False)
-	return email_verified
+	try:
+		return profile.email_verified
+	except AttributeError:
+		return False
 
 # issuers
 
 def get_all_issuers():
 	manager = component.queryUtility(IBadgeManager)
-	result = manager.get_all_issuers() if manager is not None else ()
-	return result
+	return manager.get_all_issuers() if manager is not None else ()
 
 def get_issuer(issuer):
 	manager = component.queryUtility(IBadgeManager)
-	result = manager.get_issuer(issuer) if manager is not None else None
-	return result
+	return manager.get_issuer(issuer) if manager is not None else None
 
 def issuer_exists(issuer):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.issuer_exists(issuer)
-	return result
+	return manager.issuer_exists(issuer)
 
 def add_issuer(issuer):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.add_issuer(issuer)
-	return result
+	return manager.add_issuer(issuer)
 
 # badges
 
 def badge_exists(badge):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.badge_exists(badge)
-	return result
+	return manager.badge_exists(badge)
 
 def add_badge(badge, issuer):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.add_badge(badge, issuer)
-	return result
+	return manager.add_badge(badge, issuer)
 
 def update_badge(badge):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.update_badge(badge)
-	return result
+	return manager.update_badge(badge)
 
 def get_badge(badge):
 	manager = component.queryUtility(IBadgeManager)
-	result = manager.get_badge(badge) if manager is not None else None
-	return result
+	return manager.get_badge(badge) if manager is not None else None
 
 def get_all_badges():
 	manager = component.queryUtility(IBadgeManager)
-	result = manager.get_all_badges() if manager is not None else ()
-	return result
+	return manager.get_all_badges() if manager is not None else ()
 
 # persons
 
 def add_person(person):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.add_person(person)
-	return result
+	return manager.add_person(person)
 
 def delete_person(person):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.delete_person(person)
-	return result
+	return manager.delete_person(person)
 
 def person_exists(person):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.person_exists(person)
-	return result
+	return manager.person_exists(person)
 
 def get_person_badges(person):
 	manager = component.queryUtility(IBadgeManager)
-	result = manager.get_person_badges(person) if manager is not None else ()
-	return result
+	return manager.get_person_badges(person) if manager is not None else ()
 
 def get_person_assertions(person):
 	manager = component.queryUtility(IBadgeManager)
-	result = manager.get_person_assertions(person) if manager is not None else ()
-	return result
+	return manager.get_person_assertions(person) if manager is not None else ()
 
 def get_all_persons(person):
 	manager = component.queryUtility(IBadgeManager)
-	result = manager.get_all_persons() if manager is not None else ()
-	return result
+	return manager.get_all_persons() if manager is not None else ()
 
 # assertions
 
 def add_assertion(person, badge, exported=False):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.add_assertion(person, badge, exported=exported)
-	return result
+	return manager.add_assertion(person, badge, exported=exported)
 
 def remove_assertion(person, badge):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.remove_assertion(person, badge)
-	return result
+	return manager.remove_assertion(person, badge)
 
 def assertion_exists(user, badge):
 	manager = component.getUtility(IBadgeManager)
@@ -156,20 +143,19 @@ def assertion_exists(user, badge):
 
 def get_assertion(user, badge):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.get_assertion(user, badge)
-	return result
+	return manager.get_assertion(user, badge)
 
 def get_assertion_by_id(assertion_id):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.get_assertion_by_id(assertion_id)
-	return result
+	return manager.get_assertion_by_id(assertion_id)
 
 def update_assertion(assertion_id, email=None, exported=True):
 	manager = component.getUtility(IBadgeManager)
-	result = manager.update_assertion(assertion_id, email=email, exported=exported)
-	return result
+	return manager.update_assertion(assertion_id, email=email, exported=exported)
 
 def is_locked(context):
-	result = getattr(context, 'exported', None) or False
-	return result
+	try:
+		return context.exported
+	except AttributeError:
+		return False
 is_exported = is_locked

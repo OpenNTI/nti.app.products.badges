@@ -335,7 +335,7 @@ class UpdatePersonsView(AbstractAuthenticatedView):
 			if self.update_person(manager, person, messages, errors):
 				count += 1
 		result['Elapsed'] = time.time() - now
-		result['Total'] = result['Count'] = count
+		result[ITEM_COUNT] = result[TOTAL] = count
 		return result
 
 @view_config(name='AllBadges')

@@ -25,7 +25,7 @@ from nti.dataserver.interfaces import EVERYONE_USER_NAME
 
 from nti.dataserver.interfaces import IACLProvider
 
-from nti.property.property import Lazy
+from nti.property.property import LazyOnClass
 
 @interface.implementer(IACLProvider)
 class OpenMixinACLProvider(object):
@@ -33,10 +33,9 @@ class OpenMixinACLProvider(object):
 	def __init__(self, context):
 		self.context = context
 
-	@Lazy
+	@LazyOnClass
 	def __acl__(self):
-		result = acl_from_aces(ace_allowing(EVERYONE_USER_NAME, ACT_READ, type(self)))
-		return result
+		return acl_from_aces(ace_allowing(EVERYONE_USER_NAME, ACT_READ, type(self)))
 
 @component.adapter(IBadgeClass)
 class OpenBadgeACLProvider(OpenMixinACLProvider):

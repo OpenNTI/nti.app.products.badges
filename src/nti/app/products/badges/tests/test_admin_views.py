@@ -61,7 +61,6 @@ class TestAdminViews(ApplicationLayerTest):
 		assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'), is_(True))
 
 		# This had the side-effect of creating notable data about the award
-
 		path = '/dataserver2/users/%s/Pages(%s)/RUGDByOthersThatIMightBeInterestedIn/' % ( username, ntiids.ROOT )
 		res = self.testapp.get(path, extra_environ=self._make_extra_environ(username))
 		assert_that( res.json_body, has_entry( 'TotalItemCount', 1))
@@ -101,7 +100,7 @@ class TestAdminViews(ApplicationLayerTest):
 									"badge":"badge.1"},
 							   		status=200)
 		assert_that(res.json_body, has_key('href'))
-		open_assertion_path = res.json_body['href']		
+		open_assertion_path = res.json_body['href']
 		self.testapp.get(open_assertion_path, status=200)
 
 		revoke_badge_path = '/dataserver2/BadgeAdmin/@@revoke'
@@ -111,12 +110,12 @@ class TestAdminViews(ApplicationLayerTest):
 							   status=204)
 		manager = component.getUtility(IBadgeManager)
 		assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'), is_(False))
-		
+
 		self.testapp.post_json(revoke_badge_path,
 							   {"username":"ichigo@bleach.com",
 								"badge":"badge.1"},
 							   status=404)
-		
+
 		self.testapp.get(open_assertion_path, status=404)
 		self.testapp.get(open_assertion_path+'/image.png', status=404)
 
@@ -157,33 +156,33 @@ class TestAdminViews(ApplicationLayerTest):
 								"dbname":"sample",
 								"verify":True},
 							   status=200)
-		
+
 	@WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
 	def test_update_persons(self):
 		manager = component.getUtility(IBadgeManager)
-		
+
 		username = 'ichigo'
 		with mock_dataserver.mock_db_trans(self.ds):
-			user = self._create_user(username=username, 
-							  		 external_value={'email':'foo@nt.com'})	
+			user = self._create_user(username=username,
+							  		 external_value={'email':'foo@nt.com'})
 			# create person email not verified
 			manager.add_person(user)
-			
+
 			# update verification
 			IUserProfile(user).email_verified = True
 			IUserProfile(user).email = 'ichigo@bleach.org'
-			
+
 		person = manager.get_person(name='ichigo')
 		assert_that(person, is_not(none()))
 		assert_that(person, has_property('email', 'ichigo'))
-		
+
 		path = '/dataserver2/BadgeAdmin/update_persons'
 		res = self.testapp.post_json(path, status=200)
 		assert_that(res.json_body, has_entry('Total', is_(1)))
-		
+
 		person = manager.get_person(name='ichigo')
 		assert_that(person, is_not(none()))
 		assert_that(person, has_property('email', 'ichigo@bleach.org'))
-		
+
 		person = manager.get_person(email='ichigo@bleach.org')
 		assert_that(person, is_not(none()))

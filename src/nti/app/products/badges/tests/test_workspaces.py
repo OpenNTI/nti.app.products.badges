@@ -23,6 +23,7 @@ from hamcrest import greater_than_or_equal_to
 
 import os
 import fudge
+
 from io import BytesIO
 
 from nti.appserver.workspaces.interfaces import ICollection
@@ -66,7 +67,7 @@ class TestWorkspaces(ApplicationLayerTest):
 
 			workspace = [x for x in workspaces if app_badge_interfaces.IBadgesWorkspace.providedBy(x)][0]
 
-			badges_path = '/dataserver2/users/sjohnson%40nextthought.COM/Badges'
+			badges_path = '/dataserver2/users/sjohnson@nextthought.COM/Badges'
 			assert_that( traversal.resource_path( workspace ),
 						 is_(badges_path))
 
@@ -136,7 +137,7 @@ class TestWorkspaces(ApplicationLayerTest):
 				 'nti.app.products.badges.decorators.is_locked',
 				 'nti.app.products.badges.externalization.is_locked',
 				 'nti.app.products.badges.views.is_locked')
-	def test_assertions(self, mock_ic, mock_ie1, mock_ie2, mock_ie3):		
+	def test_assertions(self, mock_ic, mock_ie1, mock_ie2, mock_ie3):
 		mock_ie1.is_callable().with_args().returns(True)
 		mock_ie2.is_callable().with_args().returns(True)
 		mock_ie3.is_callable().with_args().returns(True)
@@ -154,7 +155,7 @@ class TestWorkspaces(ApplicationLayerTest):
 		res = testapp.get(earned_badges_path,
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
-		
+
 		assertion_path = None
 		assert_that(res.json_body, has_entry(u'Items', has_length(greater_than_or_equal_to(1))))
 		item = res.json_body['Items'][0]
@@ -162,7 +163,7 @@ class TestWorkspaces(ApplicationLayerTest):
 		for link in item['Links']:
 			if link.get('rel') == 'assertion':
 				assertion_path = link['href']
-			
+
 		assert_that(assertion_path, is_not(none()))
 		res = testapp.get(assertion_path,
 						  extra_environ=self._make_extra_environ(user=username),
@@ -174,9 +175,9 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry(u'image', is_not(none())))
 		assert_that(res.json_body, has_entry(u'recipient',
 											 has_entry(u'MimeType', u'application/vnd.nextthought.openbadges.identityobject')))
-		
+
 		uid = res.json_body['uid'] # save uid
-		
+
 		icon  = os.path.join(os.path.dirname(__file__), 'icon.png')
 		with open(icon, "rb") as fp:
 			icon = fp.read()
@@ -188,12 +189,12 @@ class TestWorkspaces(ApplicationLayerTest):
 						  status=200)
 		data = get_baked_data(BytesIO(res.body))
 		assert_that(data, has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
-		
+
 		assertion_assertion_path = assertion_path + "/assertion.json"
 		res = testapp.get(assertion_assertion_path,
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
-		
+
 		assert_that(res.json_body, has_entry('uid', is_(uid)))
 		assert_that(res.json_body, has_entry('issuedOn', is_not(none())))
 		assert_that(res.json_body, has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
@@ -203,9 +204,9 @@ class TestWorkspaces(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry('recipient', has_entry('hashed', is_(True))))
 		assert_that(res.json_body, has_entry('recipient', has_entry('salt', is_not(none()))))
 		assert_that(res.json_body, has_entry('recipient', has_entry('identity', is_not(none()))))
-		
+
 		image_url = res.json_body['image']
-		
+
 		badge_json_url = 'http://localhost/dataserver2/OpenBadges/badge.2/badge.json'
 		res = testapp.get(badge_json_url,
 						  extra_environ=self._make_extra_environ(user=username),
@@ -218,10 +219,10 @@ class TestWorkspaces(ApplicationLayerTest):
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
 		assert_that(res.json_body, has_entry('url', is_('http://nti.com')))
-		
+
 		res = testapp.get(image_url,
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
-		
+
 		assert_that(res.headers, has_entry('Content-Type', is_('image/png')))
 		assert_that(res.body, has_length(greater_than_or_equal_to(20000)) )

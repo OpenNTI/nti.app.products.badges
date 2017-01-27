@@ -74,27 +74,27 @@ class TestViews(ApplicationLayerTest):
 		manager = component.getUtility(IBadgeManager)
 		assertion = manager.get_assertion('ichigo@bleach.com', 'badge.1')
 		assert_that(assertion, is_not(none()))
-		
+
 		open_assertion_path = '/dataserver2/OpenAssertions/%s' % urllib.quote(assertion.id)
 		testapp = TestApp(self.app)
 		res = testapp.get(open_assertion_path,
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
-		
+
 		assertion_json_path = open_assertion_path + "/assertion.json"
 		res = testapp.get(assertion_json_path,
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=422)
-		
+
 		export_assertion_path = open_assertion_path + "/lock"
 		testapp.post(export_assertion_path,
 					 extra_environ=self._make_extra_environ(user=username),
 					 status=422)
-		
+
 		with mock_dataserver.mock_db_trans(self.ds):
 			user = User.get_user(username)
 			force_email_verification(user)
-		
+
 		icon  = os.path.join(os.path.dirname(__file__), 'icon.png')
 		with open(icon, "rb") as fp:
 			icon = fp.read()
@@ -104,36 +104,36 @@ class TestViews(ApplicationLayerTest):
 						   status=200)
 		data = get_baked_data(BytesIO(res.body))
 		assert_that(data, has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
-		
+
 		baked_image_path = open_assertion_path + "/image.png"
 		res = testapp.get(baked_image_path,
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
 		data = get_baked_data(BytesIO(res.body))
 		assert_that(data, has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
-		
+
 		assertion_json_path = open_assertion_path + "/assertion.json"
 		res = testapp.get(assertion_json_path,
 						  extra_environ=self._make_extra_environ(user=username),
 						  status=200)
-		
+
 		assert_that(res.json_body, has_entry('badge', 'http://localhost/dataserver2/OpenBadges/badge.1/badge.json'))
-		
+
 		assert_that(res.json_body, has_entries(
 										'image', 'http://localhost/dataserver2/OpenAssertions/f35d4fc8b4f1294aeac14ef865bef15c/image.png',
 										'issuedOn', is_not(none()),
 										'uid', 'f35d4fc8b4f1294aeac14ef865bef15c'))
-		
-		assert_that(res.json_body, has_entry('recipient', 
+
+		assert_that(res.json_body, has_entry('recipient',
 											 has_entries('hashed', True,
 														 'identity', is_not(none()),
 														 'salt', is_not(none()),
 														 'type', u'email')))
-		
-		assert_that(res.json_body, has_entry('verify', 
+
+		assert_that(res.json_body, has_entry('verify',
 											 has_entries('type', 'hosted',
 														 'url', contains_string('http://localhost'))))
-		
+
 		assert_that(res.json_body, does_not(has_key('evidence')))
 		assert_that(res.json_body, does_not(has_key('expires')))
 
@@ -167,12 +167,12 @@ class TestViews(ApplicationLayerTest):
 		assert_that(res.json_body, has_entry('Links', has_item(has_entry('rel', 'assertion'))))
 
 		mock_ic.is_callable().with_args().returns(True)
-	
+
 		export_badge_path = open_badges_path + '/lock'
 		res = testapp.post(export_badge_path,
 						   extra_environ=self._make_extra_environ(user=username),
 						   status=200)
-		
+
 		assert_that(res.json_body, has_entry('Locked', is_(True)))
 		assert_that(res.json_body, has_entry('Links', does_not(has_item(has_entry('rel', 'lock')))))
 		assert_that(res.json_body, has_entry('Links', has_item(has_entry('rel', 'baked-image'))))

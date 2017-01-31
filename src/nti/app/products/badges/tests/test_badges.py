@@ -19,36 +19,37 @@ from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_user_id
 from nti.app.products.badges import get_all_badges
 
-import nti.dataserver.tests.mock_dataserver as mock_dataserver
+from nti.app.products.badges.tests import NTIBadgesTestCase
+
+from nti.dataserver.tests import mock_dataserver
 from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 
-from nti.app.products.badges.tests import NTIBadgesTestCase
 
 class TestBadges(NTIBadgesTestCase):
 
-	def _create_user(self, username='ntiuser', password='temp001',
-					 email='ntiuser@nti.com', alias='myalias',
-					 home_page='http://www.foo.com',
-					 about="my bio"):
-		ds = mock_dataserver.current_mock_ds
-		usr = User.create_user(ds, username=username, password=password,
-                               external_value={'email': email, 'alias':alias,
-											   'home_page':home_page,
-											   'about':about})
-		return usr
+    def _create_user(self, username='ntiuser', password='temp001',
+                     email='ntiuser@nti.com', alias='myalias',
+                     home_page='http://www.foo.com',
+                     about="my bio"):
+        ds = mock_dataserver.current_mock_ds
+        usr = User.create_user(ds, username=username, password=password,
+                               external_value={'email': email, 'alias': alias,
+                                               'home_page': home_page,
+                                               'about': about})
+        return usr
 
-	@WithMockDSTrans
-	def test_get_user_id(self):
-		user = self._create_user()
-		uid = get_user_id(user)
-		assert_that(uid, is_('ntiuser'))
+    @WithMockDSTrans
+    def test_get_user_id(self):
+        user = self._create_user()
+        uid = get_user_id(user)
+        assert_that(uid, is_('ntiuser'))
 
-	@WithMockDSTrans
-	def test_get_badge(self):
-		badge = get_badge("not found")
-		assert_that(badge, is_(none()))
+    @WithMockDSTrans
+    def test_get_badge(self):
+        badge = get_badge("not found")
+        assert_that(badge, is_(none()))
 
-	@WithMockDSTrans
-	def test_get_all_badges(self):
-		badges = list(get_all_badges())
-		assert_that(badges, has_length(greater_than_or_equal_to(0)))
+    @WithMockDSTrans
+    def test_get_all_badges(self):
+        badges = list(get_all_badges())
+        assert_that(badges, has_length(greater_than_or_equal_to(0)))

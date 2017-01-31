@@ -20,53 +20,57 @@ from nti.appserver.interfaces import ICreatableObjectFilter
 
 from nti.dataserver.interfaces import IUser
 
+
 @component.adapter(IUser)
 @interface.implementer(IPrincipalBadgeFilter)
 class _DefaultPrincipalBadgeFilter(object):
 
-	__slots__ = ()
+    __slots__ = ()
 
-	def __init__(self, *args):
-		pass
+    def __init__(self, *args):
+        pass
 
-	def allow_badge(self, user, badge):
-		return True
+    def allow_badge(self, user, badge):
+        return True
+
 
 @component.adapter(IUser)
 @interface.implementer(IPrincipalEarnedBadgeFilter)
 class _DefaultPrincipalEarnedBadgeFilter(object):
 
-	__slots__ = ()
+    __slots__ = ()
 
-	def __init__(self, *args):
-		pass
+    def __init__(self, *args):
+        pass
 
-	def allow_badge(self, user, badge):
-		return True
+    def allow_badge(self, user, badge):
+        return True
+
 
 @component.adapter(IUser)
 @interface.implementer(IPrincipalEarnableBadgeFilter)
 class _DefaultPrincipalEarnableBadgeFilter(object):
 
-	__slots__ = ()
+    __slots__ = ()
 
-	def __init__(self, *args):
-		pass
+    def __init__(self, *args):
+        pass
 
-	def allow_badge(self, user, badge):
-		return True
+    def allow_badge(self, user, badge):
+        return True
+
 
 @interface.implementer(ICreatableObjectFilter)
 class _BadgesContentObjectFilter(object):
 
-	PREFIX_1 = u'application/vnd.nextthought.badges'
-	PREFIX_2 = u'application/vnd.nextthought.openbadges'
+    PREFIX_1 = u'application/vnd.nextthought.badges'
+    PREFIX_2 = u'application/vnd.nextthought.openbadges'
 
-	def __init__(self, context=None):
-		pass
+    def __init__(self, context=None):
+        pass
 
-	def filter_creatable_objects(self, terms):
-		for name in tuple(terms):  # mutating
-			if name.startswith(self.PREFIX_1) or name.startswith(self.PREFIX_2):
-				terms.pop(name, None)
-		return terms
+    def filter_creatable_objects(self, terms):
+        for name in tuple(terms):  # mutating
+            if name.startswith(self.PREFIX_1) or name.startswith(self.PREFIX_2):
+                terms.pop(name, None)
+        return terms

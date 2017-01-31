@@ -27,24 +27,28 @@ from nti.dataserver.interfaces import IACLProvider
 
 from nti.property.property import LazyOnClass
 
+
 @interface.implementer(IACLProvider)
 class OpenMixinACLProvider(object):
 
-	def __init__(self, context):
-		self.context = context
+    def __init__(self, context):
+        self.context = context
 
-	@LazyOnClass
-	def __acl__(self):
-		return acl_from_aces(ace_allowing(EVERYONE_USER_NAME, ACT_READ, type(self)))
+    @LazyOnClass
+    def __acl__(self):
+        return acl_from_aces(ace_allowing(EVERYONE_USER_NAME, ACT_READ, type(self)))
+
 
 @component.adapter(IBadgeClass)
 class OpenBadgeACLProvider(OpenMixinACLProvider):
-	pass
+    pass
+
 
 @component.adapter(IIssuerOrganization)
 class OpenIssuerACLProvider(OpenMixinACLProvider):
-	pass
+    pass
+
 
 @component.adapter(IBadgeAssertion)
 class OpenAssertionACLProvider(OpenMixinACLProvider):
-	pass
+    pass

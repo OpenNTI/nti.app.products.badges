@@ -20,91 +20,106 @@ from nti.dataserver.interfaces import IZContained
 from nti.dataserver.interfaces import IStreamChangeEvent
 from nti.dataserver.interfaces import make_stream_change_event_interface
 
+
 class IAssertionChange(IStreamChangeEvent, IZContained):
-	"""
-	Interface marker for an Assertion change
-	"""
+    """
+    Interface marker for an Assertion change
+    """
+
 
 class IBadgeSettings(interface.Interface):
-	"""
-	The root of the settings tree for badges
-	"""
-	taggedValue(TAG_EXTERNAL_PREFERENCE_GROUP, 'write')
+    """
+    The root of the settings tree for badges
+    """
+    taggedValue(TAG_EXTERNAL_PREFERENCE_GROUP, 'write')
+
 
 class IBadgesWorkspace(IWorkspace):
-	"""
-	A workspace containing data for badges.
-	"""
+    """
+    A workspace containing data for badges.
+    """
+
 
 class IPrincipalBadgeFilter(interface.Interface):
-	"""
-	define subscriber badge filter
-	"""
+    """
+    define subscriber badge filter
+    """
 
-	def allow_badge(user, badge):
-		"""
-		allow the specified badge
-		"""
+    def allow_badge(user, badge):
+        """
+        allow the specified badge
+        """
+
 
 class IPrincipalErnableBadges(interface.Interface):
-	"""
-	subscriber for a ernable badges for a principal
-	"""
-	def iter_badges():
-		pass
+    """
+    subscriber for a ernable badges for a principal
+    """
+    def iter_badges():
+        pass
+
 
 class IPrincipalEarnedBadgeFilter(interface.Interface):
-	"""
-	define subscriber badge earned filter
-	"""
+    """
+    define subscriber badge earned filter
+    """
 
-	def allow_badge(user, badge):
-		"""
-		allow the specified badge
-		"""
+    def allow_badge(user, badge):
+        """
+        allow the specified badge
+        """
+
 
 class IPrincipalEarnableBadgeFilter(interface.Interface):
-	"""
-	define subscriber badge earnable filter
-	"""
+    """
+    define subscriber badge earnable filter
+    """
 
-	def allow_badge(user, badge):
-		"""
-		allow the specified badge
-		"""
+    def allow_badge(user, badge):
+        """
+        allow the specified badge
+        """
+
 
 class IOpenBadgeAdapter(interface.Interface):
 
-	"""
-	Utility to adapt an object to a :class:`nti.badges.openbadges.interfaces.IBadgeClass`
-	"""
+    """
+    Utility to adapt an object to a :class:`nti.badges.openbadges.interfaces.IBadgeClass`
+    """
 
-	def adapt(context):
-		"""
-		adpapt the specified context to a IBadgeClass
-		"""
+    def adapt(context):
+        """
+        adpapt the specified context to a IBadgeClass
+        """
+
 
 def get_principal_badge_filter(user):
-	filters = component.subscribers((user,), IPrincipalBadgeFilter)
-	filters = list(filters)
-	def uber_filter(badge):
-		return all((f.allow_badge(user, badge) for f in filters))
-	return uber_filter
+    filters = component.subscribers((user,), IPrincipalBadgeFilter)
+    filters = list(filters)
+
+    def uber_filter(badge):
+        return all((f.allow_badge(user, badge) for f in filters))
+    return uber_filter
+
 
 def get_principal_earned_badge_filter(user):
-	filters = component.subscribers((user,), IPrincipalEarnedBadgeFilter)
-	filters = list(filters)
-	def uber_filter(badge):
-		return all((f.allow_badge(user, badge) for f in filters))
-	return uber_filter
+    filters = component.subscribers((user,), IPrincipalEarnedBadgeFilter)
+    filters = list(filters)
+
+    def uber_filter(badge):
+        return all((f.allow_badge(user, badge) for f in filters))
+    return uber_filter
+
 
 def get_principal_earnable_badge_filter(user):
-	filters = component.subscribers((user,), IPrincipalEarnableBadgeFilter)
-	filters = list(filters)
-	def uber_filter(badge):
-		return all((f.allow_badge(user, badge) for f in filters))
-	return uber_filter
+    filters = component.subscribers((user,), IPrincipalEarnableBadgeFilter)
+    filters = list(filters)
+
+    def uber_filter(badge):
+        return all((f.allow_badge(user, badge) for f in filters))
+    return uber_filter
 
 #: Badge Earned Stream Change
 SC_BADGE_EARNED = 'BadgeEarned'
-IStreamChangeBadgeEarnedEvent = make_stream_change_event_interface(SC_BADGE_EARNED)[0]
+IStreamChangeBadgeEarnedEvent = \
+        make_stream_change_event_interface(SC_BADGE_EARNED)[0]

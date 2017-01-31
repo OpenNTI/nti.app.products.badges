@@ -15,14 +15,18 @@ generation = 4
 
 from zope.generations.generations import SchemaManager
 
+
 class _NTIBadgesSchemaManager(SchemaManager):
-	"""
-	A schema manager that we can register as a utility in ZCML.
-	"""
-	def __init__(self):
-		super(_NTIBadgesSchemaManager, self).__init__(
-									generation=generation,
-									minimum_generation=generation,
-									package_name='nti.app.products.badges.generations')
+    """
+    A schema manager that we can register as a utility in ZCML.
+    """
+
+    def __init__(self):
+        super(_NTIBadgesSchemaManager, self).__init__(
+            generation=generation,
+            minimum_generation=generation,
+            package_name='nti.app.products.badges.generations')
+
+
 def evolve(context):
-	pass
+    pass

@@ -28,18 +28,20 @@ target_metadata = getattr(model.DeclarativeBase, 'metadata')
 
 from nti.badges.tahrir.interfaces import ITahrirBadgeManager
 
+
 def do_evolve(dscontext):
-	setHooks()
-	manager = component.getUtility(ITahrirBadgeManager)
-	if manager.defaultSQLite:
-		return
-	
-	mc = MigrationContext.configure(manager.engine.connect())
-	op = Operations(mc)
-	op.add_column("badges", sa.Column('stl', sa.Unicode(128)))
+    setHooks()
+    manager = component.getUtility(ITahrirBadgeManager)
+    if manager.defaultSQLite:
+        return
+
+    mc = MigrationContext.configure(manager.engine.connect())
+    op = Operations(mc)
+    op.add_column("badges", sa.Column('stl', sa.Unicode(128)))
+
 
 def evolve(context):
-	"""
-	Evolve to generation 2 by adding the stl column to badges
-	"""
-	do_evolve(context)
+    """
+    Evolve to generation 2 by adding the stl column to badges
+    """
+    do_evolve(context)

@@ -87,7 +87,7 @@ class _BadgesWorkspace(Contained):
     def links(self):
         result = []
         link_names = [OPEN_BADGES_VIEW, OPEN_ISSUERS_VIEW,
-					  OPEN_ASSERTIONS_VIEW]
+                      OPEN_ASSERTIONS_VIEW]
         ds_folder = find_interface(self, IDataserverFolder, strict=True)
         for name in link_names:
             link = Link(ds_folder, rel=name, elements=(name,))

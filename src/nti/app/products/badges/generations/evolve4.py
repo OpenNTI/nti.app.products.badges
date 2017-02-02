@@ -44,7 +44,7 @@ def upgrade(op):
     op.create_table(
         'team',
         sa.Column('id', sa.Unicode(128), primary_key=True,
-				  default=generate_default_id),
+                  default=generate_default_id),
         sa.Column('name', sa.Unicode(128), nullable=False, unique=True),
         sa.Column('created_on', sa.DateTime(), nullable=False,
                   default=datetime.datetime.utcnow),
@@ -53,7 +53,7 @@ def upgrade(op):
     op.create_table(
         'series',
         sa.Column('id', sa.Unicode(128), primary_key=True, 
-				  default=generate_default_id),
+                  default=generate_default_id),
         sa.Column('name', sa.Unicode(128), nullable=False, unique=True),
         sa.Column('description', sa.Unicode(128), nullable=False),
         sa.Column('created_on', sa.DateTime(), nullable=False,
@@ -63,7 +63,7 @@ def upgrade(op):
                   onupdate=datetime.datetime.utcnow),
         sa.Column('tags', sa.Unicode(128)),
         sa.Column('team_id', sa.Unicode(128), sa.ForeignKey('team.id'), 
-				  nullable=False),
+                  nullable=False),
     )
 
     op.create_table(
@@ -71,9 +71,9 @@ def upgrade(op):
         sa.Column('id', sa.Integer(), primary_key=True, unique=True),
         sa.Column('position', sa.Integer(), default=None),
         sa.Column('badge_id', sa.Unicode(128), 
-				  sa.ForeignKey('badges.id'), nullable=False),
+                  sa.ForeignKey('badges.id'), nullable=False),
         sa.Column('series_id', sa.Unicode(128), 
-				  sa.ForeignKey('series.id'), nullable=False),
+                  sa.ForeignKey('series.id'), nullable=False),
     )
     op.create_unique_constraint('milestone_unique_constraint', 'milestone',
                                 ['position', 'badge_id', 'series_id'])

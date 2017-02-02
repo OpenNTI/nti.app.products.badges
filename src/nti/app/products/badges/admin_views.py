@@ -162,7 +162,7 @@ class RevokeBadgeView(BaseBadgePostView):
         if manager.assertion_exists(user, badge_name):
             manager.remove_assertion(user, badge_name)
             logger.info("Badge '%s' revoked from user %s", 
-						 badge_name, username)
+                         badge_name, username)
         else:
             logger.warn('Assertion (%s,%s) not found', user, badge_name)
             raise hexc.HTTPNotFound()
@@ -192,7 +192,7 @@ class SyncDbView(BaseBadgePostView):
         if not directory:
             directory = os.getenv('HOSTED_BADGE_IMAGES_DIR')
 
-        if         not directory or not os.path.exists(directory) \
+        if     not directory or not os.path.exists(directory) \
             or not os.path.isdir(directory):
             raise hexc.HTTPNotFound('Directory not found')
 

@@ -65,9 +65,9 @@ class TestAdminViews(ApplicationLayerTest):
 
         # This had the side-effect of creating notable data about the award
         path = '/dataserver2/users/%s/Pages(%s)/RUGDByOthersThatIMightBeInterestedIn/' % \
-            	(username, ntiids.ROOT)
+                (username, ntiids.ROOT)
         res = self.testapp.get(path, 
-							   extra_environ=self._make_extra_environ(username))
+                               extra_environ=self._make_extra_environ(username))
         assert_that(res.json_body, has_entry('TotalItemCount', 1))
         assert_that(res.json_body, has_entry('Items', has_length(1)))
         item = res.json_body['Items'][0]
@@ -81,12 +81,12 @@ class TestAdminViews(ApplicationLayerTest):
         msg = msgs[0]
         assert_that(msg, contains_string('You earned a badge'))
         assert_that(msg, 
-					contains_string('src="http://localhost/hosted_badge_images/badge_1.png"'))
+                    contains_string('src="http://localhost/hosted_badge_images/badge_1.png"'))
 
         # an in our activity
         path = '/dataserver2/users/%s/Activity' % username
         res = self.testapp.get(path, 
-							   extra_environ=self._make_extra_environ(username))
+                               extra_environ=self._make_extra_environ(username))
         assert_that(res.json_body, has_entry('TotalItemCount', 1))
         assert_that(res.json_body, has_entry('Items', has_length(1)))
         item = res.json_body['Items'][0]

@@ -23,47 +23,57 @@ from nti.app.products.badges.utils import get_assertion_url
 
 from nti.app.products.badges.tests import NTIBadgesTestCase
 
+
 class TestUtils(NTIBadgesTestCase):
 
-	def _mock_request(self):
-		result = fudge.Fake()
-		result.provides('path_info_peek').returns("dataserver2")
-		result.has_attr(host_url='http://localhost')
-		return result
+    def _mock_request(self):
+        result = fudge.Fake()
+        result.provides('path_info_peek').returns("dataserver2")
+        result.has_attr(host_url='http://localhost')
+        return result
 
-	def test_get_badge_urls(self):
-		request = self._mock_request()
-		badge = fudge.Fake()
-		badge.has_attr(name='ichigo')
-		badge.has_attr(image='ichigo.png')
-		
-		href = get_badge_href(badge, request)
-		assert_that(href, is_('/dataserver2/OpenBadges/ichigo'))
-		
-		url = get_badge_url(badge, request)
-		assert_that(url, is_('http://localhost/dataserver2/OpenBadges/ichigo'))
-		
-		url = get_openbadge_url(badge, request)
-		assert_that(url, is_('http://localhost/dataserver2/OpenBadges/ichigo/badge.json'))
-		
-		url = get_badge_image_url(badge, request)
-		assert_that(url, is_('http://localhost/hosted_badge_images/ichigo.png'))
-		
-		badge.has_attr(image='http://bleach.org/ichigo.png')
-		url = get_badge_image_url(badge, request)
-		assert_that(url, is_('http://bleach.org/ichigo.png'))
-		
-		badge.has_attr(image='tag_nextthought.com_2011-10_OU-HTML-CHEM4970_Chemistry_of_Beer.course_badge.png')
-		url = get_badge_image_url(badge, request)
-		assert_that(url, is_('http://localhost/hosted_badge_images/tag_nextthought.com_2011-10_OU-HTML-CHEM4970_Chemistry_of_Beer.course_badge.png'))
-		
-	def test_get_assertion_urls(self):
-		request = self._mock_request()
-		assertion = fudge.Fake()
-		assertion.has_attr(uid='xy##%6')
-		
-		href = get_assertion_url(assertion, request)
-		assert_that(href, is_('/dataserver2/OpenAssertions/xy%23%23%256'))
-		
-		href = get_assertion_url(assertion, request, True)
-		assert_that(href, is_('http://localhost/dataserver2/OpenAssertions/xy%23%23%256'))
+    def test_get_badge_urls(self):
+        request = self._mock_request()
+        badge = fudge.Fake()
+        badge.has_attr(name='ichigo')
+        badge.has_attr(image='ichigo.png')
+
+        href = get_badge_href(badge, request)
+        assert_that(href, is_('/dataserver2/OpenBadges/ichigo'))
+
+        url = get_badge_url(badge, request)
+        assert_that(url, is_('http://localhost/dataserver2/OpenBadges/ichigo'))
+
+        url = get_openbadge_url(badge, request)
+        assert_that(
+            url,
+            is_('http://localhost/dataserver2/OpenBadges/ichigo/badge.json'))
+
+        url = get_badge_image_url(badge, request)
+        assert_that(
+            url,
+            is_('http://localhost/hosted_badge_images/ichigo.png'))
+
+        badge.has_attr(image='http://bleach.org/ichigo.png')
+        url = get_badge_image_url(badge, request)
+        assert_that(url, is_('http://bleach.org/ichigo.png'))
+
+        badge.has_attr(
+            image='tag_nextthought.com_2011-10_OU-HTML-CHEM4970_Chemistry_of_Beer.course_badge.png')
+        url = get_badge_image_url(badge, request)
+        assert_that(
+            url,
+            is_('http://localhost/hosted_badge_images/tag_nextthought.com_2011-10_OU-HTML-CHEM4970_Chemistry_of_Beer.course_badge.png'))
+
+    def test_get_assertion_urls(self):
+        request = self._mock_request()
+        assertion = fudge.Fake()
+        assertion.has_attr(uid='xy##%6')
+
+        href = get_assertion_url(assertion, request)
+        assert_that(href, is_('/dataserver2/OpenAssertions/xy%23%23%256'))
+
+        href = get_assertion_url(assertion, request, True)
+        assert_that(
+            href,
+            is_('http://localhost/dataserver2/OpenAssertions/xy%23%23%256'))

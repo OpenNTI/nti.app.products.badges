@@ -21,49 +21,52 @@ from nti.dataserver.tests.mock_dataserver import DSInjectorMixin
 
 import zope.testing.cleanup
 
+
 class SharedConfiguringTestLayer(ZopeComponentLayer,
-								 GCLayerMixin,
-								 ConfiguringLayerMixin,
-								 DSInjectorMixin):
+                                 GCLayerMixin,
+                                 ConfiguringLayerMixin,
+                                 DSInjectorMixin):
 
-	set_up_packages = ('nti.dataserver', 'nti.app.products.badges')
+    set_up_packages = ('nti.dataserver', 'nti.app.products.badges')
 
-	@classmethod
-	def setUp(cls):
-		cls.setUpPackages()
+    @classmethod
+    def setUp(cls):
+        cls.setUpPackages()
 
-	@classmethod
-	def tearDown(cls):
-		cls.tearDownPackages()
-		zope.testing.cleanup.cleanUp()
+    @classmethod
+    def tearDown(cls):
+        cls.tearDownPackages()
+        zope.testing.cleanup.cleanUp()
 
-	@classmethod
-	def testSetUp(cls, test=None):
-		cls.setUpTestDS(test)
+    @classmethod
+    def testSetUp(cls, test=None):
+        cls.setUpTestDS(test)
 
-	@classmethod
-	def testTearDown(cls):
-		pass
+    @classmethod
+    def testTearDown(cls):
+        pass
 
 import unittest
 
+
 class NTIBadgesTestCase(unittest.TestCase):
-	layer = SharedConfiguringTestLayer
+    layer = SharedConfiguringTestLayer
+
 
 class NTIBadgesApplicationTestLayer(ApplicationTestLayer):
 
-	@classmethod
-	def setUp(cls):
-		pass
+    @classmethod
+    def setUp(cls):
+        pass
 
-	@classmethod
-	def tearDown(cls):
-		pass
+    @classmethod
+    def tearDown(cls):
+        pass
 
-	@classmethod
-	def testSetUp(cls, test=None):
-		pass
+    @classmethod
+    def testSetUp(cls, test=None):
+        pass
 
-	@classmethod
-	def testTearDown(cls):
-		pass
+    @classmethod
+    def testTearDown(cls):
+        pass

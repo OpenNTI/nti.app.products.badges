@@ -22,13 +22,13 @@ setup(
     license='Proprietary',
     keywords='pyramid preference',
     classifiers=[
+        'Framework :: Pyramid',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: Implementation :: CPython'
     ],
     packages=find_packages('src'),
     package_dir={'': 'src'},

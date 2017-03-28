@@ -16,9 +16,8 @@ from nti.app.products.badges.interfaces import IPrincipalBadgeFilter
 from nti.app.products.badges.interfaces import IPrincipalEarnedBadgeFilter
 from nti.app.products.badges.interfaces import IPrincipalEarnableBadgeFilter
 
-from nti.appserver.interfaces import ICreatableObjectFilter
-
 from nti.dataserver.interfaces import IUser
+from nti.dataserver.interfaces import ICreatableObjectFilter
 
 
 @component.adapter(IUser)

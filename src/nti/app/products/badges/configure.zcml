@@ -107,7 +107,7 @@
 				provides=".interfaces.IPrincipalEarnableBadgeFilter"/>
 
 	<subscriber	factory=".filters._BadgesContentObjectFilter"
-				provides="nti.appserver.interfaces.ICreatableObjectFilter"
+				provides="nti.dataserver.interfaces.ICreatableObjectFilter"
 				for="nti.dataserver.interfaces.IUser" />
 
 	<!-- Workspaces -->

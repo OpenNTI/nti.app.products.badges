@@ -125,6 +125,7 @@ class _MozillaOpenIssuerExternalizer(object):
 
     def toExternalObject(self, **kwargs):
         result = InterfaceObjectIO(
-            self.context, IIssuerOrganization).toExternalObject(**kwargs)
+                    self.context,
+                    IIssuerOrganization).toExternalObject(**kwargs)
         result = _clean_external(result)
         return result

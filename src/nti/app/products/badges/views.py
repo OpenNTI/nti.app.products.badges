@@ -91,7 +91,8 @@ class BadgeAdminPathAdapter(Contained):
 
 
 def _to_mozilla_backpack(context):
-    result = to_external_object(context, name="mozillabackpack",
+    result = to_external_object(context,
+                                name="mozillabackpack",
                                 decorate=False)
     return result
 

@@ -113,11 +113,11 @@ class AssertionChange(Change):
 
     @Lazy
     def badge_href(self):
-        return self.image or self.badge.image
+        return self.image or getattr(self.badge, 'image', None)
 
     @Lazy
     def badge_description(self):
-        return self.badge.description
+        return getattr(self.badge, 'description', None)
 
     @Lazy
     def recipient(self):

@@ -260,7 +260,15 @@ class OpenBadgeAwardView(AbstractAuthenticatedView,
                         u'code': 'UserNotFound',
                     },
                     None)
-
+        if not is_email_verified(user):
+            raise_json_error(
+                    self.request,
+                    hexc.HTTPUnprocessableEntity,
+                    {
+                        u'message': _("User email has not been verified."),
+                        u'code': 'UserEmailUnverified',
+                    },
+                    None)
         # add person if required
         # an adapter must exists to convert the user to a person
         if not person_exists(user):

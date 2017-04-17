@@ -26,6 +26,7 @@ from io import BytesIO
 from zope import component
 
 from nti.badges.interfaces import IBadgeManager
+
 from nti.badges.openbadges.utils.badgebakery import get_baked_data
 
 from nti.dataserver.users import User
@@ -80,8 +81,7 @@ class TestViews(ApplicationLayerTest):
         assertion = manager.get_assertion('ichigo@bleach.com', 'badge.1')
         assert_that(assertion, is_not(none()))
 
-        open_assertion_path = '/dataserver2/OpenAssertions/%s' % urllib.quote(
-            assertion.id)
+        open_assertion_path = '/dataserver2/OpenAssertions/%s' % urllib.quote(assertion.id)
         testapp = TestApp(self.app)
         res = testapp.get(open_assertion_path,
                           extra_environ=self._make_extra_environ(user=username),
@@ -151,18 +151,20 @@ class TestViews(ApplicationLayerTest):
     @fudge.patch('nti.app.products.badges.views.is_email_verified')
     @fudge.patch('nti.app.products.badges.decorators.is_earned_badge')
     def test_lock_badge(self, mock_ic, mock_ieb):
+        mock_ic.is_callable().with_args().returns(True)
         mock_ieb.is_callable().with_args().returns(True)
         username = 'ichigo@bleach.com'
         with mock_dataserver.mock_db_trans(self.ds):
-            self._create_user(username=username,
+            user = self._create_user(username=username,
                               external_value={u'email': u'ichigo@bleach.com',
                                               u'realname': u'ichigo kurosaki',
                                               u'alias': u'zangetsu'})
+            force_email_verification(user)
 
-        award_badge_path = '/dataserver2/BadgeAdmin/@@award'
+        badge_name = urllib.quote("badge.1")
+        award_badge_path = '/dataserver2/OpenBadges/%s/@@award' % badge_name
         self.testapp.post_json(award_badge_path,
-                               {"username": username,
-                                "badge": "badge.1"},
+                               {"username": username},
                                status=200)
 
         badge_name = urllib.quote("badge.1")
@@ -178,7 +180,6 @@ class TestViews(ApplicationLayerTest):
         assert_that(res.json_body,
                     has_entry('Links', has_item(has_entry('rel', 'assertion'))))
 
-        mock_ic.is_callable().with_args().returns(True)
 
         export_badge_path = open_badges_path + '/lock'
         res = testapp.post(export_badge_path,

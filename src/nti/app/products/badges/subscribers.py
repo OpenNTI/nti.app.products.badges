@@ -28,7 +28,7 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.badges.tahrir.interfaces import IIssuer
 
-from nti.dataserver.interfaces import IUser
+from nti.dataserver.interfaces import IUser 
 
 from nti.processlifetime import IApplicationTransactionOpenedEvent
 
@@ -67,6 +67,8 @@ def _after_database_opened_listener(event):
             logger.warn("Integrity error", exc_info=True)
 
 
+from nti.app.authentication import get_remote_user
+
 from nti.app.notabledata.interfaces import IUserNotableDataStorage
 
 from nti.app.products.badges.interfaces import SC_BADGE_EARNED
@@ -79,10 +81,15 @@ from nti.badges.openbadges.interfaces import IBadgeAwardedEvent
 from nti.dataserver.activitystream_change import Change
 
 from nti.dataserver.authorization import ACT_READ
+
 from nti.dataserver.authorization_acl import ace_allowing
 from nti.dataserver.authorization_acl import acl_from_aces
 
+from nti.dataserver.interfaces import ALL_PERMISSIONS
+
 from nti.dataserver.interfaces import ACE_DENY_ALL
+
+from nti.property.property import Lazy
 
 
 @interface.implementer(IAssertionChange)
@@ -99,21 +106,25 @@ class AssertionChange(Change):
         return IBadgeClass(assertion)
 
     # for ease of rendering
-    @property
+    @Lazy
     def badge(self):
         obj = self.object
         if obj is not None:
             badge = self.externalObjectTransformationHook(obj)
             return badge
 
-    @property
+    @Lazy
     def badge_href(self):
         return self.image or self.badge.image
 
-    @property
+    @Lazy
     def badge_description(self):
         return self.badge.description
 
+    @Lazy
+    def recipient(self):
+        return IUser(self.object, None)
+    
     # Eventually the assertion will have its own ACL,
     # we want to use that. Right now it has no provider,
     # so it gets no value from the superclass...
@@ -122,11 +133,17 @@ class AssertionChange(Change):
     # ...but we override to deny access for everyone except the
     # "creator", which right now is the owner of the
     # assertion...notable data bypasses this check for us
+    @Lazy
     def __acl__(self):
+        aces = []
         creator = self.creator
         if creator is not None:
-            return acl_from_aces(ace_allowing(creator, ACT_READ))
-        return (ACE_DENY_ALL,)
+            aces.add(ace_allowing(creator, ALL_PERMISSIONS))
+        recipient = self.recipient
+        if recipient is not None:
+            aces.add(ace_allowing(recipient, ACT_READ))
+        aces.append(ACE_DENY_ALL)
+        return acl_from_aces(aces)
 
 
 @component.adapter(IBadgeAssertion, IBadgeAwardedEvent)
@@ -144,7 +161,7 @@ def _make_assertions_notable_to_target(assertion, event):
 
     user = IUser(assertion)
     # Set a creator...this may not be the best we can do in some cases
-    change.creator = user
+    change.creator = get_remote_user() or user
 
     storage = IUserNotableDataStorage(user)
     storage.store_object(change, safe=True, take_ownership=True)

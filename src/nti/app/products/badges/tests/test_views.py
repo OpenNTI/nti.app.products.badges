@@ -117,8 +117,8 @@ class TestViews(ApplicationLayerTest):
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
         data = get_baked_data(BytesIO(res.body))
-        assert_that(data, has_entry(
-            'image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
+        assert_that(data, 
+                    has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
 
         assertion_json_path = open_assertion_path + "/assertion.json"
         res = testapp.get(assertion_json_path,
@@ -155,11 +155,10 @@ class TestViews(ApplicationLayerTest):
         mock_ieb.is_callable().with_args().returns(True)
         username = 'ichigo@bleach.com'
         with mock_dataserver.mock_db_trans(self.ds):
-            user = self._create_user(username=username,
+            self._create_user(username=username,
                               external_value={u'email': u'ichigo@bleach.com',
                                               u'realname': u'ichigo kurosaki',
                                               u'alias': u'zangetsu'})
-            force_email_verification(user)
 
         badge_name = urllib.quote("badge.1")
         award_badge_path = '/dataserver2/OpenBadges/%s/@@award' % badge_name

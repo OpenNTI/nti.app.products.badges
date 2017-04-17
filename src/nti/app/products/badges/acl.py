@@ -24,8 +24,9 @@ from nti.dataserver.authorization_acl import acl_from_aces
 from nti.dataserver.interfaces import EVERYONE_USER_NAME
 
 from nti.dataserver.interfaces import IACLProvider
+from nti.dataserver.interfaces import ISupplementalACLProvider
 
-from nti.property.property import LazyOnClass
+from nti.property.property import Lazy
 
 
 @interface.implementer(IACLProvider)
@@ -34,9 +35,17 @@ class OpenMixinACLProvider(object):
     def __init__(self, context):
         self.context = context
 
-    @LazyOnClass
+    @Lazy
     def __acl__(self):
-        return acl_from_aces(ace_allowing(EVERYONE_USER_NAME, ACT_READ, type(self)))
+        aces = []
+        aces.append(ace_allowing(EVERYONE_USER_NAME, ACT_READ, type(self)))
+        # Now add in any supplemental providers.
+        for supplemental in component.subscribers((self.context,),
+                                                  ISupplementalACLProvider):
+            for supplemental_ace in supplemental.__acl__ or ():
+                if supplemental_ace is not None:
+                    aces.append(supplemental_ace)
+        return acl_from_aces(aces)
 
 
 @component.adapter(IBadgeClass)

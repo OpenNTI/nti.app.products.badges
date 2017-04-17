@@ -56,6 +56,11 @@
 	<adapter factory=".adapters.open_assertion_to_user" />
 	<adapter factory=".adapters.open_assertion_to_tahrir_assertion" />
 
+	<!-- Weak refs -->
+	<adapter factory=".wref.OpenAssertionWeakRef"
+			 for="nti.badges.openbadges.interfaces.IBadgeAssertion" 
+			 provides="nti.wref.interfaces.IWeakRef" />
+	
 	<!-- Decorators -->
 	<subscriber factory=".decorators._BadgeLinkFixer"
 				provides="nti.externalization.interfaces.IExternalMappingDecorator"

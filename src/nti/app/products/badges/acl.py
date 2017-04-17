@@ -12,11 +12,14 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from nti.app.products.badges.interfaces import ACT_AWARD_BADGE
+
 from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
 from nti.badges.openbadges.interfaces import IIssuerOrganization
 
 from nti.dataserver.authorization import ACT_READ
+from nti.dataserver.authorization import ROLE_ADMIN 
 
 from nti.dataserver.authorization_acl import ace_allowing
 from nti.dataserver.authorization_acl import acl_from_aces
@@ -37,8 +40,8 @@ class OpenMixinACLProvider(object):
 
     @Lazy
     def __acl__(self):
-        aces = []
-        aces.append(ace_allowing(EVERYONE_USER_NAME, ACT_READ, type(self)))
+        aces = [ace_allowing(ROLE_ADMIN, ACT_AWARD_BADGE, type(self)),
+                ace_allowing(EVERYONE_USER_NAME, ACT_READ, type(self))]
         # Now add in any supplemental providers.
         for supplemental in component.subscribers((self.context,),
                                                   ISupplementalACLProvider):

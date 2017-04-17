@@ -119,7 +119,7 @@ class AwardBadgeView(BaseBadgePostView):
         if result is None:
             add_assertion(user, badge_name)
             result = get_assertion(user, badge_name)
-            notify(BadgeAwardedEvent(result))
+            notify(BadgeAwardedEvent(result, self.remoteUser))
             logger.info("Badge '%s' added to user %s",
                         badge_name, username)
         result = IBadgeAssertion(result)
@@ -141,8 +141,8 @@ class RevokeBadgeView(BaseBadgePostView):
 
         # validate user
         username = values.get('user') \
-            or values.get('username') \
-            or values.get('email')
+                or values.get('username') \
+                or values.get('email')
         if not username:
             raise hexc.HTTPUnprocessableEntity('Username was not specified')
         user = User.get_user(username)
@@ -195,8 +195,8 @@ class SyncDbView(BaseBadgePostView):
         if not directory:
             directory = os.getenv('HOSTED_BADGE_IMAGES_DIR')
 
-        if not directory or not os.path.exists(directory) \
-                or not os.path.isdir(directory):
+        if     not directory or not os.path.exists(directory) \
+            or not os.path.isdir(directory):
             raise hexc.HTTPNotFound('Directory not found')
 
         # update badges

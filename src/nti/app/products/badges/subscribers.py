@@ -67,8 +67,6 @@ def _after_database_opened_listener(event):
             logger.warn("Integrity error", exc_info=True)
 
 
-from nti.app.authentication import get_remote_user
-
 from nti.app.notabledata.interfaces import IUserNotableDataStorage
 
 from nti.app.products.badges.interfaces import SC_BADGE_EARNED
@@ -161,7 +159,7 @@ def _make_assertions_notable_to_target(assertion, event):
 
     user = IUser(assertion)
     # Set a creator...this may not be the best we can do in some cases
-    change.creator = get_remote_user() or user
+    change.creator = event.giver or user
 
     storage = IUserNotableDataStorage(user)
     storage.store_object(change, safe=True, take_ownership=True)

@@ -12,6 +12,8 @@ from zope import interface
 
 from zope.interface.interface import taggedValue
 
+from zope.security.permission import Permission
+
 from nti.appserver.workspaces.interfaces import IWorkspace
 
 from nti.app.client_preferences.interfaces import TAG_EXTERNAL_PREFERENCE_GROUP
@@ -19,6 +21,9 @@ from nti.app.client_preferences.interfaces import TAG_EXTERNAL_PREFERENCE_GROUP
 from nti.dataserver.interfaces import IZContained
 from nti.dataserver.interfaces import IStreamChangeEvent
 from nti.dataserver.interfaces import make_stream_change_event_interface
+
+#: Award a badge permission
+ACT_AWARD_BADGE = Permission('nti.actions.badges.award')
 
 
 class IAssertionChange(IStreamChangeEvent, IZContained):

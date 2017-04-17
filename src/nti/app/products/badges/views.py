@@ -13,10 +13,14 @@ import urllib
 import requests
 from io import BytesIO
 
+from requests.structures import CaseInsensitiveDict
+
 from zope import component
 from zope import interface
 
 from zope.container.contained import Contained
+
+from zope.event import notify
 
 from zope.traversing.interfaces import IPathAdapter
 
@@ -36,6 +40,8 @@ from nti.app.base.abstract_views import AbstractAuthenticatedView
 
 from nti.app.externalization.error import raise_json_error
 
+from nti.app.externalization.view_mixins import ModeledContentUploadRequestUtilsMixin
+
 from nti.app.products.badges import MessageFactory as _
 
 from nti.app.products.badges import OPEN_BADGES_VIEW
@@ -44,13 +50,17 @@ from nti.app.products.badges import OPEN_ASSERTIONS_VIEW
 
 from nti.app.products.badges import is_locked
 from nti.app.products.badges import get_badge
+from nti.app.products.badges import add_person
 from nti.app.products.badges import get_issuer
+from nti.app.products.badges import add_assertion
 from nti.app.products.badges import get_assertion
+from nti.app.products.badges import person_exists
 from nti.app.products.badges import get_user_email
 from nti.app.products.badges import update_assertion
 from nti.app.products.badges import is_email_verified
 
-from nti.app.products.badges.interfaces import IBadgesWorkspace
+from nti.app.products.badges.interfaces import ACT_AWARD_BADGE
+from nti.app.products.badges.interfaces import IBadgesWorkspace 
 
 from nti.app.products.badges.utils import get_badge_image_url
 
@@ -65,12 +75,16 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
 from nti.badges.openbadges.interfaces import IIssuerOrganization
 
+from nti.badges.openbadges.interfaces import BadgeAwardedEvent
+
 from nti.badges.openbadges.utils.badgebakery import bake_badge
 
 from nti.dataserver import authorization as nauth
 
 from nti.dataserver.interfaces import IUser
 from nti.dataserver.interfaces import IDataserverFolder
+
+from nti.dataserver.users import User
 
 from nti.externalization.externalization import to_external_object
 
@@ -110,6 +124,7 @@ class OpenJSONView(AbstractView):
 
 class Response(PyramidResponse):
     default_charset = None
+
 
 # Issuers
 
@@ -206,6 +221,71 @@ class OpenBadgeJSONView(OpenJSONView):
         result = _to_mozilla_backpack(self.request.context)
         interface.alsoProvides(result, INoHrefInResponse)
         return result
+
+
+@view_config(name="award")
+@view_defaults(route_name='objects.generic.traversal',
+               renderer='rest',
+               request_method='POST',
+               context=IBadgeClass,
+               permission=ACT_AWARD_BADGE)
+class OpenBadgeAwardView(AbstractAuthenticatedView,
+                         ModeledContentUploadRequestUtilsMixin):
+
+    def readInput(self, value=None):
+        result = super(OpenBadgeAwardView, self).readInput(value=value)
+        return CaseInsensitiveDict(result)
+
+    def __call__(self):
+        values = self.readInput()
+        username = values.get('user') \
+                or values.get('username') 
+        if not username:
+            raise_json_error(
+                    self.request,
+                    hexc.HTTPUnprocessableEntity,
+                    {
+                        u'message': _("Username was not specified."),
+                        u'code': 'UsernameNotSpecified',
+                    },
+                    None)
+
+        user = User.get_user(username)
+        if user is None:
+            raise_json_error(
+                    self.request,
+                    hexc.HTTPUnprocessableEntity,
+                    {
+                        u'message': _("User not found."),
+                        u'code': 'UserNotFound',
+                    },
+                    None)
+
+        # add person if required
+        # an adapter must exists to convert the user to a person
+        if not person_exists(user):
+            add_person(user)
+
+        # add assertion
+        name = self.context.name
+        result = get_assertion(user, name)
+        if result is None:
+            add_assertion(user, name)
+            result = get_assertion(user, name)
+            notify(BadgeAwardedEvent(result, self.remoteUser))
+            logger.info("Badge '%s' added to user %s",
+                        name, username)
+            result = IBadgeAssertion(result)
+            return result
+
+        raise_json_error(
+                self.request,
+                hexc.HTTPUnprocessableEntity,
+                {
+                    u'message': _("Badge already awarded."),
+                    u'code': 'BadgeAlreadyAwarded',
+                },
+                None)
 
 
 # Assertions

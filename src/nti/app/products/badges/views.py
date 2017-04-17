@@ -26,11 +26,15 @@ from pyramid.interfaces import IRequest
 
 from pyramid.response import Response as PyramidResponse
 
+from pyramid.threadlocal import get_current_request
+
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 
 from nti.app.base.abstract_views import AbstractView
 from nti.app.base.abstract_views import AbstractAuthenticatedView
+
+from nti.app.externalization.error import raise_json_error
 
 from nti.app.products.badges import MessageFactory as _
 
@@ -154,6 +158,7 @@ class OpenIssuerJSONView(OpenJSONView):
         interface.alsoProvides(result, INoHrefInResponse)
         return result
 
+
 # Badges
 
 
@@ -201,6 +206,7 @@ class OpenBadgeJSONView(OpenJSONView):
         result = _to_mozilla_backpack(self.request.context)
         interface.alsoProvides(result, INoHrefInResponse)
         return result
+
 
 # Assertions
 
@@ -287,7 +293,7 @@ class OpenAssertionImageView(AbstractView):
         return response
 
 
-def assert_assertion_exported(context, remoteUser=None):
+def assert_assertion_exported(context, remoteUser=None, request=None):
     context = context
     if is_locked(context):
         return
@@ -295,8 +301,15 @@ def assert_assertion_exported(context, remoteUser=None):
     # verify user access
     user = IUser(context, None)
     if user is None:
-        raise hexc.HTTPUnprocessableEntity(
-            _("Cannot find user for assertion."))
+        request = request or get_current_request()
+        raise_json_error(
+            request,
+            hexc.HTTPUnprocessableEntity,
+            {
+                u'message': _("Cannot find user for assertion."),
+                u'code': 'AssertionNotFound',
+            },
+            None)
     if remoteUser is not None and remoteUser != user:
         raise hexc.HTTPForbidden()
 
@@ -304,8 +317,15 @@ def assert_assertion_exported(context, remoteUser=None):
     email = get_user_email(user)
     email_verified = is_email_verified(user)
     if not email or not email_verified:
-        msg = _("Cannot export assertion to an unverified email.")
-        raise hexc.HTTPUnprocessableEntity(msg)
+        request = request or get_current_request()
+        raise_json_error(
+            request,
+            hexc.HTTPUnprocessableEntity,
+            {
+                u'message': _("Cannot export assertion to an unverified email."),
+                u'code': 'CannotExportAssertion',
+            },
+            None)
     update_assertion(context.uid, email=email, exported=True)
 
 
@@ -319,7 +339,14 @@ class OpenAssertionJSONView(OpenJSONView):
     def __call__(self):
         context = self.request.context
         if not is_locked(context):
-            raise hexc.HTTPUnprocessableEntity(_("Assertion is not locked."))
+            raise_json_error(
+                self.request,
+                hexc.HTTPUnprocessableEntity,
+                {
+                    u'message': _("Assertion is not locked."),
+                    u'code': 'AssertionIsNotLocked',
+                },
+                None)
         self._set_environ()
         external = _to_mozilla_backpack(context)
         interface.alsoProvides(external, INoHrefInResponse)
@@ -341,7 +368,7 @@ class ExportOpenAssertionView(AbstractAuthenticatedView):
             raise hexc.HTTPForbidden()
 
         # verify the assertion can be exported
-        assert_assertion_exported(context, self.remoteUser)
+        assert_assertion_exported(context, self.remoteUser, self.request)
         payload = _to_mozilla_backpack(context)
         badge_url = _get_badge_image_url(context, self.request)
         target = _get_image(badge_url, payload=payload, locked=True)
@@ -366,8 +393,14 @@ class LockBadgeView(AbstractAuthenticatedView):
         context = self.request.context
         assertion = get_assertion(self.remoteUser, context.name)
         if assertion is None:
-            raise hexc.HTTPUnprocessableEntity(
-                _("Cannot find user assertion."))
+            raise_json_error(
+                self.request,
+                hexc.HTTPUnprocessableEntity,
+                {
+                    u'message': _("Cannot find user assertion."),
+                    u'code': 'CannotFindAssertion',
+                },
+                None)
 
         # verify the assertion can be exported and export
         assert_assertion_exported(assertion, self.remoteUser)

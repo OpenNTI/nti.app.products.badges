@@ -17,6 +17,8 @@ from requests.structures import CaseInsensitiveDict
 
 from zope import component
 
+from zope.event import notify
+
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
@@ -43,6 +45,7 @@ from nti.badges.interfaces import IBadgeManager
 
 from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
+from nti.badges.openbadges.interfaces import BadgeAwardedEvent
 
 from nti.common.string import TRUE_VALUES
 
@@ -84,9 +87,9 @@ class AwardBadgeView(BaseBadgePostView):
         values = self.readInput()
 
         # validate user
-        username =  values.get('user') \
-                 or values.get('username') \
-                 or values.get('email')
+        username = values.get('user') \
+            or values.get('username') \
+            or values.get('email')
         if not username:
             raise hexc.HTTPUnprocessableEntity('Username was not specified')
 
@@ -116,9 +119,9 @@ class AwardBadgeView(BaseBadgePostView):
         if result is None:
             add_assertion(user, badge_name)
             result = get_assertion(user, badge_name)
+            notify(BadgeAwardedEvent(result))
             logger.info("Badge '%s' added to user %s",
                         badge_name, username)
-
         result = IBadgeAssertion(result)
         return result
 
@@ -138,8 +141,8 @@ class RevokeBadgeView(BaseBadgePostView):
 
         # validate user
         username = values.get('user') \
-                or values.get('username') \
-                or values.get('email')
+            or values.get('username') \
+            or values.get('email')
         if not username:
             raise hexc.HTTPUnprocessableEntity('Username was not specified')
         user = User.get_user(username)
@@ -161,8 +164,8 @@ class RevokeBadgeView(BaseBadgePostView):
 
         if manager.assertion_exists(user, badge_name):
             manager.remove_assertion(user, badge_name)
-            logger.info("Badge '%s' revoked from user %s", 
-                         badge_name, username)
+            logger.info("Badge '%s' revoked from user %s",
+                        badge_name, username)
         else:
             logger.warn('Assertion (%s,%s) not found', user, badge_name)
             raise hexc.HTTPNotFound()
@@ -192,8 +195,8 @@ class SyncDbView(BaseBadgePostView):
         if not directory:
             directory = os.getenv('HOSTED_BADGE_IMAGES_DIR')
 
-        if     not directory or not os.path.exists(directory) \
-            or not os.path.isdir(directory):
+        if not directory or not os.path.exists(directory) \
+                or not os.path.isdir(directory):
             raise hexc.HTTPNotFound('Directory not found')
 
         # update badges
@@ -208,8 +211,10 @@ class SyncDbView(BaseBadgePostView):
         now = time.time()
 
         # sync database
-        issuers, badges = sync_db(
-            directory, update=update, verify=verify, secret=secret)
+        issuers, badges = sync_db(directory,
+                                  update=update,
+                                  verify=verify,
+                                  secret=secret)
 
         # return
         result = LocatedExternalDict()

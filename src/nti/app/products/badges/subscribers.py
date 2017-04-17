@@ -66,7 +66,6 @@ def _after_database_opened_listener(event):
         except (sqlalchemy.exc.IntegrityError, sqlalchemy.exc.InvalidRequestError):
             logger.warn("Integrity error", exc_info=True)
 
-from zope.lifecycleevent import IObjectAddedEvent
 
 from nti.app.notabledata.interfaces import IUserNotableDataStorage
 
@@ -74,6 +73,8 @@ from nti.app.products.badges.interfaces import SC_BADGE_EARNED
 from nti.app.products.badges.interfaces import IAssertionChange
 
 from nti.appserver.interfaces import IUserActivityStorage
+
+from nti.badges.openbadges.interfaces import IBadgeAwardedEvent
 
 from nti.dataserver.activitystream_change import Change
 
@@ -128,7 +129,7 @@ class AssertionChange(Change):
         return (ACE_DENY_ALL,)
 
 
-@component.adapter(IBadgeAssertion, IObjectAddedEvent)
+@component.adapter(IBadgeAssertion, IBadgeAwardedEvent)
 def _make_assertions_notable_to_target(assertion, event):
     """
     When a badge assertion is recorded, the event is notable

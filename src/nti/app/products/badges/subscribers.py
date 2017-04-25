@@ -12,6 +12,8 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from zope.cachedescriptors.property import Lazy
+
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 
 import sqlalchemy.exc
@@ -86,8 +88,6 @@ from nti.dataserver.authorization_acl import acl_from_aces
 from nti.dataserver.interfaces import ALL_PERMISSIONS
 
 from nti.dataserver.interfaces import ACE_DENY_ALL
-
-from nti.property.property import Lazy
 
 
 @interface.implementer(IAssertionChange)

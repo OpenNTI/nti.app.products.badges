@@ -24,7 +24,7 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
     badge_ids = []
     person_ids = []
     issuer_ids = []
-    for code in xrange(issuers):
+    for code in range(issuers):
         code += 1
         issuer_id = database.add_issuer(origin=u'http://nti.com',
                                         name=u'issuer_%s' % code,
@@ -34,10 +34,10 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
         if verbose:
             print('Issuer %s added' % issuer_id)
 
-    for code in xrange(badges):
+    for code in range(badges):
         code += 1
         tags = ''
-        for x in xrange(random.randint(1, 3)):
+        for x in range(random.randint(1, 3)):
             tags += 'tag.%s,' % (x + 1)
         badge_id = database.add_badge(name=u'badge.%s' % code,
                                       desc=u'Badge %s' % code,
@@ -49,7 +49,7 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
         if verbose:
             print('Badge %s added' % badge_id)
 
-    for code in xrange(persons):
+    for code in range(persons):
         code += 1
         email = u'%s.%s@nti.com' % (person_prefix, code)
         person_id = database.add_person(email=email,
@@ -60,7 +60,7 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
         if verbose:
             print('Person %s added', person_id)
 
-    for code in xrange(awards):
+    for code in range(awards):
         badge_id = random.choice(badge_ids)
         person_id = random.choice(person_ids)
         if not database.assertion_exists(badge_id, person_id):

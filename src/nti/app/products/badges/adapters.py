@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -69,8 +69,7 @@ def set_common_person(user, person):
     person.email = uid
     profile = IUserProfile(user, None)
     person.website = getattr(profile, 'home_page', None) or u''
-    person.bio = to_plain_text(
-        ' '.join(getattr(profile, 'about', None) or u''))
+    person.bio = to_plain_text(u' '.join(getattr(profile, 'about', u'') or u''))
 
 
 @interface.implementer(IPerson)

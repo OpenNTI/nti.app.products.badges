@@ -139,7 +139,7 @@ def get_person_assertions(person):
     return manager.get_person_assertions(person) if manager is not None else ()
 
 
-def get_all_persons(person):
+def get_all_persons():
     manager = component.queryUtility(IBadgeManager)
     return manager.get_all_persons() if manager is not None else ()
 

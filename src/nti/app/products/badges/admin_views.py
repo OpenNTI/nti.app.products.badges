@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -51,7 +51,7 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 from nti.badges.openbadges.interfaces import IBadgeAssertion
 from nti.badges.openbadges.interfaces import BadgeAwardedEvent
 
-from nti.common.string import TRUE_VALUES
+from nti.common.string import is_true
 
 from nti.dataserver import authorization as nauth
 
@@ -93,27 +93,25 @@ class AwardBadgeView(BaseBadgePostView):
         # validate user
         username = values.get('user') \
                 or values.get('email') \
-                or values.get('username') 
+                or values.get('username')
         if not username:
-            raise_json_error(
-                    self.request,
-                    hexc.HTTPUnprocessableEntity,
-                    {
-                        u'message': _("Username was not specified."),
-                        u'code': 'UsernameNotSpecified',
-                    },
-                    None)
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                'message': _(u"Username was not specified."),
+                                'code': 'UsernameNotSpecified',
+                             },
+                             None)
 
         user = User.get_user(username)
         if user is None:
-            raise_json_error(
-                    self.request,
-                    hexc.HTTPUnprocessableEntity,
-                    {
-                        u'message': _("User not found."),
-                        u'code': 'UserNotFound',
-                    },
-                    None)
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                'message': _(u"User not found."),
+                                'code': 'UserNotFound',
+                             },
+                             None)
 
         # validate badge
         for name in ('badge', 'badge_name', 'badgeName', 'badgeid', 'badge_id'):
@@ -121,25 +119,23 @@ class AwardBadgeView(BaseBadgePostView):
             if badge_name:
                 break
         if not badge_name:
-            raise_json_error(
-                    self.request,
-                    hexc.HTTPUnprocessableEntity,
-                    {
-                        u'message': _("Badge name was not specified."),
-                        u'code': 'BadgenameNotSpecified',
-                    },
-                    None)
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                'message': _(u"Badge name was not specified."),
+                                'code': 'BadgenameNotSpecified',
+                             },
+                             None)
 
         badge = get_badge(badge_name)
         if badge is None:
-            raise_json_error(
-                    self.request,
-                    hexc.HTTPUnprocessableEntity,
-                    {
-                        u'message': _("Badge name not found."),
-                        u'code': 'BadgenameNotFound',
-                    },
-                    None)
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                'message': _(u"Badge name not found."),
+                                'code': 'BadgenameNotFound',
+                             },
+                             None)
 
         # add person if required
         # an adapter must exists to convert the user to a person
@@ -176,24 +172,22 @@ class RevokeBadgeView(BaseBadgePostView):
                 or values.get('username') \
                 or values.get('email')
         if not username:
-            raise_json_error(
-                    self.request,
-                    hexc.HTTPUnprocessableEntity,
-                    {
-                        u'message': _("Username was not specified."),
-                        u'code': 'UsernameNotSpecified',
-                    },
-                    None)
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                'message': _(u"Username was not specified."),
+                                'code': 'UsernameNotSpecified',
+                             },
+                             None)
         user = User.get_user(username)
         if user is None:
-            raise_json_error(
-                    self.request,
-                    hexc.HTTPUnprocessableEntity,
-                    {
-                        u'message': _("User not found."),
-                        u'code': 'UserNotFound',
-                    },
-                    None)
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                'message': _(u"User not found."),
+                                'code': 'UserNotFound',
+                             },
+                             None)
 
         # validate badge
         for name in ('badge', 'name'):
@@ -201,26 +195,24 @@ class RevokeBadgeView(BaseBadgePostView):
             if badge_name:
                 break
         if not badge_name:
-            raise_json_error(
-                    self.request,
-                    hexc.HTTPUnprocessableEntity,
-                    {
-                        u'message': _("Badge name was not specified."),
-                        u'code': 'BadgenameNotSpecified',
-                    },
-                    None)
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                'message': _(u"Badge name was not specified."),
+                                'code': 'BadgenameNotSpecified',
+                             },
+                             None)
 
         manager = component.getUtility(IBadgeManager)
         badge = manager.get_badge(badge_name)
         if badge is None:
-            raise_json_error(
-                    self.request,
-                    hexc.HTTPUnprocessableEntity,
-                    {
-                        u'message': _("Badge name not found."),
-                        u'code': 'BadgenameNotFound',
-                    },
-                    None)
+            raise_json_error(self.request,
+                             hexc.HTTPUnprocessableEntity,
+                             {
+                                'message': _(u"Badge name not found."),
+                                'code': 'BadgenameNotFound',
+                             },
+                             None)
 
         if manager.assertion_exists(user, badge_name):
             manager.remove_assertion(user, badge_name)
@@ -260,12 +252,10 @@ class SyncDbView(BaseBadgePostView):
             raise hexc.HTTPNotFound(_("Directory not found."))
 
         # update badges
-        update = values.get('update') or u''
-        update = str(update).lower() in TRUE_VALUES
+        update = is_true(values.get('update'))
 
         # verify object
-        verify = values.get('verify') or u''
-        verify = str(verify).lower() in TRUE_VALUES
+        verify = is_true(values.get('verify'))
 
         secret = values.get('secret')
         now = time.time()

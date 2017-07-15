@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -27,10 +27,10 @@ from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 
 class TestBadges(NTIBadgesTestCase):
 
-    def _create_user(self, username='ntiuser', password='temp001',
-                     email='ntiuser@nti.com', alias='myalias',
-                     home_page='http://www.foo.com',
-                     about="my bio"):
+    def _create_user(self, username=u'ntiuser', password=u'temp001',
+                     email=u'ntiuser@nti.com', alias=u'myalias',
+                     home_page=u'http://www.foo.com',
+                     about=u"my bio"):
         ds = mock_dataserver.current_mock_ds
         usr = User.create_user(ds, username=username, password=password,
                                external_value={'email': email, 'alias': alias,

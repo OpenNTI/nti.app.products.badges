@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -30,10 +30,10 @@ URL_SCHEMES = ("file", "ftp", "http", "https", "ldap")
 def get_ds2(request=None):
     request = request if request else get_current_request()
     try:
-        # e.g. /dataserver2
-        return request.path_info_peek() if request else None
+        result = request.path_info_peek() if request else None
     except AttributeError:  # in unit test we may see this
-        return None
+        result = None
+    return result or "dataserver2"
 
 
 def get_user(user=None):
@@ -44,11 +44,8 @@ def get_user(user=None):
 
 def get_badge_href(context, request=None):
     ds2 = get_ds2(request)
-    if ds2:
-        # href is the open badge URL
-        href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, quote(context.name))
-        return href
-    return None
+    href = '/%s/%s/%s' % (ds2, OPEN_BADGES_VIEW, quote(context.name))
+    return href
 
 
 def get_badge_url(context, request=None):
@@ -75,9 +72,6 @@ def get_badge_image_url(context, request=None):
 def get_assertion_url(assertion, request=None, full=False):
     request = request if request else get_current_request()
     ds2 = get_ds2(request)
-    if not ds2:
-        return None
-
     uid = quote(assertion.uid)
     href = '/%s/%s/%s' % (ds2, OPEN_ASSERTIONS_VIEW, uid)
     result = urljoin(request.host_url, href) if full else href
@@ -112,11 +106,9 @@ def get_openbadge_url(context, request=None):
 
 def get_issuer_href(context, request=None):
     ds2 = get_ds2(request)
-    if ds2:
-        # href is the open badge URL
-        href = '/%s/%s/%s' % (ds2, OPEN_ISSUERS_VIEW, quote(context.name))
-        return href
-    return None
+    # href is the open badge URL
+    href = '/%s/%s/%s' % (ds2, OPEN_ISSUERS_VIEW, quote(context.name))
+    return href
 
 
 def get_issuer_url(context, request=None):

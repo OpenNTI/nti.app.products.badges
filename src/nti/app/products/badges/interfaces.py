@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 from zope import component
@@ -125,6 +125,6 @@ def get_principal_earnable_badge_filter(user):
     return uber_filter
 
 #: Badge Earned Stream Change
-SC_BADGE_EARNED = 'BadgeEarned'
+SC_BADGE_EARNED = u'BadgeEarned'
 IStreamChangeBadgeEarnedEvent = \
         make_stream_change_event_interface(SC_BADGE_EARNED)[0]

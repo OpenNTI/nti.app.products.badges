@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -62,8 +62,8 @@ class _DefaultPrincipalEarnableBadgeFilter(object):
 @interface.implementer(ICreatableObjectFilter)
 class _BadgesContentObjectFilter(object):
 
-    PREFIX_1 = u'application/vnd.nextthought.badges'
-    PREFIX_2 = u'application/vnd.nextthought.openbadges'
+    PREFIX_1 = 'application/vnd.nextthought.badges'
+    PREFIX_2 = 'application/vnd.nextthought.openbadges'
 
     def __init__(self, context=None):
         pass

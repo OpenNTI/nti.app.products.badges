@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -48,10 +48,10 @@ class TestAdminViews(ApplicationLayerTest):
 
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
     def test_award(self):
-        username = 'ichigo@bleach.com'
+        username = u'ichigo@bleach.com'
         with mock_dataserver.mock_db_trans(self.ds):
-            self._create_user(
-                username=username, external_value={'email': username})
+            self._create_user(username=username, 
+                              external_value={'email': username})
 
         award_badge_path = '/dataserver2/BadgeAdmin/@@award'
 
@@ -60,8 +60,8 @@ class TestAdminViews(ApplicationLayerTest):
                                 "badge": "badge.1"},
                                status=200)
         manager = component.getUtility(IBadgeManager)
-        assert_that(manager.assertion_exists(
-            'ichigo@bleach.com', 'badge.1'), is_(True))
+        assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'), 
+                    is_(True))
 
         # This had the side-effect of creating notable data about the award
         path = '/dataserver2/users/%s/Pages(%s)/RUGDByOthersThatIMightBeInterestedIn/' % \
@@ -97,10 +97,10 @@ class TestAdminViews(ApplicationLayerTest):
 
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
     def test_revoke(self):
-        username = 'ichigo@bleach.com'
+        username = u'ichigo@bleach.com'
         with mock_dataserver.mock_db_trans(self.ds):
-            self._create_user(
-                username=username, external_value={'email': username})
+            self._create_user(username=username, 
+                              external_value={'email': username})
 
         award_badge_path = '/dataserver2/BadgeAdmin/@@award'
         res = self.testapp.post_json(award_badge_path,
@@ -117,8 +117,8 @@ class TestAdminViews(ApplicationLayerTest):
                                 "badge": "badge.1"},
                                status=204)
         manager = component.getUtility(IBadgeManager)
-        assert_that(manager.assertion_exists(
-            'ichigo@bleach.com', 'badge.1'), is_(False))
+        assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'),
+                    is_(False))
 
         self.testapp.post_json(revoke_badge_path,
                                {"username": "ichigo@bleach.com",
@@ -131,9 +131,9 @@ class TestAdminViews(ApplicationLayerTest):
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
     def test_bulk_import(self):
         with mock_dataserver.mock_db_trans(self.ds):
-            for username in ('ichigo', 'rukia'):
+            for username in (u'ichigo', u'rukia'):
                 self._create_user(username=username,
-                                  external_value={'email': username + '@bleach.com'})
+                                  external_value={'email': username + u'@bleach.com'})
 
         award_badge_path = '/dataserver2/BadgeAdmin/@@award'
         self.testapp.post_json(award_badge_path,
@@ -170,16 +170,16 @@ class TestAdminViews(ApplicationLayerTest):
     def test_update_persons(self):
         manager = component.getUtility(IBadgeManager)
 
-        username = 'ichigo'
+        username = u'ichigo'
         with mock_dataserver.mock_db_trans(self.ds):
             user = self._create_user(username=username,
-                                     external_value={'email': 'foo@nt.com'})
+                                     external_value={'email': u'foo@nt.com'})
             # create person email not verified
             manager.add_person(user)
 
             # update verification
             IUserProfile(user).email_verified = True
-            IUserProfile(user).email = 'ichigo@bleach.org'
+            IUserProfile(user).email = u'ichigo@bleach.org'
 
         person = manager.get_person(name='ichigo')
         assert_that(person, is_not(none()))

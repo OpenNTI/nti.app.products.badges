@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -61,24 +61,27 @@ class TestWorkspaces(ApplicationLayerTest):
             service = IUserService(user)
 
             workspaces = service.workspaces
-
             assert_that(workspaces,
                         has_item(verifiably_provides(app_badge_interfaces.IBadgesWorkspace)))
 
-            workspace = [
-                x for x in workspaces if app_badge_interfaces.IBadgesWorkspace.providedBy(x)][0]
+            workspaces = [
+                x for x in workspaces if app_badge_interfaces.IBadgesWorkspace.providedBy(x)
+            ]
+            workspace = workspaces[0]
 
             badges_path = '/dataserver2/users/sjohnson@nextthought.COM/Badges'
             assert_that(traversal.resource_path(workspace),
                         is_(badges_path))
 
-            assert_that(workspace.collections, contains(verifiably_provides(ICollection),
-                                                        verifiably_provides(ICollection),
-                                                        verifiably_provides(ICollection)))
+            assert_that(workspace.collections, 
+                        contains(verifiably_provides(ICollection),
+                                 verifiably_provides(ICollection),
+                                 verifiably_provides(ICollection)))
 
-            assert_that(workspace.collections, has_items(has_property('name', 'AllBadges'),
-                                                         has_property('name', 'EarnedBadges'),
-                                                         has_property('name', 'EarnableBadges')))
+            assert_that(workspace.collections, 
+                        has_items(has_property('name', 'AllBadges'),
+                                  has_property('name', 'EarnedBadges'),
+                                  has_property('name', 'EarnableBadges')))
 
             assert_that([traversal.resource_path(c) for c in workspace.collections],
                         has_items(badges_path + '/AllBadges',
@@ -87,7 +90,7 @@ class TestWorkspaces(ApplicationLayerTest):
 
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
     def test_all_badges(self):
-        username = 'ichigo@bleach.com'
+        username = u'ichigo@bleach.com'
         with mock_dataserver.mock_db_trans(self.ds):
             self._create_user(username=username)
 
@@ -96,13 +99,13 @@ class TestWorkspaces(ApplicationLayerTest):
         res = testapp.get(all_badges_path,
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
-        assert_that(res.json_body, has_entry(
-            u'Items', has_length(greater_than_or_equal_to(sample_size))))
+        assert_that(res.json_body, 
+                    has_entry('Items', has_length(greater_than_or_equal_to(sample_size))))
 
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
     def test_earned_badges(self):
-        badge_name = "badge.1"
-        username = 'person.1@nti.com'
+        badge_name = u"badge.1"
+        username = u'person.1@nti.com'
         with mock_dataserver.mock_db_trans(self.ds):
             self._create_user(username=username, 
                               external_value={'email': username})
@@ -113,7 +116,7 @@ class TestWorkspaces(ApplicationLayerTest):
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
         assert_that(res.json_body, 
-                    has_entry(u'Items', has_length(greater_than_or_equal_to(0))))
+                    has_entry('Items', has_length(greater_than_or_equal_to(0))))
 
         with mock_dataserver.mock_db_trans(self.ds):
             add_assertion(username, badge_name)
@@ -122,11 +125,11 @@ class TestWorkspaces(ApplicationLayerTest):
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
         assert_that(res.json_body, 
-                    has_entry(u'Items', has_length(greater_than_or_equal_to(1))))
+                    has_entry('Items', has_length(greater_than_or_equal_to(1))))
 
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
     def test_earnable_badges(self):
-        username = 'person.1@nti.com'
+        username = u'person.1@nti.com'
         with mock_dataserver.mock_db_trans(self.ds):
             self._create_user(username=username, 
                               external_value={'email': username})
@@ -137,7 +140,7 @@ class TestWorkspaces(ApplicationLayerTest):
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
         assert_that(res.json_body, 
-                    has_entry(u'Items', has_length(greater_than_or_equal_to(0))))
+                    has_entry('Items', has_length(greater_than_or_equal_to(0))))
 
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
     @fudge.patch('nti.app.products.badges.views.get_badge_image_content',
@@ -149,8 +152,8 @@ class TestWorkspaces(ApplicationLayerTest):
         mock_ie2.is_callable().with_args().returns(True)
         mock_ie3.is_callable().with_args().returns(True)
 
-        badge_name = "badge.2"
-        username = 'person.2@nti.com'
+        badge_name = u"badge.2"
+        username = u'person.2@nti.com'
         with mock_dataserver.mock_db_trans(self.ds):
             self._create_user(username=username, 
                               external_value={'email': username})
@@ -166,7 +169,7 @@ class TestWorkspaces(ApplicationLayerTest):
 
         assertion_path = None
         assert_that(res.json_body, 
-                    has_entry(u'Items', has_length(greater_than_or_equal_to(1))))
+                    has_entry('Items', has_length(greater_than_or_equal_to(1))))
         item = res.json_body['Items'][0]
         assert_that(item, has_key('Links'))
         for link in item['Links']:
@@ -179,13 +182,14 @@ class TestWorkspaces(ApplicationLayerTest):
                           status=200)
 
         assert_that(res.json_body, has_entry('uid', is_not(none())))
-        assert_that(res.json_body, has_entry(
-            u'MimeType', u'application/vnd.nextthought.openbadges.assertion'))
-        assert_that(res.json_body, has_entry(u'Links', has_length(2)))
-        assert_that(res.json_body, has_entry(u'image', is_not(none())))
-        assert_that(res.json_body, has_entry(u'recipient',
-                                             has_entry(u'MimeType',
-                                                       u'application/vnd.nextthought.openbadges.identityobject')))
+        assert_that(res.json_body, 
+                    has_entry('MimeType', 'application/vnd.nextthought.openbadges.assertion'))
+        assert_that(res.json_body, has_entry('Links', has_length(2)))
+        assert_that(res.json_body, has_entry('image', is_not(none())))
+        assert_that(res.json_body, 
+                    has_entry('recipient',
+                              has_entry('MimeType',
+                                        'application/vnd.nextthought.openbadges.identityobject')))
 
         uid = res.json_body['uid']  # save uid
 
@@ -229,8 +233,7 @@ class TestWorkspaces(ApplicationLayerTest):
 
         badge_json_url = 'http://localhost/dataserver2/OpenBadges/badge.2/badge.json'
         res = testapp.get(badge_json_url,
-                          extra_environ=self._make_extra_environ(
-                              user=username),
+                          extra_environ=self._make_extra_environ(user=username),
                           status=200)
         assert_that(res.json_body, 
                     has_entry('image', is_('http://localhost/hosted_badge_images/badge_2.png')))

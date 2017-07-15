@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -50,12 +50,12 @@ class TestViews(ApplicationLayerTest):
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
     @fudge.patch('nti.app.products.badges.views.get_badge_image_content')
     def test_open_badges(self, mock_ic):
-        username = 'ichigo@bleach.com'
+        username = u'ichigo@bleach.com'
         with mock_dataserver.mock_db_trans(self.ds):
             self._create_user(username=username,
-                              external_value={u'email': u'ichigo@bleach.com',
-                                              u'realname': u'ichigo kurosaki',
-                                              u'alias': u'zangetsu'})
+                              external_value={'email': u'ichigo@bleach.com',
+                                              'realname': u'ichigo kurosaki',
+                                              'alias': u'zangetsu'})
 
         badge_name = urllib.quote("badge.1")
         open_badges_path = '/dataserver2/OpenBadges/%s' % badge_name
@@ -110,7 +110,8 @@ class TestViews(ApplicationLayerTest):
                            status=200)
         data = get_baked_data(BytesIO(res.body))
         assert_that(data, 
-                    has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
+                    has_entry('image', 
+                              contains_string('http://localhost/dataserver2/OpenAssertions/')))
 
         baked_image_path = open_assertion_path + "/image.png"
         res = testapp.get(baked_image_path,
@@ -118,7 +119,8 @@ class TestViews(ApplicationLayerTest):
                           status=200)
         data = get_baked_data(BytesIO(res.body))
         assert_that(data, 
-                    has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
+                    has_entry('image',
+                              contains_string('http://localhost/dataserver2/OpenAssertions/')))
 
         assertion_json_path = open_assertion_path + "/assertion.json"
         res = testapp.get(assertion_json_path,
@@ -153,12 +155,12 @@ class TestViews(ApplicationLayerTest):
     def test_lock_badge(self, mock_ic, mock_ieb):
         mock_ic.is_callable().with_args().returns(True)
         mock_ieb.is_callable().with_args().returns(True)
-        username = 'ichigo@bleach.com'
+        username = u'ichigo@bleach.com'
         with mock_dataserver.mock_db_trans(self.ds):
             self._create_user(username=username,
-                              external_value={u'email': u'ichigo@bleach.com',
-                                              u'realname': u'ichigo kurosaki',
-                                              u'alias': u'zangetsu'})
+                              external_value={'email': u'ichigo@bleach.com',
+                                              'realname': u'ichigo kurosaki',
+                                              'alias': u'zangetsu'})
 
         badge_name = urllib.quote("badge.1")
         award_badge_path = '/dataserver2/OpenBadges/%s/@@award' % badge_name
@@ -178,7 +180,6 @@ class TestViews(ApplicationLayerTest):
                     has_entry('Links', has_item(has_entry('rel', 'lock'))))
         assert_that(res.json_body,
                     has_entry('Links', has_item(has_entry('rel', 'assertion'))))
-
 
         export_badge_path = open_badges_path + '/lock'
         res = testapp.post(export_badge_path,

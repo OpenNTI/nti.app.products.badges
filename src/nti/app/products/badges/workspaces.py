@@ -6,7 +6,7 @@ Implementation of an Atom/OData workspace and collection for badges.
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -87,7 +87,8 @@ class _BadgesWorkspace(Contained):
     @property
     def links(self):
         result = []
-        link_names = [OPEN_BADGES_VIEW, OPEN_ISSUERS_VIEW,
+        link_names = [OPEN_BADGES_VIEW,
+                      OPEN_ISSUERS_VIEW,
                       OPEN_ASSERTIONS_VIEW]
         ds_folder = find_interface(self, IDataserverFolder, strict=True)
         for name in link_names:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -54,7 +54,7 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
         email = u'%s.%s@nti.com' % (person_prefix, code)
         person_id = database.add_person(email=email,
                                         nickname=email,
-                                        website='http://nti.com/persons/%s.htm' % code,
+                                        website=u'http://nti.com/persons/%s.htm' % code,
                                         bio=u'I am person %s' % code)
         person_ids.append(person_id)
         if verbose:
@@ -64,8 +64,10 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
         badge_id = random.choice(badge_ids)
         person_id = random.choice(person_ids)
         if not database.assertion_exists(badge_id, person_id):
-            database.add_assertion(
-                badge_id, person_id, datetime.now(), notify=False)
+            database.add_assertion(badge_id,
+                                   person_id,
+                                   datetime.now(),
+                                   notify=False)
             if verbose:
                 print('Badge %s awarded to %s' % (badge_id, person_id))
 
@@ -116,6 +118,7 @@ def main(args=None):
     dburi = "sqlite:///%s" % os.path.expanduser(args.file)
     generate(dburi, args.issuers, args.badges, args.persons, args.awards,
              verbose=args.verbose)
+
 
 if __name__ == '__main__':
     main()

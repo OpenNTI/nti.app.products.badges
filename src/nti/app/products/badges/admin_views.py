@@ -11,7 +11,6 @@ logger = __import__('logging').getLogger(__name__)
 
 import os
 import time
-import simplejson
 
 from requests.structures import CaseInsensitiveDict
 
@@ -72,7 +71,7 @@ class BaseBadgePostView(AbstractAuthenticatedView,
     def readInput(self, value=None):
         result = CaseInsensitiveDict()
         if self.request.body:
-            values = super(BaseBadgePostView, self).readInput(value=value)
+            values = super(BaseBadgePostView, self).readInput(value)
             result.update(values)
         return result
 
@@ -323,7 +322,8 @@ def bulk_import(input_source, errors=[]):
                request_method='POST',
                context=BadgeAdminPathAdapter,
                permission=nauth.ACT_NTI_ADMIN)
-class BulkImportView(AbstractAuthenticatedView):
+class BulkImportView(AbstractAuthenticatedView, 
+                     ModeledContentUploadRequestUtilsMixin):
 
     def __call__(self):
         now = time.time()
@@ -335,7 +335,7 @@ class BulkImportView(AbstractAuthenticatedView):
             source = values['source'].file
             source.seek(0)
         else:
-            values = simplejson.loads(unicode(request.body, request.charset))
+            values = self.readInput()
             values = CaseInsensitiveDict(values)
             source = os.path.expanduser(values['source'])
             source = open(source, "r")

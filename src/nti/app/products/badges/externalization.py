@@ -65,7 +65,8 @@ class _MozillaOpenAssertionExternalizer(object):
 
     def toExternalObject(self, **kwargs):
         result = InterfaceObjectIO(
-            self.context, IBadgeAssertion).toExternalObject(**kwargs)
+                    self.context, 
+                    IBadgeAssertion).toExternalObject(**kwargs)
         result = _clean_external(result)
 
         # get assertion_image
@@ -99,7 +100,8 @@ class _MozillaOpenBadgeExternalizer(object):
 
     def toExternalObject(self, **kwargs):
         result = InterfaceObjectIO(
-            self.context, IBadgeClass).toExternalObject(**kwargs)
+                    self.context, 
+                    IBadgeClass).toExternalObject(**kwargs)
         result = _clean_external(result)
 
         request = get_current_request()

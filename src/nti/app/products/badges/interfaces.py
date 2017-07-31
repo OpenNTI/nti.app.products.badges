@@ -7,6 +7,8 @@
 from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
+logger = __import__('logging').getLogger(__name__)
+
 from zope import component
 from zope import interface
 
@@ -101,7 +103,6 @@ class IOpenBadgeAdapter(interface.Interface):
 def get_principal_badge_filter(user):
     filters = component.subscribers((user,), IPrincipalBadgeFilter)
     filters = list(filters)
-
     def uber_filter(badge):
         return all((f.allow_badge(user, badge) for f in filters))
     return uber_filter
@@ -110,7 +111,6 @@ def get_principal_badge_filter(user):
 def get_principal_earned_badge_filter(user):
     filters = component.subscribers((user,), IPrincipalEarnedBadgeFilter)
     filters = list(filters)
-
     def uber_filter(badge):
         return all((f.allow_badge(user, badge) for f in filters))
     return uber_filter
@@ -119,7 +119,6 @@ def get_principal_earned_badge_filter(user):
 def get_principal_earnable_badge_filter(user):
     filters = component.subscribers((user,), IPrincipalEarnableBadgeFilter)
     filters = list(filters)
-
     def uber_filter(badge):
         return all((f.allow_badge(user, badge) for f in filters))
     return uber_filter

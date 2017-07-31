@@ -36,14 +36,14 @@ from nti.processlifetime import IApplicationTransactionOpenedEvent
 
 
 @component.adapter(IUser, IObjectRemovedEvent)
-def _user_deleted(user, event):
+def _user_deleted(user, _):
     if person_exists(user):
         logger.info("Removing badge data for user %s", user)
         delete_person(user)
 
 
 @component.adapter(IApplicationTransactionOpenedEvent)
-def _after_database_opened_listener(event):
+def _after_database_opened_listener(_):
     logger.info("Adding registered tahrir issuers")
 
     # TODO: Should probably defer this until needed

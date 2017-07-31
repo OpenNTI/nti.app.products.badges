@@ -65,7 +65,7 @@ def _assertion_links(links, context, remoteUser, request, badge=None):
     return locked
 
 
-def is_earned_badge(context, user=None):
+def is_earned_badge(context, unused_user=None):
     return IEarnedBadge.providedBy(context)
 
 

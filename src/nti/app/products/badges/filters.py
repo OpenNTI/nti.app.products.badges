@@ -29,7 +29,7 @@ class _DefaultPrincipalBadgeFilter(object):
     def __init__(self, *args):
         pass
 
-    def allow_badge(self, user, badge):
+    def allow_badge(self, unused_user, unused_badge):
         return True
 
 
@@ -42,7 +42,7 @@ class _DefaultPrincipalEarnedBadgeFilter(object):
     def __init__(self, *args):
         pass
 
-    def allow_badge(self, user, badge):
+    def allow_badge(self, unused_user, unused_badge):
         return True
 
 
@@ -55,7 +55,7 @@ class _DefaultPrincipalEarnableBadgeFilter(object):
     def __init__(self, *args):
         pass
 
-    def allow_badge(self, user, badge):
+    def allow_badge(self, unused_user, unused_badge):
         return True
 
 

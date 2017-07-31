@@ -88,7 +88,7 @@ class NTIBadgesApplicationTestLayer(ApplicationTestLayer):
         _restore_ds_dir(cls)
 
     @classmethod
-    def testSetUp(cls, test=None):
+    def testSetUp(cls, unused_test=None):
         bm = manager.create_badge_manager(dburi="sqlite://")
         component.provideUtility(bm)
 
@@ -117,7 +117,7 @@ class NTISampleBadgesApplicationTestLayer(ApplicationTestLayer):
         _restore_ds_dir(cls)
 
     @classmethod
-    def testSetUp(cls, test=None):
+    def testSetUp(cls, unused_test=None):
         cls._register_sample()
 
     @classmethod

@@ -91,7 +91,7 @@ from nti.externalization.externalization import to_external_object
 
 @interface.implementer(IPathAdapter)
 @component.adapter(IUser, IRequest)
-def BadgesWorkspacePathAdapter(context, request):
+def BadgesWorkspacePathAdapter(context, unused_request):
     service = IUserService(context)
     workspace = IBadgesWorkspace(service)
     return workspace
@@ -133,7 +133,7 @@ class Response(PyramidResponse):
 @component.adapter(IDataserverFolder, IRequest)
 class OpenIssuersPathAdapter(Contained):
 
-    def __init__(self, dataserver, request):
+    def __init__(self, dataserver, unused_request):
         self.__parent__ = dataserver
         self.__name__ = OPEN_ISSUERS_VIEW
 
@@ -181,7 +181,7 @@ class OpenIssuerJSONView(OpenJSONView):
 @component.adapter(IDataserverFolder, IRequest)
 class OpenBadgesPathAdapter(Contained):
 
-    def __init__(self, dataserver, request):
+    def __init__(self, dataserver, unused_request):
         self.__parent__ = dataserver
         self.__name__ = OPEN_BADGES_VIEW
 
@@ -244,8 +244,8 @@ class OpenBadgeAwardView(AbstractAuthenticatedView,
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"Username was not specified."),
-                                'code': 'UsernameNotSpecified',
+                                 'message': _(u"Username was not specified."),
+                                 'code': 'UsernameNotSpecified',
                              },
                              None)
 
@@ -254,16 +254,16 @@ class OpenBadgeAwardView(AbstractAuthenticatedView,
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"User not found."),
-                                'code': 'UserNotFound',
+                                 'message': _(u"User not found."),
+                                 'code': 'UserNotFound',
                              },
                              None)
         if not is_email_verified(user):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"User email has not been verified."),
-                                'code': 'UserEmailUnverified',
+                                 'message': _(u"User email has not been verified."),
+                                 'code': 'UserEmailUnverified',
                              },
                              None)
         # add person if required
@@ -286,8 +286,8 @@ class OpenBadgeAwardView(AbstractAuthenticatedView,
         raise_json_error(self.request,
                          hexc.HTTPUnprocessableEntity,
                          {
-                            'message': _(u"Badge already awarded."),
-                            'code': 'BadgeAlreadyAwarded',
+                             'message': _(u"Badge already awarded."),
+                             'code': 'BadgeAlreadyAwarded',
                          },
                          None)
 
@@ -299,7 +299,7 @@ class OpenBadgeAwardView(AbstractAuthenticatedView,
 @component.adapter(IDataserverFolder, IRequest)
 class OpenAssertionsPathAdapter(Contained):
 
-    def __init__(self, dataserver, request):
+    def __init__(self, dataserver, unused_request):
         self.__parent__ = dataserver
         self.__name__ = OPEN_ASSERTIONS_VIEW
 
@@ -389,8 +389,8 @@ def assert_assertion_exported(context, remoteUser=None, request=None):
         raise_json_error(request,
                          hexc.HTTPUnprocessableEntity,
                          {
-                            'message': _(u"Cannot find user for assertion."),
-                            'code': 'AssertionNotFound',
+                             'message': _(u"Cannot find user for assertion."),
+                             'code': 'AssertionNotFound',
                          },
                          None)
     if remoteUser is not None and remoteUser != user:
@@ -404,8 +404,8 @@ def assert_assertion_exported(context, remoteUser=None, request=None):
         raise_json_error(request,
                          hexc.HTTPUnprocessableEntity,
                          {
-                            'message': _(u"Cannot export assertion to an unverified email."),
-                            'code': 'CannotExportAssertion',
+                             'message': _(u"Cannot export assertion to an unverified email."),
+                             'code': 'CannotExportAssertion',
                          },
                          None)
     update_assertion(context.uid, email=email, exported=True)
@@ -424,8 +424,8 @@ class OpenAssertionJSONView(OpenJSONView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"Assertion is not locked."),
-                                'code': 'AssertionIsNotLocked',
+                                 'message': _(u"Assertion is not locked."),
+                                 'code': 'AssertionIsNotLocked',
                              },
                              None)
         self._set_environ()
@@ -477,8 +477,8 @@ class LockBadgeView(AbstractAuthenticatedView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"Cannot find user assertion."),
-                                'code': 'CannotFindAssertion',
+                                 'message': _(u"Cannot find user assertion."),
+                                 'code': 'CannotFindAssertion',
                              },
                              None)
 
@@ -501,5 +501,10 @@ class BadgeAssertionView(AbstractAuthenticatedView):
         context = self.request.context
         assertion = get_assertion(self.remoteUser, context.name)
         if assertion is None:
-            raise hexc.HTTPNotFound(_(u"Cannot find user assertion."))
+            raise_json_error(self.request,
+                             hexc.HTTPNotFound,
+                             {
+                                 'message': _(u"Cannot find user assertion."),
+                             },
+                             None)
         return assertion

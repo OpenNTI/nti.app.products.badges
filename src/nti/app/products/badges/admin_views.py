@@ -97,8 +97,8 @@ class AwardBadgeView(BaseBadgePostView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"Username was not specified."),
-                                'code': 'UsernameNotSpecified',
+                                 'message': _(u"Username was not specified."),
+                                 'code': 'UsernameNotSpecified',
                              },
                              None)
 
@@ -107,8 +107,8 @@ class AwardBadgeView(BaseBadgePostView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"User not found."),
-                                'code': 'UserNotFound',
+                                 'message': _(u"User not found."),
+                                 'code': 'UserNotFound',
                              },
                              None)
 
@@ -121,8 +121,8 @@ class AwardBadgeView(BaseBadgePostView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"Badge name was not specified."),
-                                'code': 'BadgenameNotSpecified',
+                                 'message': _(u"Badge name was not specified."),
+                                 'code': 'BadgenameNotSpecified',
                              },
                              None)
 
@@ -131,8 +131,8 @@ class AwardBadgeView(BaseBadgePostView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"Badge name not found."),
-                                'code': 'BadgenameNotFound',
+                                 'message': _(u"Badge name not found."),
+                                 'code': 'BadgenameNotFound',
                              },
                              None)
 
@@ -174,8 +174,8 @@ class RevokeBadgeView(BaseBadgePostView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"Username was not specified."),
-                                'code': 'UsernameNotSpecified',
+                                 'message': _(u"Username was not specified."),
+                                 'code': 'UsernameNotSpecified',
                              },
                              None)
         user = User.get_user(username)
@@ -183,8 +183,8 @@ class RevokeBadgeView(BaseBadgePostView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"User not found."),
-                                'code': 'UserNotFound',
+                                 'message': _(u"User not found."),
+                                 'code': 'UserNotFound',
                              },
                              None)
 
@@ -197,8 +197,8 @@ class RevokeBadgeView(BaseBadgePostView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"Badge name was not specified."),
-                                'code': 'BadgenameNotSpecified',
+                                 'message': _(u"Badge name was not specified."),
+                                 'code': 'BadgenameNotSpecified',
                              },
                              None)
 
@@ -208,8 +208,8 @@ class RevokeBadgeView(BaseBadgePostView):
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {
-                                'message': _(u"Badge name not found."),
-                                'code': 'BadgenameNotFound',
+                                 'message': _(u"Badge name not found."),
+                                 'code': 'BadgenameNotFound',
                              },
                              None)
 
@@ -322,7 +322,7 @@ def bulk_import(input_source, errors=[]):
                request_method='POST',
                context=BadgeAdminPathAdapter,
                permission=nauth.ACT_NTI_ADMIN)
-class BulkImportView(AbstractAuthenticatedView, 
+class BulkImportView(AbstractAuthenticatedView,
                      ModeledContentUploadRequestUtilsMixin):
 
     def __call__(self):

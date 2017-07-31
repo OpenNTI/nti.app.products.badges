@@ -124,7 +124,7 @@ def BadgesWorkspace(user_service):
 class AllBadgesCollection(Contained):
 
     #: Our name, part of our URL.
-    __name__ = 'AllBadges'
+    __name__ = u'AllBadges'
 
     name = alias('__name__', __name__)
 
@@ -157,7 +157,7 @@ class AllBadgesCollection(Contained):
 class EarnableBadgeCollection(Contained):
 
     #: Our name, part of our URL.
-    __name__ = 'EarnableBadges'
+    __name__ = u'EarnableBadges'
 
     name = alias('__name__', __name__)
 
@@ -190,7 +190,7 @@ class EarnableBadgeCollection(Contained):
 class EarnedBadgeCollection(Contained):
 
     #: Our name, part of our URL.
-    __name__ = 'EarnedBadges'
+    __name__ = u'EarnedBadges'
 
     name = alias('__name__', __name__)
 
@@ -222,7 +222,7 @@ class EarnedBadgeCollection(Contained):
 class AssertionCollection(Contained):
 
     # Our name, part of our URL.
-    __name__ = 'Assertions'
+    __name__ = u'Assertions'
     name = alias('__name__', __name__)
 
     accepts = ()

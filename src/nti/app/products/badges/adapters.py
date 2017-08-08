@@ -9,6 +9,8 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import six
+
 from datetime import datetime
 
 from zope import component
@@ -69,7 +71,11 @@ def set_common_person(user, person):
     person.email = uid
     profile = IUserProfile(user, None)
     person.website = getattr(profile, 'home_page', None) or u''
-    person.bio = to_plain_text(u' '.join(getattr(profile, 'about', u'') or u''))
+    about = getattr(profile, 'about', u'') or u''
+    about = [about] if isinstance(about, six.string_types) else about
+    about = to_plain_text(u' '.join(about))
+    # Tahrir limit
+    person.bio = about[:140]
 
 
 @interface.implementer(IPerson)

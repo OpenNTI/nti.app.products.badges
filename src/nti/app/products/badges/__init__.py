@@ -62,6 +62,7 @@ def is_email_verified(user):
     except AttributeError:
         return False
 
+
 # issuers
 
 
@@ -83,6 +84,7 @@ def issuer_exists(issuer):
 def add_issuer(issuer):
     manager = component.getUtility(IBadgeManager)
     return manager.add_issuer(issuer)
+
 
 # badges
 
@@ -110,6 +112,7 @@ def get_badge(badge):
 def get_all_badges():
     manager = component.queryUtility(IBadgeManager)
     return manager.get_all_badges() if manager is not None else ()
+
 
 # persons
 
@@ -142,6 +145,7 @@ def get_person_assertions(person):
 def get_all_persons():
     manager = component.queryUtility(IBadgeManager)
     return manager.get_all_persons() if manager is not None else ()
+
 
 # assertions
 

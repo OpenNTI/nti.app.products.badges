@@ -27,9 +27,12 @@ from zope import component
 
 from nti.badges.interfaces import IBadgeManager
 
+from nti.badges.openbadges.interfaces import IBadgeClass as IOpenBadgeClass
+
 from nti.badges.openbadges.utils.badgebakery import get_baked_data
 
-from nti.dataserver.users import User
+from nti.dataserver.users.users import User
+
 from nti.dataserver.users.utils import force_email_verification
 
 from nti.appserver.tests.test_application import TestApp
@@ -40,7 +43,7 @@ from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDSHandleChanges
 
-import nti.dataserver.tests.mock_dataserver as mock_dataserver
+from nti.dataserver.tests import mock_dataserver
 
 
 class TestViews(ApplicationLayerTest):
@@ -64,13 +67,13 @@ class TestViews(ApplicationLayerTest):
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
         assert_that(res.json_body,
-                    has_entry(u'name', 'badge.1'))
+                    has_entry('name', 'badge.1'))
         assert_that(res.json_body,
-                    has_entry(u'href', '/dataserver2/OpenBadges/badge.1'))
+                    has_entry('href', '/dataserver2/OpenBadges/badge.1'))
         assert_that(res.json_body,
-                    has_entry(u'image', 'http://localhost/hosted_badge_images/badge_1.png'))
+                    has_entry('image', 'http://localhost/hosted_badge_images/badge_1.png'))
         assert_that(res.json_body,
-                    has_entry(u'criteria', 'http://nti.com/criteria/1.html'))
+                    has_entry('criteria', 'http://nti.com/criteria/1.html'))
 
         award_badge_path = '/dataserver2/BadgeAdmin/@@award'
         self.testapp.post_json(award_badge_path,
@@ -80,6 +83,8 @@ class TestViews(ApplicationLayerTest):
         manager = component.getUtility(IBadgeManager)
         assertion = manager.get_assertion('ichigo@bleach.com', 'badge.1')
         assert_that(assertion, is_not(none()))
+        open_badge = IOpenBadgeClass(assertion, None)
+        assert_that(open_badge, is_not(none()))
 
         open_assertion_path = '/dataserver2/OpenAssertions/%s' % urllib.quote(assertion.id)
         testapp = TestApp(self.app)
@@ -140,7 +145,7 @@ class TestViews(ApplicationLayerTest):
                               has_entries('hashed', True,
                                           'identity', is_not(none()),
                                           'salt', is_not(none()),
-                                          'type', u'email')))
+                                          'type', 'email')))
 
         assert_that(res.json_body, has_entry('verify',
                                              has_entries('type', 'hosted',

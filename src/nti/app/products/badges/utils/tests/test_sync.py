@@ -64,7 +64,7 @@ class TestSync(NTIBadgesTestCase):
             issuer = None
             for _, manager in component.getUtilitiesFor(IBadgeManager):
                 if issuer is None:
-                    issuer = manager.get_issuer('Bleach', "https://bleach.org")
+                    issuer = manager.get_issuer(u'Bleach', u"https://bleach.org")
                 if badge is None:
                     badge = manager.get_badge('Zangetzus')
             assert_that(badge, is_not(none()))

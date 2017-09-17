@@ -120,13 +120,6 @@ def open_assertion_to_user(assertion):
 def open_assertion_to_badge(assertion):
     return assertion.badge
 
-
-@interface.implementer(IBadgeClass)
-@component.adapter(IAssertion)
-def tahrir_assertion_to_badge(assertion):
-    return assertion.badge
-
-
 @interface.implementer(INTIPerson)
 @component.adapter(IUser)
 def user_to_ntiperson(user):

@@ -38,7 +38,7 @@ def generate_db(database, issuers=5, badges=5, persons=5, awards=0,
         code += 1
         tags = ''
         for x in range(random.randint(1, 3)):
-            tags += 'tag.%s,' % (x + 1)
+            tags += u'tag.%s,' % (x + 1)
         badge_id = database.add_badge(name=u'badge.%s' % code,
                                       desc=u'Badge %s' % code,
                                       image=u'badge_%s.png' % code,

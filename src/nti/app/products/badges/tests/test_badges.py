@@ -13,7 +13,7 @@ from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import greater_than_or_equal_to
 
-from nti.dataserver.users import User
+from nti.dataserver.users.users import User
 
 from nti.app.products.badges import get_badge
 from nti.app.products.badges import get_user_id
@@ -22,6 +22,7 @@ from nti.app.products.badges import get_all_badges
 from nti.app.products.badges.tests import NTIBadgesTestCase
 
 from nti.dataserver.tests import mock_dataserver
+
 from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 
 

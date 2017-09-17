@@ -54,8 +54,9 @@ from nti.common.string import is_true
 
 from nti.dataserver import authorization as nauth
 
-from nti.dataserver.users import User
 from nti.dataserver.users.interfaces import IUserProfile
+
+from nti.dataserver.users.users import User
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields

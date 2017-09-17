@@ -14,7 +14,7 @@ from nti.badges.openbadges import interfaces as open_interfaces
 
 from nti.badges.tahrir import interfaces as tahrir_interfaces
 
-from nti.dataserver.users import User
+from nti.dataserver.users.users import User
 
 from nti.app.products.badges.tests import NTIBadgesTestCase
 

@@ -22,7 +22,7 @@ from nti.app.products.badges import OPEN_ASSERTIONS_VIEW
 
 from nti.dataserver.interfaces import IUser
 
-from nti.dataserver.users import User
+from nti.dataserver.users.users import User
 
 URL_SCHEMES = ("file", "ftp", "http", "https", "ldap")
 

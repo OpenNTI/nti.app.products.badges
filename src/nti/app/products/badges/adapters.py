@@ -44,8 +44,9 @@ from nti.contentfragments.interfaces import IPlainTextContentFragment
 
 from nti.dataserver.interfaces import IUser
 
-from nti.dataserver.users import User
 from nti.dataserver.users.interfaces import IUserProfile
+
+from nti.dataserver.users.users import User
 
 
 @interface.implementer(IIdentityObject)
@@ -119,6 +120,7 @@ def open_assertion_to_user(assertion):
 @component.adapter(IBadgeAssertion)
 def open_assertion_to_badge(assertion):
     return assertion.badge
+
 
 @interface.implementer(INTIPerson)
 @component.adapter(IUser)

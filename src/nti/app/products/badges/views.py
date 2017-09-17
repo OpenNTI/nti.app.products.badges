@@ -84,7 +84,7 @@ from nti.dataserver import authorization as nauth
 from nti.dataserver.interfaces import IUser
 from nti.dataserver.interfaces import IDataserverFolder
 
-from nti.dataserver.users import User
+from nti.dataserver.users.users import User
 
 from nti.externalization.externalization import to_external_object
 

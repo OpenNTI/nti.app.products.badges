@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
@@ -20,8 +21,8 @@ does_not = is_not
 
 import os
 import fudge
-import urllib
 from io import BytesIO
+from six.moves.urllib_parse import quote
 
 from zope import component
 
@@ -60,7 +61,7 @@ class TestViews(ApplicationLayerTest):
                                               'realname': u'ichigo kurosaki',
                                               'alias': u'zangetsu'})
 
-        badge_name = urllib.quote("badge.1")
+        badge_name = quote("badge.1")
         open_badges_path = '/dataserver2/OpenBadges/%s' % badge_name
         testapp = TestApp(self.app)
         res = testapp.get(open_badges_path,
@@ -86,7 +87,7 @@ class TestViews(ApplicationLayerTest):
         open_badge = IOpenBadgeClass(assertion, None)
         assert_that(open_badge, is_not(none()))
 
-        open_assertion_path = '/dataserver2/OpenAssertions/%s' % urllib.quote(assertion.id)
+        open_assertion_path = '/dataserver2/OpenAssertions/%s' % quote(assertion.id)
         testapp = TestApp(self.app)
         res = testapp.get(open_assertion_path,
                           extra_environ=self._make_extra_environ(user=username),
@@ -167,13 +168,13 @@ class TestViews(ApplicationLayerTest):
                                               'realname': u'ichigo kurosaki',
                                               'alias': u'zangetsu'})
 
-        badge_name = urllib.quote("badge.1")
+        badge_name = quote("badge.1")
         award_badge_path = '/dataserver2/OpenBadges/%s/@@award' % badge_name
         self.testapp.post_json(award_badge_path,
                                {"username": username},
                                status=200)
 
-        badge_name = urllib.quote("badge.1")
+        badge_name = quote("badge.1")
         open_badges_path = '/dataserver2/OpenBadges/%s' % badge_name
         testapp = TestApp(self.app)
         res = testapp.get(open_badges_path,

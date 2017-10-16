@@ -4,15 +4,14 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
-logger = __import__('logging').getLogger(__name__)
-
-import urllib
-import requests
 from io import BytesIO
+from six.moves import urllib_parse
 
+import requests
 from requests.structures import CaseInsensitiveDict
 
 from zope import component
@@ -88,6 +87,8 @@ from nti.dataserver.users.users import User
 
 from nti.externalization.externalization import to_external_object
 
+logger = __import__('logging').getLogger(__name__)
+
 
 @interface.implementer(IPathAdapter)
 @component.adapter(IUser, IRequest)
@@ -140,7 +141,7 @@ class OpenIssuersPathAdapter(Contained):
     def __getitem__(self, issuer_id):
         if not issuer_id:
             raise hexc.HTTPNotFound()
-        issuer_id = urllib.unquote(issuer_id)
+        issuer_id = urllib_parse.unquote(issuer_id)
         result = get_issuer(issuer_id)
         if result is not None:
             result = IIssuerOrganization(result)
@@ -189,7 +190,7 @@ class OpenBadgesPathAdapter(Contained):
         if not badge_id:
             raise hexc.HTTPNotFound()
 
-        badge_id = urllib.unquote(badge_id)
+        badge_id = urllib_parse.unquote(badge_id)
         result = get_badge(badge_id)
         if result is not None:
             result = IBadgeClass(result)
@@ -306,7 +307,7 @@ class OpenAssertionsPathAdapter(Contained):
     def __getitem__(self, assertion_id):
         if not assertion_id:
             raise hexc.HTTPNotFound()
-        assertion_id = urllib.unquote(assertion_id)
+        assertion_id = urllib_parse.unquote(assertion_id)
         manager = component.getUtility(IBadgeManager)
         result = manager.get_assertion_by_id(assertion_id)
         if result is not None:

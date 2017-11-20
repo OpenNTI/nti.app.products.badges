@@ -6,12 +6,9 @@ generation 2.
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
-
-generation = 2
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import sqlalchemy as sa
 
@@ -27,6 +24,10 @@ from tahrir_api import model
 target_metadata = getattr(model.DeclarativeBase, 'metadata')
 
 from nti.badges.tahrir.interfaces import ITahrirBadgeManager
+
+generation = 2
+
+logger = __import__('logging').getLogger(__name__)
 
 
 def do_evolve(_):

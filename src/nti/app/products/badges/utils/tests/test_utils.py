@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
@@ -14,14 +15,14 @@ does_not = is_not
 
 import fudge
 
+from nti.app.products.badges.tests import NTIBadgesTestCase
+
 from nti.app.products.badges.utils import get_badge_url
 from nti.app.products.badges.utils import get_badge_href
 from nti.app.products.badges.utils import get_openbadge_url
 from nti.app.products.badges.utils import get_badge_image_url
 
 from nti.app.products.badges.utils import get_assertion_url
-
-from nti.app.products.badges.tests import NTIBadgesTestCase
 
 
 class TestUtils(NTIBadgesTestCase):

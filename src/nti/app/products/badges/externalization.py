@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from collections import Mapping
 
@@ -34,6 +33,8 @@ from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IInternalObjectExternalizer
 
 ALL_EXTERNAL_FIELDS = getattr(StandardExternalFields, 'ALL', ())
+
+logger = __import__('logging').getLogger(__name__)
 
 
 def _clean_external(external):
@@ -64,9 +65,7 @@ class _MozillaOpenAssertionExternalizer(object):
         self.context = context
 
     def toExternalObject(self, **kwargs):
-        result = InterfaceObjectIO(
-                    self.context, 
-                    IBadgeAssertion).toExternalObject(**kwargs)
+        result = InterfaceObjectIO(self.context, IBadgeAssertion).toExternalObject(**kwargs)
         result = _clean_external(result)
 
         # get assertion_image
@@ -99,9 +98,7 @@ class _MozillaOpenBadgeExternalizer(object):
         self.context = context
 
     def toExternalObject(self, **kwargs):
-        result = InterfaceObjectIO(
-                    self.context, 
-                    IBadgeClass).toExternalObject(**kwargs)
+        result = InterfaceObjectIO(self.context, IBadgeClass).toExternalObject(**kwargs)
         result = _clean_external(result)
 
         request = get_current_request()
@@ -126,8 +123,6 @@ class _MozillaOpenIssuerExternalizer(object):
         self.context = context
 
     def toExternalObject(self, **kwargs):
-        result = InterfaceObjectIO(
-                    self.context,
-                    IIssuerOrganization).toExternalObject(**kwargs)
+        result = InterfaceObjectIO(self.context, IIssuerOrganization).toExternalObject(**kwargs)
         result = _clean_external(result)
         return result

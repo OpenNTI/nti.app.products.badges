@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
@@ -23,12 +24,6 @@ from six import StringIO
 
 from zope import component
 
-from nti.ntiids import ntiids
-
-from nti.badges.interfaces import IBadgeManager
-
-from nti.dataserver.users.interfaces import IUserProfile
-
 from nti.app.products.badges.admin_views import bulk_import
 
 from nti.app.products.badges.tests import NTISampleBadgesApplicationTestLayer
@@ -39,7 +34,13 @@ from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDSHandleChanges
 
+from nti.badges.interfaces import IBadgeManager
+
+from nti.dataserver.users.interfaces import IUserProfile
+
 from nti.dataserver.tests import mock_dataserver
+
+from nti.ntiids import ntiids
 
 
 class TestAdminViews(ApplicationLayerTest):
@@ -50,7 +51,7 @@ class TestAdminViews(ApplicationLayerTest):
     def test_award(self):
         username = u'ichigo@bleach.com'
         with mock_dataserver.mock_db_trans(self.ds):
-            self._create_user(username=username, 
+            self._create_user(username=username,
                               external_value={'email': username})
 
         award_badge_path = '/dataserver2/BadgeAdmin/@@award'
@@ -60,13 +61,13 @@ class TestAdminViews(ApplicationLayerTest):
                                 "badge": "badge.1"},
                                status=200)
         manager = component.getUtility(IBadgeManager)
-        assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'), 
+        assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'),
                     is_(True))
 
         # This had the side-effect of creating notable data about the award
         path = '/dataserver2/users/%s/Pages(%s)/RUGDByOthersThatIMightBeInterestedIn/' % \
-                (username, ntiids.ROOT)
-        res = self.testapp.get(path, 
+            (username, ntiids.ROOT)
+        res = self.testapp.get(path,
                                extra_environ=self._make_extra_environ(username))
         assert_that(res.json_body, has_entry('TotalItemCount', 1))
         assert_that(res.json_body, has_entry('Items', has_length(1)))
@@ -80,12 +81,12 @@ class TestAdminViews(ApplicationLayerTest):
         msgs = send_notable_email(self.testapp)
         msg = msgs[0]
         assert_that(msg, contains_string('You earned a badge'))
-        assert_that(msg, 
+        assert_that(msg,
                     contains_string('src="http://localhost/hosted_badge_images/badge_1.png"'))
 
         # an in our activity
         path = '/dataserver2/users/%s/Activity' % username
-        res = self.testapp.get(path, 
+        res = self.testapp.get(path,
                                extra_environ=self._make_extra_environ(username))
         assert_that(res.json_body, has_entry('TotalItemCount', 1))
         assert_that(res.json_body, has_entry('Items', has_length(1)))
@@ -99,7 +100,7 @@ class TestAdminViews(ApplicationLayerTest):
     def test_revoke(self):
         username = u'ichigo@bleach.com'
         with mock_dataserver.mock_db_trans(self.ds):
-            self._create_user(username=username, 
+            self._create_user(username=username,
                               external_value={'email': username})
 
         award_badge_path = '/dataserver2/BadgeAdmin/@@award'

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
@@ -27,17 +28,8 @@ import fudge
 
 from io import BytesIO
 
-from nti.appserver.workspaces.interfaces import ICollection
-from nti.appserver.workspaces.interfaces import IUserService
-
 from nti.app.products.badges import add_assertion
 from nti.app.products.badges import interfaces as app_badge_interfaces
-
-from nti.badges.openbadges.utils.badgebakery import get_baked_data
-
-from nti.traversal import traversal
-
-from nti.appserver.tests.test_application import TestApp
 
 from nti.app.products.badges.tests import sample_size
 from nti.app.products.badges.tests import NTISampleBadgesApplicationTestLayer
@@ -47,7 +39,16 @@ from nti.app.testing.application_webtest import ApplicationLayerTest
 from nti.app.testing.decorators import WithSharedApplicationMockDS
 from nti.app.testing.decorators import WithSharedApplicationMockDSHandleChanges
 
+from nti.appserver.tests.test_application import TestApp
+
+from nti.appserver.workspaces.interfaces import ICollection
+from nti.appserver.workspaces.interfaces import IUserService
+
+from nti.badges.openbadges.utils.badgebakery import get_baked_data
+
 from nti.dataserver.tests import mock_dataserver
+
+from nti.traversal import traversal
 
 
 class TestWorkspaces(ApplicationLayerTest):
@@ -73,12 +74,12 @@ class TestWorkspaces(ApplicationLayerTest):
             assert_that(traversal.resource_path(workspace),
                         is_(badges_path))
 
-            assert_that(workspace.collections, 
+            assert_that(workspace.collections,
                         contains(verifiably_provides(ICollection),
                                  verifiably_provides(ICollection),
                                  verifiably_provides(ICollection)))
 
-            assert_that(workspace.collections, 
+            assert_that(workspace.collections,
                         has_items(has_property('name', 'AllBadges'),
                                   has_property('name', 'EarnedBadges'),
                                   has_property('name', 'EarnableBadges')))
@@ -99,7 +100,7 @@ class TestWorkspaces(ApplicationLayerTest):
         res = testapp.get(all_badges_path,
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('Items', has_length(greater_than_or_equal_to(sample_size))))
 
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
@@ -107,7 +108,7 @@ class TestWorkspaces(ApplicationLayerTest):
         badge_name = u"badge.1"
         username = u'person.1@nti.com'
         with mock_dataserver.mock_db_trans(self.ds):
-            self._create_user(username=username, 
+            self._create_user(username=username,
                               external_value={'email': username})
 
         earned_badges_path = '/dataserver2/users/person.1%40nti.com/Badges/EarnedBadges'
@@ -115,7 +116,7 @@ class TestWorkspaces(ApplicationLayerTest):
         res = testapp.get(earned_badges_path,
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('Items', has_length(greater_than_or_equal_to(0))))
 
         with mock_dataserver.mock_db_trans(self.ds):
@@ -124,14 +125,14 @@ class TestWorkspaces(ApplicationLayerTest):
         res = testapp.get(earned_badges_path,
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('Items', has_length(greater_than_or_equal_to(1))))
 
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
     def test_earnable_badges(self):
         username = u'person.1@nti.com'
         with mock_dataserver.mock_db_trans(self.ds):
-            self._create_user(username=username, 
+            self._create_user(username=username,
                               external_value={'email': username})
 
         earned_badges_path = '/dataserver2/users/person.1%40nti.com/Badges/EarnableBadges'
@@ -139,7 +140,7 @@ class TestWorkspaces(ApplicationLayerTest):
         res = testapp.get(earned_badges_path,
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('Items', has_length(greater_than_or_equal_to(0))))
 
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
@@ -155,7 +156,7 @@ class TestWorkspaces(ApplicationLayerTest):
         badge_name = u"badge.2"
         username = u'person.2@nti.com'
         with mock_dataserver.mock_db_trans(self.ds):
-            self._create_user(username=username, 
+            self._create_user(username=username,
                               external_value={'email': username})
 
         with mock_dataserver.mock_db_trans(self.ds):
@@ -168,7 +169,7 @@ class TestWorkspaces(ApplicationLayerTest):
                           status=200)
 
         assertion_path = None
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('Items', has_length(greater_than_or_equal_to(1))))
         item = res.json_body['Items'][0]
         assert_that(item, has_key('Links'))
@@ -182,11 +183,11 @@ class TestWorkspaces(ApplicationLayerTest):
                           status=200)
 
         assert_that(res.json_body, has_entry('uid', is_not(none())))
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('MimeType', 'application/vnd.nextthought.openbadges.assertion'))
         assert_that(res.json_body, has_entry('Links', has_length(2)))
         assert_that(res.json_body, has_entry('image', is_not(none())))
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('recipient',
                               has_entry('MimeType',
                                         'application/vnd.nextthought.openbadges.identityobject')))
@@ -203,8 +204,8 @@ class TestWorkspaces(ApplicationLayerTest):
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
         data = get_baked_data(BytesIO(res.body))
-        assert_that(data, 
-                    has_entry('image', 
+        assert_that(data,
+                    has_entry('image',
                               contains_string('http://localhost/dataserver2/OpenAssertions/')))
 
         assertion_assertion_path = assertion_path + "/assertion.json"
@@ -214,19 +215,19 @@ class TestWorkspaces(ApplicationLayerTest):
 
         assert_that(res.json_body, has_entry('uid', is_(uid)))
         assert_that(res.json_body, has_entry('issuedOn', is_not(none())))
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('image', contains_string('http://localhost/dataserver2/OpenAssertions/')))
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('badge', is_('http://localhost/dataserver2/OpenBadges/badge.2/badge.json')))
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('verify', has_entry('url', contains_string(uid))))
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('recipient', has_entry('type', is_('email'))))
-        assert_that(res.json_body,  
+        assert_that(res.json_body,
                     has_entry('recipient', has_entry('hashed', is_(True))))
         assert_that(res.json_body,
                     has_entry('recipient', has_entry('salt', is_not(none()))))
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('recipient', has_entry('identity', is_not(none()))))
 
         image_url = res.json_body['image']
@@ -235,7 +236,7 @@ class TestWorkspaces(ApplicationLayerTest):
         res = testapp.get(badge_json_url,
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('image', is_('http://localhost/hosted_badge_images/badge_2.png')))
         assert_that(res.json_body,
                     has_entry('issuer', contains_string('http://localhost/dataserver2/OpenIssuers/issuer')))
@@ -247,7 +248,7 @@ class TestWorkspaces(ApplicationLayerTest):
         assert_that(res.json_body, has_entry('url', is_('http://nti.com')))
 
         res = testapp.get(image_url,
-                          extra_environ=self._make_extra_environ(user=username),
+                          extra_environ=self._make_extra_environ( user=username),
                           status=200)
 
         assert_that(res.headers, has_entry('Content-Type', is_('image/png')))

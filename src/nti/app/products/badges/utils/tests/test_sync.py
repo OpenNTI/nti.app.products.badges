@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
@@ -18,6 +19,8 @@ import simplejson
 
 from zope import component
 
+from nti.app.products.badges.tests import NTIBadgesTestCase
+
 from nti.app.products.badges.utils import sync
 
 from nti.badges.interfaces import IBadgeManager
@@ -25,8 +28,6 @@ from nti.badges.interfaces import IBadgeManager
 from nti.badges.openbadges.utils.badgebakery import bake_badge
 
 from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
-
-from nti.app.products.badges.tests import NTIBadgesTestCase
 
 
 class TestSync(NTIBadgesTestCase):
@@ -43,12 +44,12 @@ class TestSync(NTIBadgesTestCase):
 
             # prepare batch
             badge_json = os.path.join(os.path.dirname(__file__), 'badge.json')
-            with open(badge_json, "rb") as fp:
+            with open(badge_json, "r") as fp:
                 badge = simplejson.load(fp)
                 badge['issuer'] = 'file://' + os.path.join(hosted_images, 'issuer.json')
 
             badge_json = os.path.join(hosted_images, 'badge.json')
-            with open(badge_json, "wb") as fp:
+            with open(badge_json, "w") as fp:
                 simplejson.dump(badge, fp)
 
             # bake image

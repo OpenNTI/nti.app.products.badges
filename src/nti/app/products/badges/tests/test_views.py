@@ -26,25 +26,25 @@ from six.moves.urllib_parse import quote
 
 from zope import component
 
-from nti.badges.interfaces import IBadgeManager
-
-from nti.badges.openbadges.interfaces import IBadgeClass as IOpenBadgeClass
-
-from nti.badges.openbadges.utils.badgebakery import get_baked_data
-
-from nti.dataserver.users.users import User
-
-from nti.dataserver.users.utils import force_email_verification
-
-from nti.appserver.tests.test_application import TestApp
-
 from nti.app.products.badges.tests import NTISampleBadgesApplicationTestLayer
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDSHandleChanges
 
+from nti.appserver.tests.test_application import TestApp
+
+from nti.badges.interfaces import IBadgeManager
+
+from nti.badges.openbadges.interfaces import IBadgeClass as IOpenBadgeClass
+
+from nti.badges.openbadges.utils.badgebakery import get_baked_data
+
 from nti.dataserver.tests import mock_dataserver
+
+from nti.dataserver.users.users import User
+
+from nti.dataserver.users.utils import force_email_verification
 
 
 class TestViews(ApplicationLayerTest):
@@ -87,7 +87,8 @@ class TestViews(ApplicationLayerTest):
         open_badge = IOpenBadgeClass(assertion, None)
         assert_that(open_badge, is_not(none()))
 
-        open_assertion_path = '/dataserver2/OpenAssertions/%s' % quote(assertion.id)
+        open_assertion_path = '/dataserver2/OpenAssertions/%s' % quote(
+            assertion.id)
         testapp = TestApp(self.app)
         res = testapp.get(open_assertion_path,
                           extra_environ=self._make_extra_environ(user=username),
@@ -108,15 +109,15 @@ class TestViews(ApplicationLayerTest):
             force_email_verification(user)
 
         icon = os.path.join(os.path.dirname(__file__), 'icon.png')
-        with open(icon, "rb") as fp:
+        with open(icon, "r") as fp:
             icon = fp.read()
         mock_ic.is_callable().with_args().returns(icon)
         res = testapp.post(export_assertion_path,
                            extra_environ=self._make_extra_environ(user=username),
                            status=200)
         data = get_baked_data(BytesIO(res.body))
-        assert_that(data, 
-                    has_entry('image', 
+        assert_that(data,
+                    has_entry('image',
                               contains_string('http://localhost/dataserver2/OpenAssertions/')))
 
         baked_image_path = open_assertion_path + "/image.png"
@@ -124,7 +125,7 @@ class TestViews(ApplicationLayerTest):
                           extra_environ=self._make_extra_environ(user=username),
                           status=200)
         data = get_baked_data(BytesIO(res.body))
-        assert_that(data, 
+        assert_that(data,
                     has_entry('image',
                               contains_string('http://localhost/dataserver2/OpenAssertions/')))
 
@@ -141,7 +142,7 @@ class TestViews(ApplicationLayerTest):
                                 'issuedOn', is_not(none()),
                                 'uid', 'f35d4fc8b4f1294aeac14ef865bef15c'))
 
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('recipient',
                               has_entries('hashed', True,
                                           'identity', is_not(none()),
@@ -193,9 +194,9 @@ class TestViews(ApplicationLayerTest):
                            status=200)
 
         assert_that(res.json_body, has_entry('Locked', is_(True)))
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('Links', does_not(has_item(has_entry('rel', 'lock')))))
-        assert_that(res.json_body, 
+        assert_that(res.json_body,
                     has_entry('Links', has_item(has_entry('rel', 'baked-image'))))
         assert_that(res.json_body,
                     has_entry('Links', has_item(has_entry('rel', 'mozilla-backpack'))))

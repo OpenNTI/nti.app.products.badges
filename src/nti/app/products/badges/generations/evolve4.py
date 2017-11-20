@@ -6,12 +6,9 @@ generation 4.
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
-
-generation = 4
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import datetime
 import sqlalchemy as sa
@@ -39,6 +36,10 @@ from nti.app.products.badges.generations import table_exists
 
 from nti.badges.tahrir.interfaces import ITahrirBadgeManager
 
+generation = 4
+
+logger = __import__('logging').getLogger(__name__)
+
 
 def upgrade(op):
     op.create_table(
@@ -52,7 +53,7 @@ def upgrade(op):
 
     op.create_table(
         'series',
-        sa.Column('id', sa.Unicode(128), primary_key=True, 
+        sa.Column('id', sa.Unicode(128), primary_key=True,
                   default=generate_default_id),
         sa.Column('name', sa.Unicode(128), nullable=False, unique=True),
         sa.Column('description', sa.Unicode(128), nullable=False),
@@ -62,7 +63,7 @@ def upgrade(op):
                   default=datetime.datetime.utcnow,
                   onupdate=datetime.datetime.utcnow),
         sa.Column('tags', sa.Unicode(128)),
-        sa.Column('team_id', sa.Unicode(128), sa.ForeignKey('team.id'), 
+        sa.Column('team_id', sa.Unicode(128), sa.ForeignKey('team.id'),
                   nullable=False),
     )
 
@@ -70,9 +71,9 @@ def upgrade(op):
         'milestone',
         sa.Column('id', sa.Integer(), primary_key=True, unique=True),
         sa.Column('position', sa.Integer(), default=None),
-        sa.Column('badge_id', sa.Unicode(128), 
+        sa.Column('badge_id', sa.Unicode(128),
                   sa.ForeignKey('badges.id'), nullable=False),
-        sa.Column('series_id', sa.Unicode(128), 
+        sa.Column('series_id', sa.Unicode(128),
                   sa.ForeignKey('series.id'), nullable=False),
     )
     op.create_unique_constraint('milestone_unique_constraint', 'milestone',

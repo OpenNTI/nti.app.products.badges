@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from zope import component
 from zope import interface
@@ -21,7 +20,7 @@ from nti.badges.openbadges.interfaces import IBadgeAssertion
 from nti.badges.openbadges.interfaces import IIssuerOrganization
 
 from nti.dataserver.authorization import ACT_READ
-from nti.dataserver.authorization import ROLE_ADMIN 
+from nti.dataserver.authorization import ROLE_ADMIN
 
 from nti.dataserver.authorization_acl import ace_allowing
 from nti.dataserver.authorization_acl import acl_from_aces
@@ -30,6 +29,8 @@ from nti.dataserver.interfaces import EVERYONE_USER_NAME
 
 from nti.dataserver.interfaces import IACLProvider
 from nti.dataserver.interfaces import ISupplementalACLProvider
+
+logger = __import__('logging').getLogger(__name__)
 
 
 @interface.implementer(IACLProvider)

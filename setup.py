@@ -11,8 +11,10 @@ entry_points = {
 }
 
 TESTS_REQUIRE = [
+    'fudge',
     'nti.app.testing',
     'nti.testing',
+    'simplejson',
     'zope.dottedname',
     'zope.testrunner',
 ]
@@ -29,8 +31,11 @@ setup(
     author='Jason Madden',
     author_email='jason@nextthought.com',
     description="NTI Badges Product Integration",
-    long_description=(_read('README.rst') + '\n\n' + _read('CHANGES.rst')),
-    license='Apache',
+    long_description=(
+        _read('README.rst')
+        + '\n\n'
+        + _read("CHANGES.rst")
+    ), license='Apache',
     keywords='pyramid badges',
     classifiers=[
         'Framework :: Zope',
@@ -51,11 +56,43 @@ setup(
     tests_require=TESTS_REQUIRE,
     install_requires=[
         'setuptools',
+        'alembic',
+        'nti.app.client_preferences',
         'nti.badges',
-        'nti.app.client_preferences'
+        'nti.common',
+        'nti.contentfragments',
+        'nti.externalization',
+        'nti.links',
+        'nti.property',
+        'nti.tahrir_api',
+        'nti.traversal',
+        'pyramid',
+        'requests',
+        'six',
+        'sqlalchemy',
+        'z3c.pagelet',
+        'z3c.template',
+        'zope.cachedescriptors',
+        'zope.component',
+        'zope.container',
+        'zope.event',
+        'zope.generations',
+        'zope.interface',
+        'zope.i18nmessageid',
+        'zope.lifecycleevent',
+        'zope.location',
+        'zope.preference',
+        'zope.security',
+        'zope.traversing',
+        'zope.viewlet',
     ],
     extras_require={
         'test': TESTS_REQUIRE,
+        'docs': [
+            'Sphinx',
+            'repoze.sphinx.autointerface',
+            'sphinx_rtd_theme',
+        ],
     },
     entry_points=entry_points,
 )

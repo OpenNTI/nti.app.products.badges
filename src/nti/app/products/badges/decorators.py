@@ -74,7 +74,7 @@ def is_earned_badge(context, unused_user=None):
 @interface.implementer(IExternalMappingDecorator)
 class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 
-    def _do_decorate_external(self, context, mapping):
+    def _do_decorate_external(self, context, mapping):  # pylint: disable=arguments-differ
         request = self.request
         mapping['href'] = get_badge_href(context, request)
         mapping['image'] = get_badge_image_url(context, request)
@@ -93,7 +93,7 @@ class _BadgeLinkFixer(AbstractAuthenticatedRequestAwareDecorator):
 @interface.implementer(IExternalMappingDecorator)
 class _BadgeAssertionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 
-    def _do_decorate_external(self, context, mapping):
+    def _do_decorate_external(self, context, mapping):  # pylint: disable=arguments-differ
         request = self.request
         _links = mapping.setdefault(LINKS, [])
         mapping['href'] = get_assertion_href(context, request)
@@ -115,6 +115,6 @@ class _OpenAssertionDecorator(Singleton):
 @interface.implementer(IExternalMappingDecorator)
 class _UserBadgesLinkDecorator(AbstractAuthenticatedRequestAwareDecorator):
 
-    def _do_decorate_external(self, context, mapping):
+    def _do_decorate_external(self, context, mapping):  # pylint: disable=arguments-differ
         _links = mapping.setdefault(LINKS, [])
         _links.append(Link(context, elements=(BADGES,), rel=BADGES))

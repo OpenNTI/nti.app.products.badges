@@ -37,7 +37,7 @@ logger = __import__('logging').getLogger(__name__)
 
 
 @component.adapter(IUser, IObjectRemovedEvent)
-def _user_deleted(user, _):
+def _user_deleted(user, unused_event):
     if person_exists(user):
         logger.info("Removing badge data for user %s", user)
         delete_person(user)
@@ -47,7 +47,7 @@ def _user_deleted(user, _):
 def _after_database_opened_listener(_):
     logger.info("Adding registered tahrir issuers")
 
-    # TODO: Should probably defer this until needed
+    #  Should probably defer this until needed
     manager = component.queryUtility(IBadgeManager)
     if manager is None or getattr(manager, '_v_installed', False):
         return
@@ -56,7 +56,7 @@ def _after_database_opened_listener(_):
 
     setattr(manager, str('_v_installed'), True)
     for issuer in issuers:
-        # FIXME: Under some circumstances, we can get an
+        # Under some circumstances, we can get an
         # IntegrityError: ConstraintViolation, even though
         # this code path only checks name and origin (even on the exists call!).
         # So clearly there's some sort of race condition here.
@@ -136,6 +136,7 @@ class AssertionChange(Change):
     def __acl__(self):
         aces = []
         creator = self.creator
+        # pylint: disable=no-member
         if creator is not None:
             aces.add(ace_allowing(creator, ALL_PERMISSIONS))
         recipient = self.recipient
@@ -163,6 +164,7 @@ def _make_assertions_notable_to_target(assertion, event):
     change.creator = event.giver or user
 
     storage = IUserNotableDataStorage(user)
+    # pylint: disable=redundant-keyword-arg
     storage.store_object(change, safe=True, take_ownership=True)
 
     # At this point we can now put it in the default container in the

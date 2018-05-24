@@ -275,9 +275,10 @@ class SyncDbView(BaseBadgePostView):
         return result
 
 
-def bulk_import(input_source, errors=[]):
+def bulk_import(input_source, errors=None):
     awards = 0
     revokations = 0
+    errors = [] if errors is None else errors
     for line, source in enumerate(input_source):
         line += 1
         source = source.strip()

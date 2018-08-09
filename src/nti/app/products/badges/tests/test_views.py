@@ -5,8 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-# disable: accessing protected members, too many methods
-# pylint: disable=W0212,R0904
+# pylint: disable=protected-access,too-many-public-methods
 
 from hamcrest import is_
 from hamcrest import none
@@ -52,6 +51,14 @@ class TestViews(ApplicationLayerTest):
     layer = NTISampleBadgesApplicationTestLayer
 
     @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
+    def test_open_issuers(self):
+        issuer_name = quote("issuer_1")
+        open_issuers_path = '/dataserver2/OpenIssuers/%s/@@issuer.json' % issuer_name
+        # pylint: disable=no-member
+        testapp = TestApp(self.app)
+        testapp.get(open_issuers_path, status=200)
+
+    @WithSharedApplicationMockDSHandleChanges(users=True, testapp=True)
     @fudge.patch('nti.app.products.badges.views.get_badge_image_content')
     def test_open_badges(self, mock_ic):
         username = u'ichigo@bleach.com'
@@ -63,6 +70,7 @@ class TestViews(ApplicationLayerTest):
 
         badge_name = quote("badge.1")
         open_badges_path = '/dataserver2/OpenBadges/%s' % badge_name
+        # pylint: disable=no-member
         testapp = TestApp(self.app)
         res = testapp.get(open_badges_path,
                           extra_environ=self._make_extra_environ(user=username),
@@ -177,6 +185,7 @@ class TestViews(ApplicationLayerTest):
 
         badge_name = quote("badge.1")
         open_badges_path = '/dataserver2/OpenBadges/%s' % badge_name
+        # pylint: disable=no-member
         testapp = TestApp(self.app)
         res = testapp.get(open_badges_path,
                           extra_environ=self._make_extra_environ(user=username),

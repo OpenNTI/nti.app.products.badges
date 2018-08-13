@@ -8,14 +8,14 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+import sqlalchemy.exc
+
 from zope import component
 from zope import interface
 
 from zope.cachedescriptors.property import Lazy
 
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
-
-import sqlalchemy.exc
 
 from nti.app.products.badges import person_exists
 from nti.app.products.badges import delete_person

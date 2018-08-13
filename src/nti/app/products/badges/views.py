@@ -9,19 +9,6 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 from io import BytesIO
-from six.moves import urllib_parse
-
-import requests
-from requests.structures import CaseInsensitiveDict
-
-from zope import component
-from zope import interface
-
-from zope.container.contained import Contained
-
-from zope.event import notify
-
-from zope.traversing.interfaces import IPathAdapter
 
 from pyramid import httpexceptions as hexc
 
@@ -33,6 +20,20 @@ from pyramid.threadlocal import get_current_request
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
+
+import requests
+from requests.structures import CaseInsensitiveDict
+
+from six.moves import urllib_parse
+
+from zope import component
+from zope import interface
+
+from zope.container.contained import Contained
+
+from zope.event import notify
+
+from zope.traversing.interfaces import IPathAdapter
 
 from nti.app.base.abstract_views import AbstractView
 from nti.app.base.abstract_views import AbstractAuthenticatedView
@@ -273,6 +274,7 @@ class OpenBadgeAwardView(AbstractAuthenticatedView,
             add_person(user)
 
         # add assertion
+        # pylint: disable=no-member
         name = self.context.name
         result = get_assertion(user, name)
         if result is None:
@@ -328,9 +330,11 @@ class OpenAssertionView(AbstractView):
 
 
 def get_badge_image_content(badge_url):
+    # pylint: disable=unused-variable
     __traceback_info__ = badge_url
     res = requests.get(badge_url)
     if res.status_code != 200:
+        logger.debug("Could not find image %s", badge_url)
         raise hexc.HTTPNotFound(_(u"Could not find badge image."))
     return res.content
 
@@ -367,7 +371,7 @@ class OpenAssertionImageView(AbstractView):
         # baked image if locked
         locked = is_locked(context)
         badge_url = _get_badge_image_url(context, self.request)
-        payload = _to_mozilla_backpack(context) if is_locked else None
+        payload = _to_mozilla_backpack(context) if locked else None
         target = _get_image(badge_url, payload=payload, locked=locked)
 
         # return baked image
@@ -485,7 +489,7 @@ class LockBadgeView(AbstractAuthenticatedView):
 
         # verify the assertion can be exported and export
         assert_assertion_exported(assertion, self.remoteUser)
-        # XXX: Mark as earned badge (see decorators). We can do this because
+        # Mark as earned badge (see decorators). We can do this because
         # badges are not persistent objects in ZODB
         interface.alsoProvides(context, IEarnedBadge)
         return context

@@ -8,14 +8,14 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+from datetime import datetime
+
 import six
 
-from datetime import datetime
+from tahrir_api.model import Person
 
 from zope import component
 from zope import interface
-
-from tahrir_api.model import Person
 
 from nti.app.products.badges import get_user_id
 from nti.app.products.badges import get_assertion_by_id
@@ -93,6 +93,7 @@ def user_to_tahrir_person(user):
 @interface.implementer(IUser)
 @component.adapter(IPerson)
 def tahrir_person_to_user(person):
+    # pylint: disable=unused-variable
     __traceback_info__ = person.nickname, person.email
     result = User.get_user(person.nickname)
     return result

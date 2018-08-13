@@ -17,9 +17,6 @@ from zope.cachedescriptors.property import Lazy
 
 from zope.container.contained import Contained
 
-from nti.appserver.workspaces.interfaces import IUserService
-from nti.appserver.workspaces.interfaces import IContainerCollection
-
 from nti.app.products.badges import BADGES
 from nti.app.products.badges import OPEN_BADGES_VIEW
 from nti.app.products.badges import OPEN_ISSUERS_VIEW
@@ -36,6 +33,9 @@ from nti.app.products.badges.interfaces import IPrincipalErnableBadges
 from nti.app.products.badges.interfaces import get_principal_badge_filter
 from nti.app.products.badges.interfaces import get_principal_earned_badge_filter
 from nti.app.products.badges.interfaces import get_principal_earnable_badge_filter
+
+from nti.appserver.workspaces.interfaces import IUserService
+from nti.appserver.workspaces.interfaces import IContainerCollection
 
 from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeManager
@@ -101,6 +101,7 @@ class _BadgesWorkspace(Contained):
         """
         Make us traversable to collections.
         """
+        # pylint: disable=not-an-iterable
         for i in self.collections:
             if i.__name__ == key:
                 return i

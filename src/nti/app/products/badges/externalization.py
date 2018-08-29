@@ -32,7 +32,7 @@ from nti.externalization.datastructures import InterfaceObjectIO
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IInternalObjectExternalizer
 
-ALL_EXTERNAL_FIELDS = getattr(StandardExternalFields, 'ALL', ())
+ALL_EXTERNAL_FIELDS = StandardExternalFields.EXTERNAL_KEYS
 
 logger = __import__('logging').getLogger(__name__)
 

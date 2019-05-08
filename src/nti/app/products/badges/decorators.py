@@ -8,6 +8,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
+from collections import Mapping
+
 from zope import component
 from zope import interface
 
@@ -118,3 +120,26 @@ class _UserBadgesLinkDecorator(AbstractAuthenticatedRequestAwareDecorator):
     def _do_decorate_external(self, context, mapping):  # pylint: disable=arguments-differ
         _links = mapping.setdefault(LINKS, [])
         _links.append(Link(context, elements=(BADGES,), rel=BADGES))
+
+@component.adapter(IUser)
+@interface.implementer(IExternalObjectDecorator)
+class BadgesRelRemoverDecorator(Singleton):
+    """
+    Decorator that can be registered to remove the badges rel, if necessary
+    """
+
+    def decorateExternalObject(self, unused_context, mapping):
+        new_links = []
+        _links = mapping.setdefault(LINKS, [])
+        for link in _links:
+            try:
+                # Some links may be externalized already.
+                if isinstance(link, Mapping):
+                    rel = link.get('rel')
+                else:
+                    rel = link.rel
+                if rel not in (BADGES,):
+                    new_links.append(link)
+            except AttributeError:
+                pass
+        mapping[LINKS] = new_links

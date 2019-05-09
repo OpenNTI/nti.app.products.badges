@@ -26,6 +26,7 @@ from nti.app.products.badges.utils import get_assertion_image_url
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.badges.interfaces import IBadgeClass
+from nti.badges.interfaces import IBadgeManager
 from nti.badges.interfaces import IEarnedBadge
 from nti.badges.interfaces import IBadgeAssertion
 
@@ -116,6 +117,9 @@ class _OpenAssertionDecorator(Singleton):
 @component.adapter(IUser)
 @interface.implementer(IExternalMappingDecorator)
 class _UserBadgesLinkDecorator(AbstractAuthenticatedRequestAwareDecorator):
+
+    def _predicate(self, unused_context, unused_result):
+        return component.queryUtility(IBadgeManager) is not None
 
     def _do_decorate_external(self, context, mapping):  # pylint: disable=arguments-differ
         _links = mapping.setdefault(LINKS, [])

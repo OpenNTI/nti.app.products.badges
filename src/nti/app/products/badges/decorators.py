@@ -125,6 +125,7 @@ class _UserBadgesLinkDecorator(AbstractAuthenticatedRequestAwareDecorator):
         _links = mapping.setdefault(LINKS, [])
         _links.append(Link(context, elements=(BADGES,), rel=BADGES))
 
+
 @component.adapter(IUser)
 @interface.implementer(IExternalObjectDecorator)
 class BadgesRelRemoverDecorator(Singleton):

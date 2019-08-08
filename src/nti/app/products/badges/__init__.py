@@ -78,31 +78,31 @@ def get_issuer(issuer):
 
 
 def issuer_exists(issuer):
-    manager = component.getUtility(IBadgeManager)
-    return manager.issuer_exists(issuer)
+    manager = component.queryUtility(IBadgeManager)
+    return manager.issuer_exists(issuer) if manager is not None else None
 
 
 def add_issuer(issuer):
-    manager = component.getUtility(IBadgeManager)
-    return manager.add_issuer(issuer)
+    manager = component.queryUtility(IBadgeManager)
+    return manager.add_issuer(issuer) if manager is not None else None
 
 
 # badges
 
 
 def badge_exists(badge):
-    manager = component.getUtility(IBadgeManager)
-    return manager.badge_exists(badge)
+    manager = component.queryUtility(IBadgeManager)
+    return manager.badge_exists(badge)  if manager is not None else None
 
 
 def add_badge(badge, issuer):
-    manager = component.getUtility(IBadgeManager)
-    return manager.add_badge(badge, issuer)
+    manager = component.queryUtility(IBadgeManager)
+    return manager.add_badge(badge, issuer) if manager is not None else None
 
 
 def update_badge(badge):
-    manager = component.getUtility(IBadgeManager)
-    return manager.update_badge(badge)
+    manager = component.queryUtility(IBadgeManager)
+    return manager.update_badge(badge) if manager is not None else None
 
 
 def get_badge(badge):
@@ -119,18 +119,21 @@ def get_all_badges():
 
 
 def add_person(person):
-    manager = component.getUtility(IBadgeManager)
-    return manager.add_person(person)
+    manager = component.queryUtility(IBadgeManager)
+    if manager is not None:
+        return manager.add_person(person)
 
 
 def delete_person(person):
-    manager = component.getUtility(IBadgeManager)
-    return manager.delete_person(person)
+    manager = component.queryUtility(IBadgeManager)
+    if manager is not None:
+        return manager.delete_person(person)
 
 
 def person_exists(person):
-    manager = component.getUtility(IBadgeManager)
-    return manager.person_exists(person)
+    manager = component.queryUtility(IBadgeManager)
+    if manager is not None:
+        return manager.person_exists(person)
 
 
 def get_person_badges(person):
@@ -148,7 +151,7 @@ def get_all_persons():
     return manager.get_all_persons() if manager is not None else ()
 
 
-# assertions
+# assertions, must have utility to be messing with assertions
 
 
 def add_assertion(person, badge, exported=False):

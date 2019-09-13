@@ -89,14 +89,17 @@ class TestViews(ApplicationLayerTest):
                                {"username": username,
                                 "badge": "badge.1"},
                                status=200)
-        manager = component.getUtility(IBadgeManager)
-        assertion = manager.get_assertion('ichigo@bleach.com', 'badge.1')
-        assert_that(assertion, is_not(none()))
-        open_badge = IOpenBadgeClass(assertion, None)
-        assert_that(open_badge, is_not(none()))
 
-        open_assertion_path = '/dataserver2/OpenAssertions/%s' % quote(
-            assertion.id)
+        with mock_dataserver.mock_db_trans(self.ds):
+            manager = component.getUtility(IBadgeManager)
+            assertion = manager.get_assertion('ichigo@bleach.com', 'badge.1')
+        
+            assert_that(assertion, is_not(none()))
+            open_badge = IOpenBadgeClass(assertion, None)
+            assert_that(open_badge, is_not(none()))
+
+            open_assertion_path = '/dataserver2/OpenAssertions/%s' % quote(
+                assertion.id)
         testapp = TestApp(self.app)
         res = testapp.get(open_assertion_path,
                           extra_environ=self._make_extra_environ(user=username),

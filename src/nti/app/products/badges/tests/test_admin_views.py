@@ -60,9 +60,11 @@ class TestAdminViews(ApplicationLayerTest):
                                {"username": "ichigo@bleach.com",
                                 "badge": "badge.1"},
                                status=200)
-        manager = component.getUtility(IBadgeManager)
-        assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'),
-                    is_(True))
+
+        with mock_dataserver.mock_db_trans(self.ds):
+            manager = component.getUtility(IBadgeManager)
+            assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'),
+                        is_(True))
 
         # This had the side-effect of creating notable data about the award
         path = '/dataserver2/users/%s/Pages(%s)/RUGDByOthersThatIMightBeInterestedIn/' % \
@@ -117,9 +119,11 @@ class TestAdminViews(ApplicationLayerTest):
                                {"username": "ichigo@bleach.com",
                                 "badge": "badge.1"},
                                status=204)
-        manager = component.getUtility(IBadgeManager)
-        assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'),
-                    is_(False))
+
+        with mock_dataserver.mock_db_trans(self.ds):
+            manager = component.getUtility(IBadgeManager)
+            assert_that(manager.assertion_exists('ichigo@bleach.com', 'badge.1'),
+                        is_(False))
 
         self.testapp.post_json(revoke_badge_path,
                                {"username": "ichigo@bleach.com",
@@ -182,17 +186,20 @@ class TestAdminViews(ApplicationLayerTest):
             IUserProfile(user).email_verified = True
             IUserProfile(user).email = u'ichigo@bleach.org'
 
-        person = manager.get_person(name='ichigo')
-        assert_that(person, is_not(none()))
-        assert_that(person, has_property('email', 'ichigo'))
+        with mock_dataserver.mock_db_trans(self.ds):
+            person = manager.get_person(name='ichigo')
+            assert_that(person, is_not(none()))
+            assert_that(person, has_property('email', 'ichigo'))
 
         path = '/dataserver2/BadgeAdmin/update_persons'
         res = self.testapp.post_json(path, status=200)
         assert_that(res.json_body, has_entry('Total', is_(1)))
 
-        person = manager.get_person(name='ichigo')
-        assert_that(person, is_not(none()))
-        assert_that(person, has_property('email', 'ichigo@bleach.org'))
+        with mock_dataserver.mock_db_trans(self.ds):
+            person = manager.get_person(name='ichigo')
+            assert_that(person, is_not(none()))
+            assert_that(person, has_property('email', 'ichigo@bleach.org'))
 
-        person = manager.get_person(email='ichigo@bleach.org')
-        assert_that(person, is_not(none()))
+        with mock_dataserver.mock_db_trans(self.ds):
+            person = manager.get_person(email='ichigo@bleach.org')
+            assert_that(person, is_not(none()))

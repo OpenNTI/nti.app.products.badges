@@ -29,7 +29,7 @@ from nti.badges.openbadges.interfaces import IBadgeClass
 
 from nti.badges.tahrir.interfaces import IIssuer
 
-from nti.dataserver.interfaces import IUser 
+from nti.dataserver.interfaces import IUser
 
 from nti.processlifetime import IApplicationTransactionOpenedEvent
 
@@ -123,7 +123,7 @@ class AssertionChange(Change):
     @Lazy
     def recipient(self):
         return IUser(self.object, None)
-    
+
     # Eventually the assertion will have its own ACL,
     # we want to use that. Right now it has no provider,
     # so it gets no value from the superclass...

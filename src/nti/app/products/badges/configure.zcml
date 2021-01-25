@@ -21,4 +21,9 @@
 	<include package="zope.viewlet" file="meta.zcml" /> <!-- zope:viewlet/Manager -->
 	<include package="zope.viewlet" />
 
+	<!-- Generations -->
+    <utility factory=".generations.install._NTIBadgesSchemaManager"
+             name="nti.dataserver-ntibadges"
+             provides="zope.generations.interfaces.IInstallableSchemaManager" />
+
 </configure>

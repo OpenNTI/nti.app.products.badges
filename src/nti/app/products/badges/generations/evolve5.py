@@ -78,4 +78,5 @@ def evolve(context):
     """
     Evolve to generation 5 by removing persistent assertion change objects.
     """
-    do_evolve(context, generation)
+    # 1.25.21 - this migration is now defunct
+    pass
